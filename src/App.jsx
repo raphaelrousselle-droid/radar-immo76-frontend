@@ -156,41 +156,63 @@ export default function App() {
   const [open, setOpen] = useState(false);
   const [deptFilter, setDeptFilter] = useState("all");
   const [sortBy, setSortBy] = useState("score");
-  const [apiData, setApiData] = useState(null);
+  const [apiResults, setApiResults] = useState([]);
+  const [apiData,    setApiData]    = useState(null);
   const [apiLoading, setApiLoading] = useState(false);
+  const [searching,  setSearching]  = useState(false);
+  const API = "https://radar-immo76-1.onrender.com";
+
+  useEffect(() => {
+    if (!search || search.length < 2) { setApiResults([]); return; }
+    const t = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const r = await fetch(`${API}/search?q=${encodeURIComponent(search)}`);
+        if (r.ok) {
+          const data = await r.json();
+          setApiResults(data.map(c => ({
+            n: c.nom, d: c.departement?.code || "?",
+            pop: c.population || 0, _api: true
+          })));
+        }
+      } catch(e) {}
+      setSearching(false);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const enriched = useMemo(() => D.map(c => ({ ...c, sc: computeScores(c) })), []);
-  
+
   const filtered = useMemo(() => {
+    if (search && search.length >= 2) return apiResults;
     let list = enriched;
     if (deptFilter !== "all") list = list.filter(c => c.d === deptFilter);
-    if (search) {
-      const s = search.toLowerCase();
-      list = list.filter(c => c.n.toLowerCase().includes(s) || (DEPTS[c.d]||"").toLowerCase().includes(s));
-    }
     if (sortBy === "score") list = [...list].sort((a,b) => b.sc.g - a.sc.g);
     else if (sortBy === "renta") list = [...list].sort((a,b) => b.rb - a.rb);
     else if (sortBy === "pop") list = [...list].sort((a,b) => b.pop - a.pop);
-    else if (sortBy === "prix") list = [...list].sort((a,b) => a.pa - b.pa);
+    else if (sortBy === "prix") list = [...list].sort((a,b) => (a.pa||9999) - (b.pa||9999));
     return list;
-  }, [enriched, deptFilter, search, sortBy]);
+  }, [enriched, deptFilter, search, sortBy, apiResults]);
 
   async function fetchCommune(nom) {
-    setApiLoading(true);
-    setApiData(null);
+    setApiLoading(true); setApiData(null);
     try {
-      const r = await fetch(`https://radar-immo76-1.onrender.com/analyse/${encodeURIComponent(nom)}`);
+      const r = await fetch(`${API}/analyse/${encodeURIComponent(nom)}`);
       if (r.ok) { const json = await r.json(); setApiData(json); }
     } catch(e) { console.error("API error:", e); }
     setApiLoading(false);
   }
-  function select(c) { setSel(c); setOpen(false); setSearch(""); setShow(false); setTimeout(() => setShow(true), 50); fetchCommune(c.n); }
+
+  function select(c) {
+    setSel(c); setOpen(false); setSearch(""); setApiResults([]);
+    setShow(false); setTimeout(() => setShow(true), 50);
+    fetchCommune(c.n);
+  }
+
   const city = sel;
   const apiSc = apiData?.scores ? {
-    r: apiData.scores.rendement,
-    d: apiData.scores.demographie,
-    s: apiData.scores.socio_eco,
-    g: apiData.scores.global
+    r: apiData.scores.rendement, d: apiData.scores.demographie,
+    s: apiData.scores.socio_eco, g: apiData.scores.global
   } : null;
   const sc = apiSc || city?.sc;
   const gc = sc ? nc(sc.g) : "#818cf8";
@@ -201,7 +223,7 @@ export default function App() {
   const prixSource = apiData?.prix?.source || "MeilleurAgents 02/2026";
   const loyerSource = apiData?.loyer?.source || "Carte loyers ANIL 2024";
 
-  return (
+    return (
     <div style={{minHeight:"100vh",background:"linear-gradient(170deg,#060610,#090918 40%,#0b0b20)",fontFamily:F1,color:"#c8c8e0"}}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet"/>
       <style>{`*{box-sizing:border-box}input::placeholder{color:#3a3a50}select{background:#10102a;color:#a0a0c0;border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:5px 8px;font-size:11px;font-family:'Outfit',sans-serif;outline:none}`}</style>
@@ -247,24 +269,40 @@ export default function App() {
           <div onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(12,12,30,0.85)",border:"1px solid rgba(129,140,248,0.08)",borderRadius:11,padding:"11px 14px",cursor:"pointer",backdropFilter:"blur(10px)"}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <span style={{fontSize:15}}>🏙️</span>
-              <span style={{fontSize:13,color:city?"#e0e0f0":"#3a3a58",fontWeight:city?600:400}}>{city?`${city.n} — ${DEPTS[city.d]} (${city.d})`:"Sélectionner une commune..."}</span>
+              <span style={{fontSize:13,color:city?"#e0e0f0":"#3a3a58",fontWeight:city?600:400}}>{city?`${city.n}${city.d&&city.d!=="?"?" — "+(DEPTS[city.d]||"Dept "+city.d)+" ("+city.d+")":""}`:"Rechercher une commune..."}</span>
               {sc&&<span style={{background:`${gc}12`,color:gc,padding:"1px 8px",borderRadius:9,fontSize:11,fontWeight:700,fontFamily:F2}}>{sc.g}</span>}
             </div>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{transform:open?"rotate(180deg)":"",transition:"transform .15s"}}><path d="M3 4.5L6 7.5L9 4.5" stroke="#4a4a68" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </div>
           {open&&(
             <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,background:"rgba(10,10,26,0.98)",border:"1px solid rgba(129,140,248,0.08)",borderRadius:11,overflow:"hidden",boxShadow:"0 14px 40px rgba(0,0,0,0.5)",maxHeight:360,zIndex:999}}>
-              <div style={{padding:"8px 10px",borderBottom:"1px solid rgba(255,255,255,0.02)"}}>
-                <input type="text" placeholder="Rechercher..." value={search} onChange={e=>setSearch(e.target.value)} autoFocus style={{width:"100%",background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:6,padding:"8px 10px",color:"#e0e0f0",fontSize:12,outline:"none",fontFamily:F1}}/>
+              <div style={{padding:"8px 10px",borderBottom:"1px solid rgba(255,255,255,0.02)",display:"flex",alignItems:"center",gap:6}}>
+                <input type="text" placeholder="Tapez le nom d'une commune..." value={search} onChange={e=>setSearch(e.target.value)} autoFocus style={{flex:1,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:6,padding:"8px 10px",color:"#e0e0f0",fontSize:12,outline:"none",fontFamily:F1}}/>
+                {searching&&<span style={{fontSize:11,color:"#818cf8",flexShrink:0}}>⟳</span>}
               </div>
+              {search.length<2&&<div style={{padding:"6px 14px",fontSize:10,color:"#2a2a40",borderBottom:"1px solid rgba(255,255,255,0.015)"}}>Tapez 2+ lettres pour chercher parmi les 676 communes Seine-Maritime</div>}
               <div style={{overflowY:"auto",maxHeight:300}}>
-                {filtered.map((c,i)=>{const cs=c.sc,cc=nc(cs.g);return(
-                  <div key={c.n} onClick={()=>select(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.015)",background:sel?.n===c.n?"rgba(129,140,248,0.05)":"transparent"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(129,140,248,0.03)"} onMouseLeave={e=>e.currentTarget.style.background=sel?.n===c.n?"rgba(129,140,248,0.05)":"transparent"}>
-                    <div><div style={{fontSize:12,fontWeight:600,color:"#e0e0f0"}}><span style={{color:"#3a3a54",fontSize:10,marginRight:5}}>#{i+1}</span>{c.n}</div><div style={{fontSize:10,color:"#3a3a54",marginTop:1}}>{DEPTS[c.d]} ({c.d}) · {c.pop.toLocaleString("fr-FR")} hab.</div></div>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:10,color:"#3a3a54"}}>{c.rb}%</span><span style={{fontFamily:F2,fontSize:14,fontWeight:700,color:cc}}>{cs.g}</span></div>
+                {filtered.map((c,i)=>{
+                  const cs=c._api?null:c.sc;
+                  const cc=cs?nc(cs.g):"#818cf8";
+                  return(
+                  <div key={c.n+i} onClick={()=>select(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.015)",background:sel?.n===c.n?"rgba(129,140,248,0.05)":"transparent"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(129,140,248,0.03)"} onMouseLeave={e=>e.currentTarget.style.background=sel?.n===c.n?"rgba(129,140,248,0.05)":"transparent"}>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:600,color:"#e0e0f0"}}>
+                        {!c._api&&<span style={{color:"#3a3a54",fontSize:10,marginRight:5}}>#{i+1}</span>}
+                        {c.n}
+                      </div>
+                      <div style={{fontSize:10,color:"#3a3a54",marginTop:1}}>{c._api?`Dépt ${c.d}`:(DEPTS[c.d]||c.d)} · {(c.pop||0).toLocaleString("fr-FR")} hab.</div>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      {c._api
+                        ?<span style={{fontSize:9,color:"#818cf8",background:"rgba(129,140,248,0.08)",padding:"2px 7px",borderRadius:4,fontWeight:600}}>DVF</span>
+                        :<><span style={{fontSize:10,color:"#3a3a54"}}>{c.rb}%</span><span style={{fontFamily:F2,fontSize:14,fontWeight:700,color:cc}}>{cs?.g}</span></>
+                      }
+                    </div>
                   </div>
                 );})}
-                {filtered.length===0&&<div style={{padding:16,textAlign:"center",color:"#3a3a54",fontSize:11}}>Aucun résultat. Demandez dans le chat pour ajouter cette ville !</div>}
+                {filtered.length===0&&!searching&&<div style={{padding:16,textAlign:"center",color:"#3a3a54",fontSize:11}}>{search.length>=2?"Aucune commune trouvée.":"Aucun résultat."}</div>}
               </div>
             </div>
           )}
@@ -282,8 +320,8 @@ export default function App() {
               <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:3.5,color:"#3a3a54",fontWeight:600}}>Note globale</div>
               <div style={{fontSize:62,fontFamily:F2,fontWeight:700,color:gc,lineHeight:1,marginTop:2}}>{sc.g}</div>
               <div style={{fontSize:12,color:gc,fontWeight:600,marginTop:2}}>{nl(sc.g)}</div>
-              <div style={{fontSize:18,fontFamily:F2,color:"#e0e0ff",marginTop:8,fontWeight:600}}>{city.n}{apiLoading&&<span style={{fontSize:9,color:"#818cf8",marginLeft:8,fontFamily:F1,fontWeight:400,opacity:.7}}>⟳ chargement…</span>}</div>
-              <div style={{fontSize:10.5,color:"#3a3a54",marginTop:2}}>{DEPTS[city.d]} ({city.d}) · {city.pop.toLocaleString("fr-FR")} hab.</div>
+              <div style={{fontSize:18,fontFamily:F2,color:"#e0e0ff",marginTop:8,fontWeight:600}}>{apiData?.commune||city.n}{apiLoading&&<span style={{fontSize:9,color:"#818cf8",marginLeft:8,fontFamily:F1,fontWeight:400,opacity:.7}}>⟳ chargement…</span>}</div>
+              <div style={{fontSize:10.5,color:"#3a3a54",marginTop:2}}>{DEPTS[city.d]||city.d} · {(apiData?.population||city.pop||0).toLocaleString("fr-FR")} hab.{apiData?.code_postal?" · "+apiData.code_postal:""}</div>
               <div style={{display:"flex",justifyContent:"center",gap:14,marginTop:20,flexWrap:"wrap"}}>
                 <Gauge s={sc.r} l="Rendement" c="#f472b6"/>
                 <Gauge s={sc.d} l="Démographie" c="#60a5fa"/>
@@ -293,11 +331,11 @@ export default function App() {
             </div>
 
             <Sec t="Rendement Locatif" i="💰" c="#f472b6" s={sc.r}>
-              <Row i="🏢" l="Prix m² appart." v={pa ? `${pa.toLocaleString("fr-FR")} €` : "—"} s={prixSource}/>
-              <Row i="🏡" l="Prix m² maison" v={pm ? `${pm.toLocaleString("fr-FR")} €` : "—"}/>
-              <Row i="🔑" l="Loyer moyen /m²" v={lo ? `${Number(lo).toFixed(1)} €` : "—"} s={loyerSource}/>
-              <Row i="📈" l="Rentabilité brute" v={rb ? `${Number(rb).toFixed(1)} %` : "—"} h={rb>=8?"#34d399":rb>=6?"#60a5fa":"#fbbf24"}/>
-              <Row i="📊" l="Évol. prix 12 mois" v={`${city.ev>0?"+":""}${city.ev.toFixed(1)} %`} h={city.ev<=0?"#34d399":"#fbbf24"}/>
+              <Row i="🏢" l="Prix m² appart." v={pa?`${Number(pa).toLocaleString("fr-FR")} €`:"—"} s={prixSource}/>
+              <Row i="🏡" l="Prix m² maison" v={pm?`${Number(pm).toLocaleString("fr-FR")} €`:"—"}/>
+              <Row i="🔑" l="Loyer moyen /m²" v={lo?`${Number(lo).toFixed(1)} €`:"—"} s={loyerSource}/>
+              <Row i="📈" l="Rentabilité brute" v={rb?`${Number(rb).toFixed(1)} %`:"—"} h={rb>=8?"#34d399":rb>=6?"#60a5fa":"#fbbf24"}/>
+              <Row i="📊" l="Évol. prix 12 mois" v={city.ev!=null?`${city.ev>0?"+":""}${city.ev.toFixed(1)} %`:"N/A"} h={city.ev!=null&&city.ev<=0?"#34d399":"#fbbf24"}/>
               <div style={{padding:"7px 14px",display:"flex",gap:5,flexWrap:"wrap"}}>
                 <Chip t={`Zone ${city.zt} — ${tensionLabel(city.zt)}`} c={city.zt==="B1"||city.zt==="A"||city.zt==="Abis"?"#34d399":"#fbbf24"}/>
                 <Chip t={`Vacance : ${city.vac}% — ${vacLabel(city.vac)}`} c={city.vac<=8?"#34d399":city.vac<=12?"#fbbf24":"#f87171"}/>
