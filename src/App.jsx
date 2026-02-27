@@ -1,367 +1,462 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
-/* ═══════════════════════════════════════════════════════════════
-   SCORING ENGINE
-   Zone tendue: A/Abis/B1 = tendue (décret 2013 + arrêtés 2024)
-   Vacance: taux logements vacants INSEE recensement 2021
-   ═══════════════════════════════════════════════════════════════ */
-function computeScores(c) {
-  let sr;
-  const rb = c.rb || 0;
-  if (rb >= 10) sr = 10; else if (rb >= 8) sr = 8 + (rb - 8);
-  else if (rb >= 6) sr = 5 + (rb - 6) * 1.5; else if (rb >= 4) sr = 2 + (rb - 4) * 1.5;
-  else sr = Math.max(1, rb * 0.5);
-  sr = Math.min(10, Math.max(1, sr));
-  let sd = 5;
-  const ep = c.ep || 0;
-  if (ep >= 1.0) sd += 2.5; else if (ep >= 0.5) sd += 2.0;
-  else if (ep >= 0.1) sd += 1.0; else if (ep >= 0) sd += 0;
-  else if (ep >= -0.3) sd -= 1.0; else sd -= 2.0;
-  const ne = c.et || 0;
-  if (ne >= 40000) sd += 1.5; else if (ne >= 20000) sd += 1.0;
-  else if (ne >= 10000) sd += 0.5; else if (ne >= 2000) sd += 0.2;
-  // Tension: based on zonage ABC
-  const zt = c.zt || "";
-  if (zt === "Abis" || zt === "A") sd += 1.0;
-  else if (zt === "B1") sd += 0.5;
-  else if (zt === "C") sd -= 0.5;
-  sd = Math.min(10, Math.max(1, sd));
-  let se = 5;
-  const tc = c.tc || 15;
-  if (tc <= 12) se += 2.0; else if (tc <= 15) se += 1.0;
-  else if (tc <= 18) se += 0; else if (tc <= 22) se -= 1.0; else se -= 2.0;
-  const rm = c.rm || 20000;
-  if (rm >= 22000) se += 1.5; else if (rm >= 20000) se += 0.5;
-  else if (rm < 18000) se -= 1.0;
-  const pc = c.pc || 10;
-  if (pc >= 16) se += 1.0; else if (pc >= 12) se += 0.5; else se -= 0.5;
-  const tp = c.tp || 18;
-  if (tp <= 15) se += 1.0; else if (tp <= 20) se += 0;
-  else if (tp <= 25) se -= 0.5; else se -= 1.5;
-  se = Math.min(10, Math.max(1, se));
-  const gl = sr * 0.4 + sd * 0.3 + se * 0.3;
-  return { r: Math.round(sr*10)/10, d: Math.round(sd*10)/10, s: Math.round(se*10)/10, g: Math.round(gl*10)/10 };
-}
-function nc(n){return n>=8?"#34d399":n>=6?"#60a5fa":n>=4?"#fbbf24":"#f87171"}
-function nl(n){return n>=8.5?"Excellent":n>=7?"Très bon":n>=5.5?"Bon":n>=4?"Correct":"Faible"}
-function tensionLabel(z){return z==="Abis"?"Très forte (A bis)":z==="A"?"Très forte (A)":z==="B1"?"Forte (B1)":z==="B2"?"Modérée (B2)":"Faible (C)"}
-function vacLabel(v){return v<=5?"Très faible":v<=8?"Faible":v<=11?"Moyen":v<=15?"Élevé":"Très élevé"}
+const API_BASE = "https://radar-immo76-1.onrender.com";
 
-const F1="'Outfit',sans-serif",F2="'Playfair Display',serif";
+// ─── Palette & helpers ───────────────────────────────────────────────────────
+const nc = (v) => {
+  if (v == null) return "#818cf8";
+  if (v >= 7) return "#22c55e";
+  if (v >= 5) return "#f59e0b";
+  return "#ef4444";
+};
 
-/* ═══════════════════════════════════════════
-   COMPACT DATA — Normandie (+ quelques HdF)
-   Fields: n=name, d=département, pop, pa=prix appart, pm=prix maison,
-   lo=loyer m², rb=renta brute, ev=evol prix 12m,
-   tc=taux chômage recens., ep=evol pop, rm=revenu médian,
-   pc=part cadres, tp=taux pauvreté, et=étudiants,
-   zt=zone tendue (Abis/A/B1/B2/C), vac=taux vacance %,
-   tr=transports, pu=projets urbains
-   ═══════════════════════════════════════════ */
-const D = [
-// === SEINE-MARITIME (76) ===
-{n:"Rouen",d:"76",pop:117700,pa:2520,pm:2700,lo:13.2,rb:6.3,ev:0.4,tc:17.5,ep:1.1,rm:20500,pc:14.0,tp:20.0,et:30000,zt:"B1",vac:9.5,tr:"TER (1h20 Paris), Métrobus, TEOR",pu:"Écoquartier Flaubert, Axe Seine"},
-{n:"Le Havre",d:"76",pop:166700,pa:1883,pm:2346,lo:11.5,rb:7.3,ev:-0.3,tc:19.5,ep:-0.3,rm:19200,pc:10.0,tp:24.0,et:12000,zt:"B1",vac:10.2,tr:"TER, Tram, Port maritime",pu:"Réinventer la ville, quartier gare"},
-{n:"Dieppe",d:"76",pop:29080,pa:1650,pm:1850,lo:10.5,rb:7.6,ev:-0.8,tc:20.7,ep:-0.4,rm:18900,pc:7.5,tp:22.0,et:2500,zt:"C",vac:10.8,tr:"TER Rouen/Paris, port ferry",pu:"Réaménagement front de mer"},
-{n:"Sotteville-lès-Rouen",d:"76",pop:29500,pa:2180,pm:2400,lo:12.0,rb:6.6,ev:0.5,tc:18.0,ep:0.0,rm:19800,pc:11.0,tp:19.5,et:1500,zt:"B1",vac:8.0,tr:"Métrobus, TEOR, TER",pu:"Rénovation quartier gare"},
-{n:"Saint-Étienne-du-Rouvray",d:"76",pop:31200,pa:1850,pm:2100,lo:11.0,rb:7.1,ev:0.2,tc:21.0,ep:-0.2,rm:17800,pc:9.0,tp:26.0,et:8000,zt:"B1",vac:9.0,tr:"Métro, TEOR, TER",pu:"Technopôle du Madrillet"},
-{n:"Le Grand-Quevilly",d:"76",pop:26800,pa:2050,pm:2300,lo:11.5,rb:6.7,ev:0.3,tc:17.5,ep:0.0,rm:20200,pc:12.0,tp:18.0,et:500,zt:"B1",vac:7.5,tr:"Métrobus, TER",pu:"Éco-quartier Seine Sud"},
-{n:"Le Petit-Quevilly",d:"76",pop:22600,pa:1920,pm:2200,lo:11.5,rb:7.2,ev:0.4,tc:19.5,ep:0.1,rm:18500,pc:9.5,tp:24.0,et:500,zt:"B1",vac:8.5,tr:"Métrobus, TEOR",pu:"Rénovation urbaine"},
-{n:"Mont-Saint-Aignan",d:"76",pop:20100,pa:2800,pm:3100,lo:13.0,rb:5.6,ev:0.6,tc:12.5,ep:1.1,rm:24500,pc:22.0,tp:12.0,et:15000,zt:"B1",vac:7.0,tr:"TEOR, Bus",pu:"Campus universitaire"},
-{n:"Fécamp",d:"76",pop:18548,pa:1450,pm:1650,lo:9.5,rb:7.9,ev:-0.5,tc:19.5,ep:-0.5,rm:19100,pc:7.0,tp:21.0,et:500,zt:"C",vac:11.5,tr:"TER Rouen, Bus",pu:"Port de plaisance"},
-{n:"Elbeuf",d:"76",pop:17200,pa:1550,pm:1750,lo:10.0,rb:7.7,ev:-0.2,tc:22.0,ep:-0.5,rm:17500,pc:7.0,tp:26.5,et:800,zt:"B1",vac:12.0,tr:"TER, Bus",pu:"Réhabilitation industrielle"},
-{n:"Vernon",d:"27",pop:23800,pa:2200,pm:2450,lo:12.0,rb:6.5,ev:0.5,tc:16.0,ep:0.1,rm:21000,pc:13.0,tp:17.0,et:1500,zt:"B1",vac:8.5,tr:"TER (50min Paris), A13",pu:"ZAC Fieschi"},
-{n:"Canteleu",d:"76",pop:14500,pa:1750,pm:2000,lo:10.5,rb:7.2,ev:0.1,tc:20.0,ep:-0.3,rm:18000,pc:8.0,tp:23.0,et:300,zt:"B1",vac:8.0,tr:"TEOR, Bus",pu:"Rénovation urbaine"},
-{n:"Barentin",d:"76",pop:12500,pa:1680,pm:1900,lo:10.0,rb:7.1,ev:0.0,tc:17.5,ep:-0.2,rm:19500,pc:9.0,tp:18.5,et:200,zt:"C",vac:9.0,tr:"TER, Bus",pu:"Centre-ville rénové"},
-{n:"Maromme",d:"76",pop:12000,pa:1850,pm:2100,lo:11.0,rb:7.1,ev:0.2,tc:18.5,ep:-0.1,rm:19200,pc:10.0,tp:20.0,et:200,zt:"B1",vac:8.5,tr:"TEOR, Bus",pu:"Requalification"},
-{n:"Yvetot",d:"76",pop:12200,pa:1550,pm:1750,lo:9.5,rb:7.4,ev:-0.3,tc:18.0,ep:-0.3,rm:19000,pc:8.5,tp:19.5,et:500,zt:"C",vac:10.5,tr:"TER Rouen-Le Havre",pu:"Pôle commercial"},
-{n:"Bolbec",d:"76",pop:11800,pa:1250,pm:1400,lo:8.5,rb:8.2,ev:-1.0,tc:21.5,ep:-0.7,rm:17800,pc:6.5,tp:23.0,et:200,zt:"C",vac:13.0,tr:"TER, Bus",pu:"Centre-bourg"},
-{n:"Eu",d:"76",pop:6920,pa:1250,pm:1480,lo:8.5,rb:8.2,ev:-1.0,tc:21.0,ep:-0.7,rm:18500,pc:6.0,tp:20.0,et:300,zt:"C",vac:12.0,tr:"TER, proximité Tréport",pu:"Patrimoine royal"},
-{n:"Le Tréport",d:"76",pop:4876,pa:1380,pm:1550,lo:8.8,rb:7.7,ev:-0.3,tc:20.5,ep:-0.5,rm:18200,pc:5.5,tp:21.5,et:100,zt:"C",vac:14.0,tr:"TER, funiculaire",pu:"Tourisme balnéaire"},
-{n:"Bois-Guillaume",d:"76",pop:14200,pa:3050,pm:3300,lo:13.5,rb:5.3,ev:0.8,tc:11.0,ep:0.5,rm:27000,pc:28.0,tp:8.0,et:500,zt:"B1",vac:5.5,tr:"TEOR, Bus",pu:"Résidentiel premium"},
-{n:"Darnétal",d:"76",pop:10200,pa:1950,pm:2200,lo:11.0,rb:6.8,ev:0.3,tc:17.0,ep:0.1,rm:19800,pc:10.5,tp:18.0,et:300,zt:"B1",vac:8.0,tr:"TEOR, Bus",pu:"Requalification vallée"},
-{n:"Lillebonne",d:"76",pop:9200,pa:1350,pm:1550,lo:9.0,rb:8.0,ev:-0.5,tc:18.5,ep:-0.3,rm:19000,pc:8.0,tp:19.0,et:200,zt:"C",vac:11.0,tr:"TER, Bus",pu:"Zone industrielle"},
-{n:"Caudebec-lès-Elbeuf",d:"76",pop:10100,pa:1650,pm:1850,lo:10.0,rb:7.3,ev:0.0,tc:19.5,ep:-0.2,rm:18500,pc:8.0,tp:21.0,et:200,zt:"B1",vac:9.5,tr:"TER, Bus",pu:"Axe Seine"},
-// === CALVADOS (14) ===
-{n:"Caen",d:"14",pop:109400,pa:2984,pm:3768,lo:14.0,rb:5.6,ev:1.5,tc:15.0,ep:0.6,rm:21800,pc:16.5,tp:18.0,et:35000,zt:"B1",vac:8.5,tr:"TER (2h Paris), Tram, Bus",pu:"Presqu'île, nouveau CHU"},
-{n:"Hérouville-Saint-Clair",d:"14",pop:22400,pa:1950,pm:2300,lo:11.5,rb:7.1,ev:0.5,tc:19.0,ep:0.2,rm:18500,pc:10.0,tp:24.0,et:3000,zt:"B1",vac:9.0,tr:"Tram Caen",pu:"Rénovation quartiers"},
-{n:"Lisieux",d:"14",pop:20200,pa:1550,pm:1750,lo:10.0,rb:7.7,ev:-0.5,tc:19.5,ep:-0.5,rm:18500,pc:8.0,tp:22.0,et:1200,zt:"C",vac:12.5,tr:"TER (1h45 Paris)",pu:"Centre historique"},
-{n:"Bayeux",d:"14",pop:13600,pa:2350,pm:2600,lo:11.5,rb:5.9,ev:0.8,tc:14.0,ep:0.0,rm:21500,pc:14.0,tp:14.5,et:800,zt:"B1",vac:8.0,tr:"TER, Bus",pu:"Tourisme mémoriel"},
-{n:"Ifs",d:"14",pop:12800,pa:2500,pm:2800,lo:12.0,rb:5.8,ev:1.0,tc:14.5,ep:0.8,rm:22000,pc:15.0,tp:15.0,et:500,zt:"B1",vac:5.5,tr:"Tram Caen, Bus",pu:"Extension urbaine"},
-{n:"Mondeville",d:"14",pop:10500,pa:2200,pm:2500,lo:11.5,rb:6.3,ev:0.6,tc:16.5,ep:0.3,rm:20500,pc:12.0,tp:17.5,et:500,zt:"B1",vac:7.5,tr:"Tram Caen",pu:"Zone commerciale"},
-{n:"Ouistreham",d:"14",pop:9800,pa:2800,pm:3200,lo:12.0,rb:5.1,ev:1.2,tc:13.0,ep:0.4,rm:22500,pc:15.0,tp:12.0,et:100,zt:"B1",vac:18.0,tr:"Ferry Angleterre, Bus",pu:"Tourisme balnéaire"},
-{n:"Falaise",d:"14",pop:8200,pa:1350,pm:1550,lo:9.0,rb:8.0,ev:-0.5,tc:18.5,ep:-0.5,rm:18800,pc:7.5,tp:20.0,et:300,zt:"C",vac:11.5,tr:"TER, Bus",pu:"Patrimoine médiéval"},
-{n:"Honfleur",d:"14",pop:7100,pa:3500,pm:3800,lo:13.0,rb:4.5,ev:1.5,tc:15.0,ep:-0.2,rm:20500,pc:11.0,tp:17.0,et:200,zt:"B1",vac:20.0,tr:"Bus, A29",pu:"Tourisme, patrimoine"},
-{n:"Vire Normandie",d:"14",pop:11200,pa:1350,pm:1500,lo:8.5,rb:7.6,ev:-0.5,tc:16.5,ep:-0.4,rm:19200,pc:8.0,tp:18.5,et:500,zt:"C",vac:10.0,tr:"TER, Bus",pu:"Pôle industriel"},
-{n:"Colombelles",d:"14",pop:7200,pa:2100,pm:2400,lo:11.0,rb:6.3,ev:0.5,tc:17.0,ep:0.5,rm:19800,pc:11.0,tp:18.5,et:300,zt:"B1",vac:7.0,tr:"Tram Caen",pu:"Éco-quartier"},
-{n:"Blainville-sur-Orne",d:"14",pop:6200,pa:2350,pm:2650,lo:11.5,rb:5.9,ev:0.8,tc:14.0,ep:0.6,rm:21500,pc:14.0,tp:13.0,et:200,zt:"B1",vac:5.5,tr:"Tram, Bus",pu:"Extension résidentielle"},
-{n:"Dives-sur-Mer",d:"14",pop:5800,pa:2200,pm:2500,lo:10.5,rb:5.7,ev:0.5,tc:16.0,ep:-0.1,rm:20000,pc:10.0,tp:17.0,et:100,zt:"C",vac:16.0,tr:"TER, Bus",pu:"Port Guillaume"},
-{n:"Cabourg",d:"14",pop:3500,pa:3200,pm:3600,lo:12.0,rb:4.5,ev:1.0,tc:14.0,ep:0.0,rm:21000,pc:12.0,tp:14.0,et:100,zt:"B1",vac:55.0,tr:"TER, Bus",pu:"Station balnéaire"},
-{n:"Deauville",d:"14",pop:3600,pa:5500,pm:6000,lo:16.0,rb:3.5,ev:1.5,tc:12.0,ep:0.2,rm:25000,pc:18.0,tp:12.0,et:500,zt:"B1",vac:60.0,tr:"TER (2h Paris), Bus",pu:"Tourisme luxe"},
-{n:"Trouville-sur-Mer",d:"14",pop:4500,pa:4200,pm:4800,lo:14.0,rb:4.0,ev:1.0,tc:14.0,ep:-0.2,rm:22000,pc:14.0,tp:15.0,et:100,zt:"B1",vac:50.0,tr:"TER, Bus",pu:"Rénovation balnéaire"},
-{n:"Douvres-la-Délivrande",d:"14",pop:5500,pa:2400,pm:2700,lo:11.0,rb:5.5,ev:0.5,tc:13.5,ep:0.3,rm:22000,pc:14.0,tp:12.0,et:200,zt:"B1",vac:6.0,tr:"Bus Caen",pu:"Résidentiel"},
-// === EURE (27) ===
-{n:"Évreux",d:"27",pop:48300,pa:1780,pm:2050,lo:11.0,rb:7.4,ev:-0.2,tc:19.0,ep:-0.3,rm:19500,pc:10.5,tp:22.0,et:5000,zt:"B2",vac:10.0,tr:"TER (1h Paris), Bus",pu:"Rénovation Madeleine"},
-{n:"Louviers",d:"27",pop:18800,pa:1750,pm:2000,lo:10.5,rb:7.2,ev:0.0,tc:18.5,ep:-0.2,rm:19200,pc:9.0,tp:20.0,et:800,zt:"B2",vac:10.5,tr:"TER, Bus, A13/A154",pu:"Centre historique"},
-{n:"Val-de-Reuil",d:"27",pop:14500,pa:1500,pm:1750,lo:10.0,rb:8.0,ev:-0.3,tc:22.0,ep:-0.5,rm:16500,pc:6.5,tp:30.0,et:500,zt:"B1",vac:8.5,tr:"TER, Bus",pu:"ANRU, Seine Normandie"},
-{n:"Gisors",d:"27",pop:12000,pa:1850,pm:2100,lo:10.5,rb:6.8,ev:0.3,tc:16.0,ep:0.1,rm:20500,pc:10.0,tp:16.0,et:300,zt:"B2",vac:9.0,tr:"TER (1h Paris)",pu:"Patrimoine médiéval"},
-{n:"Bernay",d:"27",pop:10200,pa:1250,pm:1450,lo:8.5,rb:8.2,ev:-0.8,tc:19.0,ep:-0.5,rm:18500,pc:7.5,tp:20.0,et:400,zt:"C",vac:13.5,tr:"TER, Bus",pu:"Centre ancien"},
-{n:"Pont-Audemer",d:"27",pop:9500,pa:1550,pm:1750,lo:9.5,rb:7.4,ev:-0.3,tc:17.5,ep:-0.3,rm:19000,pc:8.5,tp:18.5,et:300,zt:"C",vac:11.0,tr:"Bus, A13",pu:"Tourisme fluvial"},
-{n:"Les Andelys",d:"27",pop:8500,pa:1650,pm:1900,lo:10.0,rb:7.3,ev:-0.2,tc:17.0,ep:-0.3,rm:19500,pc:9.0,tp:17.5,et:200,zt:"C",vac:10.5,tr:"Bus, A13",pu:"Château Gaillard"},
-{n:"Gaillon",d:"27",pop:7200,pa:1750,pm:2000,lo:10.0,rb:6.9,ev:0.2,tc:16.5,ep:0.1,rm:20000,pc:10.0,tp:16.0,et:200,zt:"B2",vac:8.5,tr:"TER, A13",pu:"Zone activités"},
-// === MANCHE (50) ===
-{n:"Cherbourg-en-Cotentin",d:"50",pop:79200,pa:2416,pm:2534,lo:11.5,rb:5.7,ev:1.0,tc:16.0,ep:-0.1,rm:20500,pc:12.0,tp:18.0,et:5000,zt:"B2",vac:9.5,tr:"TER, Aéroport, Port",pu:"Base navale, EPR Flamanville"},
-{n:"Saint-Lô",d:"50",pop:19500,pa:1550,pm:1750,lo:9.5,rb:7.4,ev:-0.2,tc:15.5,ep:-0.3,rm:20000,pc:11.0,tp:17.5,et:2000,zt:"C",vac:11.0,tr:"TER, Bus",pu:"Reconstruction, préfecture"},
-{n:"Granville",d:"50",pop:12800,pa:2200,pm:2500,lo:10.5,rb:5.7,ev:0.5,tc:15.0,ep:-0.2,rm:20500,pc:10.0,tp:16.5,et:500,zt:"C",vac:18.0,tr:"TER, Bus",pu:"Station balnéaire"},
-{n:"Coutances",d:"50",pop:9200,pa:1650,pm:1850,lo:9.5,rb:6.9,ev:0.0,tc:14.0,ep:-0.3,rm:20500,pc:11.0,tp:15.0,et:600,zt:"C",vac:10.0,tr:"TER, Bus",pu:"Patrimoine cathédrale"},
-{n:"Valognes",d:"50",pop:7200,pa:1550,pm:1750,lo:9.0,rb:7.0,ev:-0.2,tc:14.5,ep:-0.3,rm:20000,pc:9.5,tp:16.0,et:400,zt:"C",vac:10.5,tr:"TER, Bus",pu:"Patrimoine historique"},
-{n:"Avranches",d:"50",pop:8000,pa:1500,pm:1700,lo:9.0,rb:7.2,ev:-0.3,tc:15.5,ep:-0.4,rm:19500,pc:9.0,tp:17.0,et:500,zt:"C",vac:11.0,tr:"TER, Bus, A84",pu:"Baie du Mont-Saint-Michel"},
-{n:"Villedieu-les-Poêles",d:"50",pop:3800,pa:1200,pm:1400,lo:7.5,rb:7.5,ev:-0.5,tc:14.0,ep:-0.5,rm:19500,pc:7.0,tp:16.0,et:100,zt:"C",vac:12.0,tr:"Bus",pu:"Artisanat cuivre"},
-{n:"Carentan-les-Marais",d:"50",pop:6200,pa:1350,pm:1550,lo:8.5,rb:7.6,ev:-0.3,tc:15.0,ep:-0.2,rm:19000,pc:7.5,tp:17.0,et:200,zt:"C",vac:11.5,tr:"TER, Bus",pu:"Tourisme mémoriel"},
-// === ORNE (61) ===
-{n:"Alençon",d:"61",pop:25500,pa:1350,pm:1550,lo:9.0,rb:8.0,ev:-0.5,tc:18.0,ep:-0.5,rm:19200,pc:10.0,tp:20.5,et:3000,zt:"C",vac:12.5,tr:"TER, Bus",pu:"Rénovation centre"},
-{n:"Flers",d:"61",pop:14500,pa:1050,pm:1250,lo:7.5,rb:8.6,ev:-1.0,tc:19.5,ep:-0.7,rm:17800,pc:7.0,tp:22.0,et:800,zt:"C",vac:13.5,tr:"TER, Bus",pu:"Reconversion industrielle"},
-{n:"Argentan",d:"61",pop:13800,pa:1150,pm:1350,lo:8.0,rb:8.3,ev:-0.8,tc:18.5,ep:-0.5,rm:18200,pc:7.5,tp:21.0,et:500,zt:"C",vac:13.0,tr:"TER (2h Paris), Bus",pu:"Patrimoine, haras"},
-{n:"L'Aigle",d:"61",pop:7800,pa:1100,pm:1300,lo:7.5,rb:8.2,ev:-1.0,tc:18.0,ep:-0.6,rm:18000,pc:7.0,tp:20.0,et:300,zt:"C",vac:14.0,tr:"TER, Bus",pu:"Reconversion"},
-{n:"Mortagne-au-Perche",d:"61",pop:3800,pa:1150,pm:1350,lo:7.5,rb:7.8,ev:-0.5,tc:16.0,ep:-0.5,rm:19000,pc:8.0,tp:17.0,et:200,zt:"C",vac:12.0,tr:"Bus",pu:"Perche attractif"},
-{n:"La Ferté-Macé",d:"61",pop:5800,pa:950,pm:1150,lo:7.0,rb:8.8,ev:-1.2,tc:18.0,ep:-0.8,rm:17500,pc:6.5,tp:21.5,et:200,zt:"C",vac:14.5,tr:"Bus",pu:"Station thermale"},
-{n:"Sées",d:"61",pop:4200,pa:1050,pm:1250,lo:7.5,rb:8.6,ev:-0.5,tc:16.5,ep:-0.4,rm:18500,pc:8.0,tp:18.0,et:400,zt:"C",vac:12.0,tr:"TER, Bus",pu:"Patrimoine cathédrale"},
-// === VILLES HORS NORMANDIE (comparaison) ===
-{n:"Rennes",d:"35",pop:222485,pa:3650,pm:3800,lo:14.8,rb:4.9,ev:0.8,tc:12.5,ep:1.2,rm:22800,pc:19.5,tp:14.5,et:68000,zt:"B1",vac:6.5,tr:"LGV (1h25 Paris), Métro",pu:"EuroRennes, ligne B métro"},
-{n:"Compiègne",d:"60",pop:41007,pa:2350,pm:2600,lo:13.0,rb:6.6,ev:1.0,tc:14.0,ep:0.2,rm:21800,pc:16.0,tp:16.0,et:8000,zt:"B1",vac:7.5,tr:"TER (40min Paris), A1",pu:"UTC campus, Royallieu"},
-{n:"Beauvais",d:"60",pop:56254,pa:1920,pm:2150,lo:12.0,rb:7.5,ev:0.5,tc:18.5,ep:0.1,rm:19200,pc:10.0,tp:23.0,et:5500,zt:"B1",vac:9.0,tr:"TER (1h15 Paris), Aéroport",pu:"Quartier gare"},
-{n:"Senlis",d:"60",pop:16480,pa:3200,pm:3500,lo:15.0,rb:5.6,ev:1.5,tc:10.5,ep:0.4,rm:25000,pc:22.0,tp:11.0,et:2000,zt:"B1",vac:5.5,tr:"TER, A1, Roissy",pu:"Patrimoine médiéval"},
-{n:"Creil",d:"60",pop:35520,pa:1750,pm:2000,lo:11.5,rb:7.9,ev:0.8,tc:21.0,ep:0.1,rm:17500,pc:7.0,tp:28.0,et:2000,zt:"B1",vac:8.5,tr:"TER (30min Paris)",pu:"ANRU, nouvelle gare"},
-{n:"Amiens",d:"80",pop:135501,pa:2150,pm:2050,lo:12.5,rb:7.0,ev:0.8,tc:19.0,ep:-0.2,rm:19500,pc:11.5,tp:22.5,et:30000,zt:"B1",vac:9.5,tr:"TER (1h10 Paris), Bus",pu:"Citadelle, Intercampus"},
-{n:"Abbeville",d:"80",pop:23042,pa:1350,pm:1500,lo:9.2,rb:8.2,ev:0.2,tc:20.0,ep:-0.4,rm:18800,pc:8.0,tp:22.0,et:1200,zt:"C",vac:12.0,tr:"TER Amiens/Paris, A28",pu:"Centre-ville"},
-];
+const nLabel = (v) => {
+  if (v == null) return "—";
+  if (v >= 7) return "Bon";
+  if (v >= 5) return "Moyen";
+  return "Faible";
+};
 
-const DEPTS = {"76":"Seine-Maritime","14":"Calvados","27":"Eure","50":"Manche","61":"Orne","35":"Ille-et-Vilaine","60":"Oise","80":"Somme"};
+// ─── Barre de progression ─────────────────────────────────────────────────────
+const ProgressBar = ({ value, max = 10, color }) => {
+  const pct = Math.min(100, Math.max(0, ((value ?? 0) / max) * 100));
+  return (
+    <div style={{ background: "#e5e7eb", borderRadius: 6, height: 10, overflow: "hidden", flex: 1 }}>
+      <div style={{ width: `${pct}%`, background: color ?? nc(value), height: "100%", borderRadius: 6, transition: "width 0.5s ease" }} />
+    </div>
+  );
+};
 
-/* ═══════════════════════════════════════════
-   UI COMPONENTS
-   ═══════════════════════════════════════════ */
-function Gauge({s,l,c,sz=112}){const r=(sz-14)/2,ci=Math.PI*r,of=ci*(1-s/10);return(<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}><svg width={sz} height={sz/2+14} viewBox={`0 0 ${sz} ${sz/2+14}`}><path d={`M 7 ${sz/2+7} A ${r} ${r} 0 0 1 ${sz-7} ${sz/2+7}`} fill="none" stroke="#141428" strokeWidth="5" strokeLinecap="round"/><path d={`M 7 ${sz/2+7} A ${r} ${r} 0 0 1 ${sz-7} ${sz/2+7}`} fill="none" stroke={c} strokeWidth="5" strokeLinecap="round" strokeDasharray={ci} strokeDashoffset={of} style={{transition:"stroke-dashoffset .8s ease-out"}}/><text x={sz/2} y={sz/2+1} textAnchor="middle" fontSize="20" fontWeight="700" fill={c} fontFamily={F2}>{s.toFixed(1)}</text><text x={sz/2} y={sz/2+12} textAnchor="middle" fontSize="8" fill="#4a4a64" fontFamily={F1}>/ 10</text></svg><span style={{fontSize:9,color:"#5a5a78",fontFamily:F1,fontWeight:600,textTransform:"uppercase",letterSpacing:1.3}}>{l}</span></div>)}
-function Row({i,l,v,s,h}){const[o,setO]=useState(false);return(<div onMouseEnter={()=>setO(true)} onMouseLeave={()=>setO(false)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:"1px solid rgba(255,255,255,0.02)",background:o?"rgba(255,255,255,0.01)":"transparent",transition:"background .1s"}}><div style={{display:"flex",alignItems:"center",gap:7,flex:1,minWidth:0}}><span style={{fontSize:12,width:16,textAlign:"center",flexShrink:0}}>{i}</span><span style={{fontSize:11.5,color:"#8a8aa8",fontFamily:F1}}>{l}</span></div><div style={{textAlign:"right",flexShrink:0,maxWidth:"55%",paddingLeft:6}}><span style={{fontSize:12,fontWeight:600,color:h||"#c8c8e0",fontFamily:F1,wordBreak:"break-word"}}>{v}</span>{s&&<div style={{fontSize:8.5,color:"#3a3a54",marginTop:1}}>{s}</div>}</div></div>)}
-function Sec({t,i,c,s,ch}){return(<div style={{background:"linear-gradient(145deg,rgba(14,14,30,0.94),rgba(10,10,24,0.97))",borderRadius:13,border:`1px solid ${c}10`,overflow:"hidden",marginBottom:14}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 14px",borderBottom:`1px solid ${c}08`,background:`linear-gradient(90deg,${c}04,transparent)`}}><div style={{display:"flex",alignItems:"center",gap:7}}><span style={{fontSize:15}}>{i}</span><span style={{fontSize:10.5,fontWeight:600,color:c,fontFamily:F1,textTransform:"uppercase",letterSpacing:1}}>{t}</span></div><div style={{background:`${c}0e`,borderRadius:14,padding:"1px 9px",fontSize:12,fontWeight:700,color:c,fontFamily:F2}}>{s}/10</div></div>{ch}</div>)}
-function Chip({t,c="#60a5fa"}){return <span style={{display:"inline-block",padding:"2px 7px",borderRadius:4,fontSize:9.5,fontWeight:600,color:c,background:`${c}0c`,fontFamily:F1}}>{t}</span>}
+// ─── Ligne critère avec barre ─────────────────────────────────────────────────
+const CriteriaRow = ({ label, value, unit = "", note, max = 10, info }) => {
+  const color = nc(note);
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+        <span style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>{label}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {value != null && (
+            <span style={{ fontSize: 13, color: "#6b7280" }}>
+              {typeof value === "number" ? value.toLocaleString("fr-FR") : value}{unit}
+            </span>
+          )}
+          <span style={{
+            fontSize: 12, fontWeight: 700, color: "white",
+            background: color, borderRadius: 4, padding: "1px 7px", minWidth: 28, textAlign: "center"
+          }}>
+            {note != null ? note.toFixed(1) : "—"}/10
+          </span>
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <ProgressBar value={note} max={max} color={color} />
+        {info && <span style={{ fontSize: 11, color: "#9ca3af", whiteSpace: "nowrap" }}>{info}</span>}
+      </div>
+    </div>
+  );
+};
 
-/* ═══════════════════════════════════════════
-   MAIN APP
-   ═══════════════════════════════════════════ */
-export default function App() {
-  const [search, setSearch] = useState("");
-  const [sel, setSel] = useState(null);
-  const [show, setShow] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [deptFilter, setDeptFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("score");
+// ─── Jauge circulaire ─────────────────────────────────────────────────────────
+const Gauge = ({ label, value, weight, onClick, active }) => {
+  const color = nc(value);
+  const pct = value != null ? (value / 10) * 100 : 0;
+  const r = 32, circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
+  return (
+    <div onClick={onClick} style={{
+      cursor: "pointer", textAlign: "center", padding: "10px 8px",
+      borderRadius: 10, background: active ? "#f0f9ff" : "#f9fafb",
+      border: `2px solid ${active ? color : "#e5e7eb"}`,
+      transition: "all 0.2s", minWidth: 100, flex: 1
+    }}>
+      <svg width={80} height={80} style={{ display: "block", margin: "0 auto" }}>
+        <circle cx={40} cy={40} r={r} fill="none" stroke="#e5e7eb" strokeWidth={7} />
+        <circle cx={40} cy={40} r={r} fill="none" stroke={color} strokeWidth={7}
+          strokeDasharray={`${dash} ${circ - dash}`}
+          strokeLinecap="round"
+          transform="rotate(-90 40 40)" />
+        <text x={40} y={44} textAnchor="middle" fontSize={16} fontWeight={700} fill={color}>
+          {value != null ? value.toFixed(1) : "—"}
+        </text>
+      </svg>
+      <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginTop: 2 }}>{label}</div>
+      <div style={{ fontSize: 11, color: "#9ca3af" }}>Poids {weight}%</div>
+      <div style={{ fontSize: 11, fontWeight: 600, color, marginTop: 2 }}>{nLabel(value)}</div>
+    </div>
+  );
+};
 
-  const API = "https://radar-immo76-1.onrender.com";
-  const [apiResults, setApiResults] = useState([]);
-  const [apiData,    setApiData]    = useState(null);
-  const [apiLoading, setApiLoading] = useState(false);
-  const [searching,  setSearching]  = useState(false);
+// ─── Panneau détail d'une jauge ───────────────────────────────────────────────
+const DetailPanel = ({ type, city, apiData }) => {
+  const d = apiData ?? {};
 
-  useEffect(() => {
-    if (!search || search.length < 2) { setApiResults([]); return; }
-    const t = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const r = await fetch(`${API}/search?q=${encodeURIComponent(search)}`);
-        if (r.ok) {
-          const data = await r.json();
-          setApiResults(data.map(c => ({ n: c.nom, d: c.departement?.code||"?", pop: c.population||0, _api: true })));
-        }
-      } catch(e) {}
-      setSearching(false);
-    }, 350);
-    return () => clearTimeout(t);
-  }, [search]);
-
-  const enriched = useMemo(() => D.map(c => ({ ...c, sc: computeScores(c) })), []);
-  const filtered = useMemo(() => {
-    if (search && search.length >= 2) return apiResults;
-    let list = enriched;
-    if (deptFilter !== "all") list = list.filter(c => c.d === deptFilter);
-    if (sortBy === "score") list = [...list].sort((a,b) => b.sc.g - a.sc.g);
-    else if (sortBy === "renta") list = [...list].sort((a,b) => b.rb - a.rb);
-    else if (sortBy === "pop") list = [...list].sort((a,b) => b.pop - a.pop);
-    else if (sortBy === "prix") list = [...list].sort((a,b) => (a.pa||9999)-(b.pa||9999));
-    return list;
-  }, [enriched, deptFilter, search, sortBy, apiResults]);
-
-  async function fetchCommune(nom) {
-    setApiLoading(true); setApiData(null);
-    try {
-      const r = await fetch(`${API}/analyse/${encodeURIComponent(nom)}`);
-      if (r.ok) { const json = await r.json(); setApiData(json); }
-    } catch(e) {}
-    setApiLoading(false);
-  }
-  function select(c) {
-    setSel(c); setOpen(false); setSearch(""); setApiResults([]);
-    setShow(false); setTimeout(() => setShow(true), 50); fetchCommune(c.n);
-  }
-  const city = sel;
-  const apiSc = apiData?.scores ? { r: apiData.scores.rendement, d: apiData.scores.demographie, s: apiData.scores.socio_eco, g: apiData.scores.global } : null;
-  const sc = apiSc || city?.sc;
-  const gc = sc ? nc(sc.g) : "#818cf8";
-  const pa = apiData?.prix?.appartement_m2 || city?.pa;
-  const pm = apiData?.prix?.maison_m2 || city?.pm;
-  const lo = apiData?.loyer?.appartement_m2 || city?.lo;
-  const rb = apiData?.rentabilite_brute_pct || city?.rb;
-  const ev = city?.ev ?? null;
-  const tc = apiData?.socio_eco?.chomage_pct ?? city?.tc ?? null;
-  const rm = apiData?.socio_eco?.revenu_median ?? city?.rm ?? null;
-  const pc = apiData?.socio_eco?.part_cadres_pct ?? city?.pc ?? null;
-  const tp = apiData?.socio_eco?.taux_pauvrete_pct ?? city?.tp ?? null;
-  const et = apiData?.demographie?.nb_etudiants ?? city?.et ?? null;
-  const ep = apiData?.demographie?.evolution_pop_pct_an ?? city?.ep ?? null;
-  const vac = apiData?.demographie?.vacance_pct ?? city?.vac ?? null;
-  const zt = apiData?.zonage_abc || city?.zt || "?";
-  const tr = city?.tr || null;
-  const pu = city?.pu || null;
-  const prixSource = apiData?.prix?.source || "MeilleurAgents 02/2026";
-  const loyerSource = apiData?.loyer?.source || "Carte loyers ANIL 2024";
+  if (type === "rendement") {
+    const rb = d.rentabilite_brute_pct;
+    const pa = d.appartement_m2;
+    const lo = d.loyer;
+    const noteRb = rb != null ? Math.min(10, (rb / 12) * 10) : null;
+    const notePa = pa != null ? Math.max(0, Math.min(10, 10 - (pa - 800) / 320)) : null;
+    const noteLo = lo != null ? Math.min(10, (lo / 15) * 10) : null;
 
     return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(170deg,#0d0d1f,#111128 40%,#13132a)",fontFamily:F1,color:"#dcdcf0"}}>
-      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet"/>
-      <style>{`*{box-sizing:border-box}input::placeholder{color:#3a3a50}select{background:#10102a;color:#a0a0c0;border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:5px 8px;font-size:11px;font-family:'Outfit',sans-serif;outline:none}`}</style>
-      <div style={{position:"fixed",top:-150,right:-100,width:400,height:400,background:"radial-gradient(circle,rgba(129,140,248,0.035),transparent 70%)",pointerEvents:"none"}}/>
-      
-      {/* Header */}
-      <div style={{padding:"32px 14px 4px",textAlign:"center",maxWidth:760,margin:"0 auto"}}>
-        <div style={{display:"inline-flex",alignItems:"center",gap:5,padding:"3px 11px",borderRadius:14,background:"rgba(129,140,248,0.04)",border:"1px solid rgba(129,140,248,0.08)",marginBottom:10}}>
-          <span style={{fontSize:10}}>🏠</span>
-          <span style={{fontSize:9,textTransform:"uppercase",letterSpacing:2.5,color:"#818cf8",fontWeight:600}}>Radar Investissement · {D.length} communes</span>
-        </div>
-        <h1 style={{fontSize:30,fontFamily:F2,fontWeight:700,margin:0,background:"linear-gradient(135deg,#e8e8ff,#a5b4fc 60%,#818cf8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Radar Immobilier Normandie</h1>
-        <p style={{fontSize:11.5,color:"#3a3a54",marginTop:6,lineHeight:1.6,maxWidth:440,margin:"6px auto 0"}}>
-          Scoring multi-critères — prix DVF notarial 2024 (DGFiP), loyers ANIL 2024, zonage ABC officiel, données socio-éco INSEE.
-        </p>
-      </div>
+      <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10, padding: 16, marginTop: 8 }}>
+        <h4 style={{ margin: "0 0 12px", fontSize: 14, color: "#15803d", fontWeight: 700 }}>📊 Détail — Rendement Locatif</h4>
 
-      <div style={{maxWidth:760,margin:"0 auto",padding:"0 12px 50px"}}>
-        {/* Filters */}
-        <div style={{display:"flex",gap:8,marginTop:18,marginBottom:8,flexWrap:"wrap",alignItems:"center"}}>
-          <select value={deptFilter} onChange={e=>setDeptFilter(e.target.value)}>
-            <option value="all">Tous les départements</option>
-            <option value="76">Seine-Maritime (76)</option>
-            <option value="14">Calvados (14)</option>
-            <option value="27">Eure (27)</option>
-            <option value="50">Manche (50)</option>
-            <option value="61">Orne (61)</option>
-            <option value="60">Oise (60)</option>
-            <option value="80">Somme (80)</option>
-            <option value="35">Ille-et-Vilaine (35)</option>
-          </select>
-          <select value={sortBy} onChange={e=>setSortBy(e.target.value)}>
-            <option value="score">Trier par score</option>
-            <option value="renta">Trier par rentabilité</option>
-            <option value="pop">Trier par population</option>
-            <option value="prix">Trier par prix (croissant)</option>
-          </select>
-          <span style={{fontSize:10,color:"#3a3a54"}}>{filtered.length} communes</span>
-        </div>
-
-        {/* Selector */}
-        <div style={{position:"relative",marginBottom:6,zIndex:100}}>
-          <div onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(16,16,40,0.95)",border:"1px solid rgba(129,140,248,0.15)",borderRadius:11,padding:"13px 16px",cursor:"pointer"}}>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:16}}>🏙️</span>
-              <span style={{fontSize:14,color:city?"#f0f0ff":"#5a5a78",fontWeight:city?600:400}}>{city?`${city.n} — ${DEPTS[city.d]||("Dépt "+city.d)}`:"Rechercher une commune..."}</span>
-              {sc&&<span style={{background:`${gc}18`,color:gc,padding:"2px 10px",borderRadius:9,fontSize:13,fontWeight:700,fontFamily:F2}}>{sc.g}</span>}
-            </div>
-            <svg width="14" height="14" viewBox="0 0 12 12" fill="none" style={{transform:open?"rotate(180deg)":"",transition:"transform .15s"}}><path d="M3 4.5L6 7.5L9 4.5" stroke="#6a6a88" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <div style={{ background: "white", borderRadius: 8, padding: 10, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Prix achat (DVF)</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#1e40af" }}>{pa != null ? pa.toLocaleString("fr-FR") : "—"} €/m²</div>
           </div>
-          {open&&(
-            <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,background:"rgba(13,13,32,0.99)",border:"1px solid rgba(129,140,248,0.12)",borderRadius:11,overflow:"hidden",boxShadow:"0 14px 40px rgba(0,0,0,0.6)",maxHeight:400,zIndex:999}}>
-              <div style={{padding:"10px 12px",borderBottom:"1px solid rgba(255,255,255,0.05)",display:"flex",alignItems:"center",gap:8}}>
-                <input type="text" placeholder="Tapez le nom d'une commune..." value={search} onChange={e=>setSearch(e.target.value)} autoFocus style={{flex:1,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:7,padding:"10px 12px",color:"#f0f0ff",fontSize:14,outline:"none",fontFamily:F1}}/>
-                {searching&&<span style={{fontSize:13,color:"#818cf8"}}>⟳</span>}
-              </div>
-              {search.length<2&&<div style={{padding:"8px 16px",fontSize:11,color:"#4a4a68",borderBottom:"1px solid rgba(255,255,255,0.03)"}}>💡 Tapez 2 lettres pour chercher parmi les 676 communes Seine-Maritime</div>}
-              <div style={{overflowY:"auto",maxHeight:320}}>
-                {filtered.map((c,i)=>{const cs=c._api?null:c.sc;const cc=cs?nc(cs.g):"#818cf8";return(
-                  <div key={c.n+i} onClick={()=>select(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.03)",background:sel?.n===c.n?"rgba(129,140,248,0.07)":"transparent"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(129,140,248,0.05)"} onMouseLeave={e=>e.currentTarget.style.background=sel?.n===c.n?"rgba(129,140,248,0.07)":"transparent"}>
-                    <div>
-                      <div style={{fontSize:14,fontWeight:600,color:"#f0f0ff"}}>{!c._api&&<span style={{color:"#4a4a68",fontSize:11,marginRight:6}}>#{i+1}</span>}{c.n}</div>
-                      <div style={{fontSize:12,color:"#6a6a88",marginTop:2}}>{c._api?`Dépt ${c.d}`:(DEPTS[c.d]||c.d)} · {(c.pop||0).toLocaleString("fr-FR")} hab.</div>
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      {c._api?<span style={{fontSize:10,color:"#818cf8",background:"rgba(129,140,248,0.1)",padding:"3px 8px",borderRadius:5,fontWeight:600}}>DVF</span>:<><span style={{fontSize:11,color:"#5a5a78"}}>{c.rb}%</span><span style={{fontFamily:F2,fontSize:16,fontWeight:700,color:cc}}>{cs?.g}</span></>}
+          <div style={{ background: "white", borderRadius: 8, padding: 10, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Loyer médian (ANIL)</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#7c3aed" }}>{lo != null ? lo.toFixed(1) : "—"} €/m²/mois</div>
+          </div>
+          <div style={{ background: "white", borderRadius: 8, padding: 10, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.08)", gridColumn: "1/-1" }}>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Rentabilité brute</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: nc(d.rendement) }}>{rb != null ? rb.toFixed(2) : "—"}%</div>
+            <div style={{ fontSize: 11, color: "#9ca3af" }}>= loyer × 12 / prix achat × 100</div>
+          </div>
+        </div>
+
+        <CriteriaRow label="Rentabilité brute" value={rb} unit="%" note={noteRb} info="Cible >8%" />
+        <CriteriaRow label="Prix d'achat au m²" value={pa} unit=" €/m²" note={notePa} info="Plus bas = mieux" />
+        <CriteriaRow label="Loyer médian" value={lo} unit=" €/m²/mois" note={noteLo} info="Cible >10 €" />
+      </div>
+    );
+  }
+
+  if (type === "demographie") {
+    const pop = city?.pop ?? null;
+    const ev = city?.ev ?? null;
+    const notePop = pop != null ? Math.min(10, Math.log10(Math.max(1, pop)) - 2) * 2.5 : null;
+    const noteEv = ev != null ? Math.min(10, Math.max(0, 5 + ev * 2)) : null;
+
+    return (
+      <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: 16, marginTop: 8 }}>
+        <h4 style={{ margin: "0 0 12px", fontSize: 14, color: "#1d4ed8", fontWeight: 700 }}>📊 Détail — Attractivité Démographique</h4>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <div style={{ background: "white", borderRadius: 8, padding: 10, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Population</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#1d4ed8" }}>{pop != null ? pop.toLocaleString("fr-FR") : "—"} hab.</div>
+          </div>
+          <div style={{ background: "white", borderRadius: 8, padding: 10, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Évolution pop.</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: ev != null && ev >= 0 ? "#22c55e" : "#ef4444" }}>
+              {ev != null ? (ev >= 0 ? "+" : "") + ev.toFixed(1) + "%" : "—"}
+            </div>
+          </div>
+        </div>
+
+        <CriteriaRow label="Taille de la commune" value={pop != null ? pop.toLocaleString("fr-FR") : null} unit=" hab." note={notePop} info=">10 000 = top" />
+        <CriteriaRow label="Dynamisme démographique" value={ev} unit="%" note={noteEv} info="Croissance positive = mieux" />
+      </div>
+    );
+  }
+
+  if (type === "socioeco") {
+    const ch = city?.ch ?? null;
+    const rv = city?.rv ?? null;
+    const noteChom = ch != null ? Math.max(0, Math.min(10, 10 - (ch - 5) * 0.7)) : null;
+    const noteRev = rv != null ? Math.min(10, (rv / 3000) * 10) : null;
+
+    return (
+      <div style={{ background: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: 10, padding: 16, marginTop: 8 }}>
+        <h4 style={{ margin: "0 0 12px", fontSize: 14, color: "#7c3aed", fontWeight: 700 }}>📊 Détail — Score Socio-Économique</h4>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <div style={{ background: "white", borderRadius: 8, padding: 10, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Taux de chômage</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: ch != null && ch < 10 ? "#22c55e" : "#ef4444" }}>
+              {ch != null ? ch.toFixed(1) + "%" : "—"}
+            </div>
+          </div>
+          <div style={{ background: "white", borderRadius: 8, padding: 10, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Revenu médian</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#7c3aed" }}>
+              {rv != null ? rv.toLocaleString("fr-FR") + " €/an" : "—"}
+            </div>
+          </div>
+        </div>
+
+        <CriteriaRow label="Chômage" value={ch} unit="%" note={noteChom} info="<8% = favorable" />
+        <CriteriaRow label="Revenu médian" value={rv != null ? rv.toLocaleString("fr-FR") : null} unit=" €/an" note={noteRev} info="Cible >20 000 €" />
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// ─── Données statiques (53 communes Seine-Maritime >1000 hab) ─────────────────
+const D = [
+  { n: "Rouen", dep: "76", pop: 110169, ch: 15.2, rv: 18900, ev: -0.5, vac: 9.2, tc: 62, sc: { r: 5.8, d: 4.5, s: 4.2, g: 5.1 } },
+  { n: "Le Havre", dep: "76", pop: 170147, ch: 17.1, rv: 17200, ev: -1.2, vac: 10.8, tc: 58, sc: { r: 6.1, d: 4.0, s: 3.8, g: 5.2 } },
+  { n: "Dieppe", dep: "76", pop: 29084, ch: 16.8, rv: 16800, ev: -1.8, vac: 11.2, tc: 55, sc: { r: 6.8, d: 3.8, s: 3.5, g: 5.5 } },
+  { n: "Fécamp", dep: "76", pop: 19257, ch: 14.2, rv: 17500, ev: -0.9, vac: 9.8, tc: 57, sc: { r: 6.5, d: 4.2, s: 4.0, g: 5.7 } },
+  { n: "Elbeuf", dep: "76", pop: 16599, ch: 18.5, rv: 16200, ev: -1.5, vac: 12.1, tc: 54, sc: { r: 7.2, d: 3.5, s: 3.2, g: 5.8 } },
+  { n: "Sotteville-lès-Rouen", dep: "76", pop: 28950, ch: 16.1, rv: 17800, ev: -0.3, vac: 9.5, tc: 60, sc: { r: 6.9, d: 4.4, s: 4.1, g: 5.9 } },
+  { n: "Saint-Étienne-du-Rouvray", dep: "76", pop: 28170, ch: 19.2, rv: 16500, ev: -0.8, vac: 10.2, tc: 56, sc: { r: 7.0, d: 4.1, s: 3.6, g: 5.9 } },
+  { n: "Mont-Saint-Aignan", dep: "76", pop: 20220, ch: 8.5, rv: 24500, ev: 0.4, vac: 6.2, tc: 71, sc: { r: 4.8, d: 5.6, s: 6.8, g: 5.4 } },
+  { n: "Maromme", dep: "76", pop: 12840, ch: 14.8, rv: 18200, ev: -0.6, vac: 9.1, tc: 59, sc: { r: 6.6, d: 4.3, s: 4.2, g: 5.7 } },
+  { n: "Bois-Guillaume", dep: "76", pop: 13250, ch: 7.8, rv: 26000, ev: 0.8, vac: 5.9, tc: 73, sc: { r: 4.5, d: 5.8, s: 7.2, g: 5.3 } },
+  { n: "Déville-lès-Rouen", dep: "76", pop: 10180, ch: 11.2, rv: 20400, ev: -0.2, vac: 8.2, tc: 64, sc: { r: 5.5, d: 5.0, s: 5.5, g: 5.4 } },
+  { n: "Barentin", dep: "76", pop: 12680, ch: 12.5, rv: 19800, ev: 0.1, vac: 8.8, tc: 63, sc: { r: 6.1, d: 5.1, s: 5.2, g: 5.7 } },
+  { n: "Yvetot", dep: "76", pop: 10950, ch: 13.1, rv: 19200, ev: 0.2, vac: 9.0, tc: 61, sc: { r: 6.4, d: 5.1, s: 5.0, g: 5.8 } },
+  { n: "Lillebonne", dep: "76", pop: 9190, ch: 11.8, rv: 20100, ev: -0.3, vac: 8.5, tc: 63, sc: { r: 6.3, d: 4.9, s: 5.3, g: 5.8 } },
+  { n: "Bolbec", dep: "76", pop: 11480, ch: 14.9, rv: 17900, ev: -1.0, vac: 10.5, tc: 57, sc: { r: 7.0, d: 4.0, s: 3.9, g: 5.8 } },
+  { n: "Harfleur", dep: "76", pop: 8780, ch: 15.5, rv: 17600, ev: -0.5, vac: 9.8, tc: 58, sc: { r: 6.8, d: 4.3, s: 4.0, g: 5.8 } },
+  { n: "Montivilliers", dep: "76", pop: 17440, ch: 10.2, rv: 21500, ev: 0.5, vac: 7.5, tc: 66, sc: { r: 5.6, d: 5.4, s: 5.8, g: 5.6 } },
+  { n: "Gonfreville-l'Orcher", dep: "76", pop: 9540, ch: 11.5, rv: 20800, ev: -0.1, vac: 8.0, tc: 65, sc: { r: 5.9, d: 5.0, s: 5.6, g: 5.7 } },
+  { n: "Notre-Dame-de-Gravenchon", dep: "76", pop: 8600, ch: 9.8, rv: 22000, ev: 0.3, vac: 7.2, tc: 67, sc: { r: 5.4, d: 5.3, s: 6.0, g: 5.5 } },
+  { n: "Doudeville", dep: "76", pop: 2850, ch: 10.5, rv: 19500, ev: 0.1, vac: 8.3, tc: 62, sc: { r: 7.5, d: 4.2, s: 5.4, g: 6.4 } },
+  { n: "Goderville", dep: "76", pop: 2720, ch: 9.2, rv: 21000, ev: 0.6, vac: 7.5, tc: 64, sc: { r: 7.3, d: 4.8, s: 5.6, g: 6.3 } },
+  { n: "Gournay-en-Bray", dep: "76", pop: 6220, ch: 11.0, rv: 19800, ev: 0.0, vac: 8.8, tc: 62, sc: { r: 6.8, d: 4.8, s: 5.2, g: 6.1 } },
+  { n: "Neufchâtel-en-Bray", dep: "76", pop: 4940, ch: 12.8, rv: 18700, ev: -0.7, vac: 9.5, tc: 59, sc: { r: 7.1, d: 4.3, s: 4.8, g: 6.1 } },
+  { n: "Eu", dep: "76", pop: 7580, ch: 13.5, rv: 18200, ev: -0.8, vac: 9.8, tc: 58, sc: { r: 6.9, d: 4.1, s: 4.5, g: 5.9 } },
+  { n: "Saint-Valery-en-Caux", dep: "76", pop: 4560, ch: 11.5, rv: 19000, ev: -0.3, vac: 9.0, tc: 61, sc: { r: 6.5, d: 4.5, s: 5.0, g: 5.9 } },
+  { n: "Caudebec-en-Caux", dep: "76", pop: 2560, ch: 10.8, rv: 19200, ev: 0.2, vac: 8.5, tc: 62, sc: { r: 6.7, d: 4.6, s: 5.2, g: 6.0 } },
+  { n: "Pavilly", dep: "76", pop: 5840, ch: 13.0, rv: 19000, ev: 0.0, vac: 9.2, tc: 60, sc: { r: 6.6, d: 4.5, s: 4.8, g: 5.9 } },
+  { n: "Grand-Couronne", dep: "76", pop: 9860, ch: 10.5, rv: 21200, ev: 0.4, vac: 7.8, tc: 65, sc: { r: 5.8, d: 5.3, s: 5.7, g: 5.7 } },
+  { n: "Oissel", dep: "76", pop: 11640, ch: 15.5, rv: 17800, ev: -0.6, vac: 10.2, tc: 57, sc: { r: 7.0, d: 4.2, s: 4.0, g: 5.8 } },
+  { n: "Petit-Quevilly", dep: "76", pop: 21890, ch: 17.8, rv: 17000, ev: -1.0, vac: 10.8, tc: 56, sc: { r: 7.1, d: 3.9, s: 3.7, g: 5.9 } },
+  { n: "Grand-Quevilly", dep: "76", pop: 25690, ch: 16.5, rv: 17400, ev: -0.9, vac: 10.5, tc: 57, sc: { r: 7.0, d: 4.0, s: 3.8, g: 5.9 } },
+  { n: "Bihorel", dep: "76", pop: 9380, ch: 7.2, rv: 27500, ev: 0.9, vac: 5.5, tc: 75, sc: { r: 4.2, d: 6.0, s: 7.5, g: 5.0 } },
+  { n: "Bonsecours", dep: "76", pop: 6950, ch: 7.5, rv: 26800, ev: 0.7, vac: 5.8, tc: 74, sc: { r: 4.4, d: 5.8, s: 7.3, g: 5.1 } },
+  { n: "Canteleu", dep: "76", pop: 14450, ch: 19.8, rv: 16200, ev: -1.2, vac: 11.5, tc: 54, sc: { r: 7.3, d: 3.6, s: 3.3, g: 6.0 } },
+  { n: "Cléon", dep: "76", pop: 3870, ch: 12.0, rv: 19600, ev: -0.2, vac: 8.8, tc: 62, sc: { r: 6.5, d: 4.6, s: 5.1, g: 5.9 } },
+  { n: "Duclair", dep: "76", pop: 3850, ch: 10.2, rv: 20500, ev: 0.3, vac: 7.8, tc: 64, sc: { r: 6.1, d: 5.2, s: 5.5, g: 5.8 } },
+  { n: "Écalles-sur-Buchy", dep: "76", pop: 1050, ch: 9.5, rv: 20000, ev: 0.5, vac: 7.5, tc: 64, sc: { r: 7.0, d: 4.8, s: 5.3, g: 6.2 } },
+  { n: "Fontaine-la-Mallet", dep: "76", pop: 2820, ch: 8.9, rv: 22500, ev: 0.8, vac: 6.8, tc: 67, sc: { r: 5.5, d: 5.5, s: 6.2, g: 5.7 } },
+  { n: "Fontaine-le-Dun", dep: "76", pop: 1180, ch: 9.0, rv: 21000, ev: 0.4, vac: 7.2, tc: 65, sc: { r: 6.8, d: 5.0, s: 5.8, g: 6.2 } },
+  { n: "Luneray", dep: "76", pop: 2980, ch: 10.0, rv: 20500, ev: 0.3, vac: 8.0, tc: 63, sc: { r: 7.0, d: 5.0, s: 5.5, g: 6.3 } },
+  { n: "Ourville-en-Caux", dep: "76", pop: 1050, ch: 9.2, rv: 21000, ev: 0.5, vac: 7.5, tc: 64, sc: { r: 7.1, d: 5.0, s: 5.7, g: 6.3 } },
+  { n: "Saint-Nicolas-d'Aliermont", dep: "76", pop: 3230, ch: 10.5, rv: 19800, ev: 0.1, vac: 8.2, tc: 63, sc: { r: 6.8, d: 4.8, s: 5.3, g: 6.1 } },
+  { n: "Saint-Romain-de-Colbosc", dep: "76", pop: 3710, ch: 10.0, rv: 21000, ev: 0.5, vac: 7.8, tc: 64, sc: { r: 6.2, d: 5.2, s: 5.7, g: 5.9 } },
+  { n: "Tôtes", dep: "76", pop: 1080, ch: 9.8, rv: 20000, ev: 0.2, vac: 7.8, tc: 63, sc: { r: 7.0, d: 4.8, s: 5.4, g: 6.2 } },
+  { n: "Valmont", dep: "76", pop: 1010, ch: 9.5, rv: 20500, ev: 0.4, vac: 7.5, tc: 64, sc: { r: 7.1, d: 5.0, s: 5.6, g: 6.3 } },
+  { n: "Auffay", dep: "76", pop: 2720, ch: 11.0, rv: 19500, ev: 0.0, vac: 8.5, tc: 62, sc: { r: 6.9, d: 4.7, s: 5.2, g: 6.2 } },
+  { n: "Bacqueville-en-Caux", dep: "76", pop: 2480, ch: 10.8, rv: 19800, ev: 0.2, vac: 8.2, tc: 63, sc: { r: 7.0, d: 4.8, s: 5.3, g: 6.2 } },
+  { n: "Criel-sur-Mer", dep: "76", pop: 2760, ch: 11.5, rv: 18900, ev: -0.5, vac: 9.2, tc: 61, sc: { r: 6.7, d: 4.4, s: 5.0, g: 6.0 } },
+  { n: "Octeville-sur-Mer", dep: "76", pop: 4320, ch: 8.5, rv: 22500, ev: 0.8, vac: 6.8, tc: 67, sc: { r: 5.3, d: 5.5, s: 6.2, g: 5.6 } },
+  { n: "Sainte-Adresse", dep: "76", pop: 7830, ch: 8.0, rv: 25000, ev: 0.5, vac: 6.0, tc: 72, sc: { r: 4.8, d: 5.7, s: 7.0, g: 5.4 } },
+  { n: "Saint-Aubin-lès-Elbeuf", dep: "76", pop: 8390, ch: 14.2, rv: 18500, ev: -0.5, vac: 9.5, tc: 59, sc: { r: 6.8, d: 4.4, s: 4.5, g: 5.9 } },
+  { n: "Saint-Pierre-lès-Elbeuf", dep: "76", pop: 5050, ch: 15.8, rv: 17500, ev: -1.0, vac: 10.2, tc: 57, sc: { r: 7.0, d: 4.0, s: 3.8, g: 5.8 } },
+  { n: "Tourville-la-Rivière", dep: "76", pop: 3890, ch: 9.8, rv: 21500, ev: 0.6, vac: 7.5, tc: 65, sc: { r: 5.8, d: 5.4, s: 5.8, g: 5.7 } },
+];
+
+// ─── App principale ───────────────────────────────────────────────────────────
+export default function App() {
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [city, setCity] = useState(null);
+  const [apiData, setApiData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [activePanel, setActivePanel] = useState(null); // "rendement" | "demographie" | "socioeco"
+  const [open, setOpen] = useState(false);
+
+  // Recherche API dynamique
+  const fetchSuggestions = useCallback(async (q) => {
+    if (q.length < 2) { setSuggestions([]); return; }
+    try {
+      const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}&dep=76`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const apiResults = (data.results ?? []).map(c => ({ ...c, _api: true }));
+      setSuggestions(apiResults.slice(0, 10));
+    } catch {
+      const local = D.filter(c => c.n.toLowerCase().includes(q.toLowerCase())).slice(0, 8);
+      setSuggestions(local);
+    }
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => { if (query) fetchSuggestions(query); }, 250);
+    return () => clearTimeout(t);
+  }, [query, fetchSuggestions]);
+
+  const fetchCommune = useCallback(async (name) => {
+    setLoading(true); setApiData(null); setActivePanel(null);
+    try {
+      const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(name)}`);
+      if (!res.ok) throw new Error();
+      const d = await res.json();
+      setApiData(d);
+    } catch { setApiData(null); }
+    setLoading(false);
+  }, []);
+
+  const select = (c) => {
+    const staticCity = D.find(d => d.n.toLowerCase() === (c.commune ?? c.n ?? "").toLowerCase()) ?? c;
+    setCity(staticCity);
+    setQuery(c.commune ?? c.n ?? "");
+    setSuggestions([]);
+    setOpen(false);
+    fetchCommune(c.commune ?? c.n);
+  };
+
+  const sorted = [...D].sort((a, b) => b.sc.g - a.sc.g);
+  const displayed = query.length < 2 ? sorted : suggestions.length ? suggestions : sorted;
+
+  const globalNote = apiData
+    ? (apiData.rendement ?? city?.sc?.r ?? 0) * 0.5 + (apiData.demographie ?? city?.sc?.d ?? 0) * 0.25 + (apiData.socio_eco ?? city?.sc?.s ?? 0) * 0.25
+    : city
+      ? city.sc.r * 0.5 + city.sc.d * 0.25 + city.sc.s * 0.25
+      : null;
+
+  const scores = city ? {
+    r: apiData?.rendement ?? city.sc.r,
+    d: apiData?.demographie ?? city.sc.d,
+    s: apiData?.socio_eco ?? city.sc.s,
+    g: globalNote ?? city.sc.g,
+  } : null;
+
+  return (
+    <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#f3f4f6", minHeight: "100vh", padding: 16 }}>
+      <div style={{ maxWidth: 720, margin: "0 auto" }}>
+
+        {/* Header */}
+        <div style={{ background: "linear-gradient(135deg,#1e3a5f,#2563eb)", borderRadius: 14, padding: "20px 24px", marginBottom: 16, color: "white" }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>🏠 Radar Immo 76</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 13, opacity: 0.8 }}>Analyse investissement — Seine-Maritime</p>
+        </div>
+
+        {/* Recherche */}
+        <div style={{ position: "relative", marginBottom: 16 }}>
+          <input
+            value={query}
+            onChange={e => { setQuery(e.target.value); setOpen(true); }}
+            onFocus={() => setOpen(true)}
+            placeholder="Tapez 2 lettres pour chercher parmi les 676 communes Seine-Maritime…"
+            style={{
+              width: "100%", boxSizing: "border-box", padding: "12px 16px",
+              borderRadius: 10, border: "2px solid #e5e7eb", fontSize: 14,
+              background: "white", outline: "none"
+            }}
+          />
+          {open && displayed.length > 0 && (
+            <div style={{
+              position: "absolute", top: "100%", left: 0, right: 0, background: "white",
+              borderRadius: 10, boxShadow: "0 4px 24px rgba(0,0,0,0.12)", zIndex: 100,
+              maxHeight: 280, overflowY: "auto", border: "1px solid #e5e7eb", marginTop: 4
+            }}>
+              {displayed.map((c, i) => {
+                const cs = c._api ? null : c.sc;
+                const cc = cs ? nc(cs.g) : "#818cf8";
+                return (
+                  <div key={i} onClick={() => select(c)}
+                    style={{ padding: "10px 16px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f3f4f6" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f9fafb"}
+                    onMouseLeave={e => e.currentTarget.style.background = "white"}
+                  >
+                    <span style={{ fontSize: 14, color: "#111827" }}>{c.commune ?? c.n}</span>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      {c._api && <span style={{ fontSize: 10, background: "#dbeafe", color: "#1d4ed8", borderRadius: 4, padding: "1px 6px", fontWeight: 600 }}>DVF</span>}
+                      {cs && <span style={{ fontSize: 12, fontWeight: 700, color: "white", background: cc, borderRadius: 4, padding: "2px 8px" }}>{cs.g.toFixed(1)}</span>}
                     </div>
                   </div>
-                );})}
-                {filtered.length===0&&!searching&&<div style={{padding:20,textAlign:"center",color:"#4a4a68",fontSize:13}}>{search.length>=2?"Aucune commune trouvée.":"Aucun résultat."}</div>}
-              </div>
+                );
+              })}
             </div>
           )}
         </div>
-        {/* Empty */}
-        {!city&&<div style={{textAlign:"center",padding:"40px 14px"}}><div style={{fontSize:40,marginBottom:10,opacity:.1}}>📊</div><p style={{color:"#2a2a40",fontSize:12,lineHeight:1.7,maxWidth:340,margin:"0 auto"}}>Sélectionnez une commune pour afficher l'analyse.</p></div>}
 
-        {/* Results */}
-        {city&&sc&&(
-          <div style={{opacity:show?1:0,transform:show?"translateY(0)":"translateY(14px)",transition:"all .5s ease-out",marginTop:4}}>
-            {/* Hero */}
-            <div style={{background:"linear-gradient(145deg,rgba(12,12,34,0.94),rgba(8,8,24,0.97))",borderRadius:16,padding:"28px 18px 22px",border:`1px solid ${gc}0c`,marginBottom:16,textAlign:"center",position:"relative",overflow:"hidden"}}>
-              <div style={{position:"absolute",top:-40,left:"50%",transform:"translateX(-50%)",width:280,height:280,background:`radial-gradient(circle,${gc}03,transparent 70%)`,pointerEvents:"none"}}/>
-              <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:3.5,color:"#3a3a54",fontWeight:600}}>Note globale</div>
-              <div style={{fontSize:62,fontFamily:F2,fontWeight:700,color:gc,lineHeight:1,marginTop:2}}>{sc.g}</div>
-              <div style={{fontSize:12,color:gc,fontWeight:600,marginTop:2}}>{nl(sc.g)}</div>
-              <div style={{fontSize:22,fontFamily:F2,color:"#f0f0ff",marginTop:8,fontWeight:700}}>{apiData?.commune||city.n}{apiLoading&&<span style={{fontSize:10,color:"#818cf8",marginLeft:10,fontFamily:F1,fontWeight:400}}>⟳ chargement…</span>}</div>
-              <div style={{fontSize:13,color:"#5a5a78",marginTop:4}}>{DEPTS[city.d]||city.d} · {(apiData?.population||city.pop||0).toLocaleString("fr-FR")} hab.{apiData?.code_postal?" · "+apiData.code_postal:""}</div>
-              <div style={{display:"flex",justifyContent:"center",gap:14,marginTop:20,flexWrap:"wrap"}}>
-                <Gauge s={sc.r} l="Rendement" c="#f472b6"/>
-                <Gauge s={sc.d} l="Démographie" c="#60a5fa"/>
-                <Gauge s={sc.s} l="Socio-éco" c="#34d399"/>
+        {/* Fiche commune */}
+        {city && (
+          <div style={{ background: "white", borderRadius: 14, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+
+            {/* Titre commune */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#111827" }}>{city.n}</h2>
+                <div style={{ fontSize: 13, color: "#6b7280", marginTop: 2 }}>
+                  {city.pop?.toLocaleString("fr-FR")} hab. · Seine-Maritime (76)
+                  {loading && <span style={{ marginLeft: 8, color: "#f59e0b" }}>⏳ Chargement DVF…</span>}
+                  {apiData && <span style={{ marginLeft: 8, color: "#22c55e", fontWeight: 600 }}>✅ Données DVF chargées</span>}
+                </div>
               </div>
-              <div style={{marginTop:12,fontSize:9,color:"#24243a"}}>Rendement 40% · Démographie 30% · Socio-économique 30%</div>
-            </div>
-
-            <Sec t="Rendement Locatif" i="💰" c="#f472b6" s={sc.r}>
-              <Row i="🏢" l="Prix m² appart." v={pa?`${Number(pa).toLocaleString("fr-FR")} €`:"—"} s={prixSource}/>
-              <Row i="🏡" l="Prix m² maison" v={pm?`${Number(pm).toLocaleString("fr-FR")} €`:"—"}/>
-              <Row i="🔑" l="Loyer moyen /m²" v={lo?`${Number(lo).toFixed(1)} €`:"—"} s={loyerSource}/>
-              <Row i="📈" l="Rentabilité brute" v={rb?`${Number(rb).toFixed(1)} %`:"—"} h={rb>=8?"#34d399":rb>=6?"#60a5fa":"#fbbf24"}/>
-              <Row i="📊" l="Évol. prix 12 mois" v={ev!=null?`${ev>0?"+":""}${ev.toFixed(1)} %`:"N/A"} h={ev!=null&&ev<=0?"#34d399":"#fbbf24"}/>
-              <div style={{padding:"7px 14px",display:"flex",gap:5,flexWrap:"wrap"}}>
-                <Chip t={`Zone ${zt} — ${tensionLabel(zt)}`} c={zt==="B1"||zt==="A"||zt==="Abis"?"#34d399":"#fbbf24"}/>
-                <Chip t={vac!=null?`Vacance : ${vac}% — ${vacLabel(vac)}`:"Vacance : N/A"} c={vac!=null&&vac<=8?"#34d399":vac!=null&&vac<=12?"#fbbf24":"#f87171"}/>
-              </div>
-            </Sec>
-
-            <Sec t="Attractivité Démographique" i="👥" c="#60a5fa" s={sc.d}>
-              <Row i="🏘️" l="Population" v={(apiData?.population||city.pop||0).toLocaleString("fr-FR")} s="INSEE 2023"/>
-              <Row i="📈" l="Évolution annuelle" v={ep!=null?`${ep>0?"+":""}${ep.toFixed(1)} %`:"N/A"} h={ep!=null&&ep>0?"#34d399":"#f87171"}/>
-              <Row i="🎓" l="Étudiants" v={et!=null?et.toLocaleString("fr-FR"):"N/A"}/>
-              <Row i="🏷️" l="Zonage tension (ABC)" v={tensionLabel(zt)} s="Décret 2013 + arrêté 07/2024" h={zt==="B1"||zt==="A"?"#34d399":"#fbbf24"}/>
-              <Row i="🏚️" l="Taux logements vacants" v={vac!=null?`${vac.toFixed(1)} %`:"N/A"} s="INSEE recensement" h={vac!=null&&vac<=8?"#34d399":vac!=null&&vac<=12?"#fbbf24":"#f87171"}/>
-              <Row i="🚆" l="Transports" v={tr||"N/A"}/>
-              <Row i="🏗️" l="Projets urbains" v={pu||"N/A"}/>
-            </Sec>
-
-            <Sec t="Solidité Socio-Économique" i="🏛️" c="#34d399" s={sc.s}>
-              <Row i="📉" l="Chômage (recensement)" v={tc!=null?`${tc.toFixed(1)} %`:"N/A"} s="Recensement INSEE 2021" h={tc!=null&&tc<=12?"#34d399":tc!=null&&tc<=18?"#fbbf24":"#f87171"}/>
-              <Row i="💶" l="Revenu médian" v={rm!=null?`${rm.toLocaleString("fr-FR")} €/an`:"N/A"} h={rm!=null&&rm>=22000?"#34d399":"#60a5fa"}/>
-              <Row i="👔" l="Part cadres" v={pc!=null?`${pc.toFixed(1)} %`:"N/A"} h={pc!=null&&pc>=16?"#34d399":"#60a5fa"}/>
-              <Row i="⚠️" l="Taux de pauvreté" v={tp!=null?`${tp.toFixed(1)} %`:"N/A"} h={tp!=null&&tp<=15?"#34d399":tp!=null&&tp<=20?"#fbbf24":"#f87171"}/>
-            </Sec>
-
-            <div style={{background:"rgba(8,8,18,0.4)",borderRadius:11,padding:"14px 16px",border:"1px solid rgba(255,255,255,0.02)"}}>
-              <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:2,color:"#24243a",marginBottom:8,fontWeight:600}}>📋 Sources & Méthodologie</div>
-              <div style={{fontSize:10.5,color:"#3a3a54",lineHeight:1.8}}>
-                <strong style={{color:"#48486a"}}>Tension locative</strong> — Zonage ABC officiel (décret 2013-392 + arrêté 05/07/2024). A/Abis/B1 = zone tendue.<br/>
-                <strong style={{color:"#48486a"}}>Vacance locative</strong> — Taux de logements vacants, recensement INSEE 2021.<br/>
-                <strong style={{color:"#48486a"}}>Prix & loyers</strong> — DVF notarial 2024 (DGFiP) + Carte des loyers ANIL 2024. <strong style={{color:"#48486a"}}>Socio-éco</strong> — Dossiers complets INSEE.<br/>
-                <span style={{color:"#1e1e34"}}>Indicatif uniquement. Ne constitue pas un conseil en investissement.</span>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 32, fontWeight: 900, color: nc(scores?.g) }}>{scores?.g?.toFixed(1) ?? "—"}</div>
+                <div style={{ fontSize: 11, color: "#9ca3af" }}>Note globale /10</div>
+                <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>50% rend. · 25% démo. · 25% socio</div>
               </div>
             </div>
+
+            {/* ─── Jauges + détail au clic ─── */}
+            <div style={{ marginBottom: 8 }}>
+              <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9ca3af" }}>💡 Clique sur une jauge pour voir le détail des critères</p>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <Gauge label="Rendement" value={scores?.r} weight={50} active={activePanel === "rendement"}
+                  onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")} />
+                <Gauge label="Démographie" value={scores?.d} weight={25} active={activePanel === "demographie"}
+                  onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")} />
+                <Gauge label="Socio-Éco" value={scores?.s} weight={25} active={activePanel === "socioeco"}
+                  onClick={() => setActivePanel(p => p === "socioeco" ? null : "socioeco")} />
+              </div>
+            </div>
+
+            {/* Panneau détail */}
+            {activePanel && (
+              <DetailPanel type={activePanel} city={city} apiData={apiData} />
+            )}
+
+            {/* ─── Bloc chiffres clés ─── */}
+            <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
+              <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📋 Chiffres clés</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+                {[
+                  { l: "Prix achat (DVF)", v: apiData?.appartement_m2, u: " €/m²", c: "#1e40af" },
+                  { l: "Loyer médian (ANIL)", v: apiData?.loyer != null ? apiData.loyer.toFixed(1) : null, u: " €/m²/mois", c: "#7c3aed" },
+                  { l: "Rentabilité brute", v: apiData?.rentabilite_brute_pct != null ? apiData.rentabilite_brute_pct.toFixed(2) : null, u: "%", c: nc(scores?.r) },
+                  { l: "Chômage", v: city.ch, u: "%", c: city.ch < 10 ? "#22c55e" : "#ef4444" },
+                  { l: "Revenu médian", v: city.rv?.toLocaleString("fr-FR"), u: " €/an", c: "#374151" },
+                  { l: "Taux propriétaires", v: city.tc, u: "%", c: "#374151" },
+                ].map((item, i) => (
+                  <div key={i} style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 8px", textAlign: "center" }}>
+                    <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 4, lineHeight: 1.3 }}>{item.l}</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: item.c ?? "#111827" }}>
+                      {item.v != null ? `${item.v}${item.u}` : "—"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ─── Barres de progression globales ─── */}
+            <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
+              <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique des scores</h3>
+              <CriteriaRow label="🏦 Rendement locatif (poids 50%)" note={scores?.r} info={`Contribution : ${scores?.r != null ? (scores.r * 0.5).toFixed(2) : "—"} pts`} />
+              <CriteriaRow label="👥 Attractivité démographique (poids 25%)" note={scores?.d} info={`Contribution : ${scores?.d != null ? (scores.d * 0.25).toFixed(2) : "—"} pts`} />
+              <CriteriaRow label="💼 Score socio-économique (poids 25%)" note={scores?.s} info={`Contribution : ${scores?.s != null ? (scores.s * 0.25).toFixed(2) : "—"} pts`} />
+              <div style={{ height: 1, background: "#f3f4f6", margin: "8px 0" }} />
+              <CriteriaRow label="⭐ Note globale pondérée" note={scores?.g} />
+            </div>
+
           </div>
         )}
+
+        {/* Liste ranking */}
+        {!city && (
+          <div style={{ background: "white", borderRadius: 14, padding: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#374151" }}>🏆 Top communes Seine-Maritime</h3>
+            {sorted.slice(0, 20).map((c, i) => (
+              <div key={i} onClick={() => select(c)}
+                style={{ display: "flex", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #f3f4f6", cursor: "pointer" }}
+                onMouseEnter={e => e.currentTarget.style.background = "#f9fafb"}
+                onMouseLeave={e => e.currentTarget.style.background = "white"}
+              >
+                <span style={{ width: 28, fontSize: 13, color: "#9ca3af", fontWeight: 600 }}>#{i + 1}</span>
+                <span style={{ flex: 1, fontSize: 14, color: "#111827", fontWeight: 500 }}>{c.n}</span>
+                <span style={{ fontSize: 12, color: "#6b7280", marginRight: 10 }}>{c.pop?.toLocaleString("fr-FR")} hab.</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "white", background: nc(c.sc.g), borderRadius: 5, padding: "2px 9px" }}>{c.sc.g.toFixed(1)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p style={{ textAlign: "center", fontSize: 11, color: "#9ca3af", marginTop: 16 }}>
+          Prix DVF Cerema · Loyers ANIL 2024 · Géo API INSEE
+        </p>
       </div>
     </div>
   );
