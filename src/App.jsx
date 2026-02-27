@@ -142,7 +142,7 @@ const DEPTS = {"76":"Seine-Maritime","14":"Calvados","27":"Eure","50":"Manche","
    UI COMPONENTS
    ═══════════════════════════════════════════ */
 function Gauge({s,l,c,sz=112}){const r=(sz-14)/2,ci=Math.PI*r,of=ci*(1-s/10);return(<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}><svg width={sz} height={sz/2+14} viewBox={`0 0 ${sz} ${sz/2+14}`}><path d={`M 7 ${sz/2+7} A ${r} ${r} 0 0 1 ${sz-7} ${sz/2+7}`} fill="none" stroke="#141428" strokeWidth="5" strokeLinecap="round"/><path d={`M 7 ${sz/2+7} A ${r} ${r} 0 0 1 ${sz-7} ${sz/2+7}`} fill="none" stroke={c} strokeWidth="5" strokeLinecap="round" strokeDasharray={ci} strokeDashoffset={of} style={{transition:"stroke-dashoffset .8s ease-out"}}/><text x={sz/2} y={sz/2+1} textAnchor="middle" fontSize="20" fontWeight="700" fill={c} fontFamily={F2}>{s.toFixed(1)}</text><text x={sz/2} y={sz/2+12} textAnchor="middle" fontSize="8" fill="#4a4a64" fontFamily={F1}>/ 10</text></svg><span style={{fontSize:9,color:"#5a5a78",fontFamily:F1,fontWeight:600,textTransform:"uppercase",letterSpacing:1.3}}>{l}</span></div>)}
-function Row({i,l,v,s,h}){const[o,setO]=useState(false);return(<div onMouseEnter={()=>setO(true)} onMouseLeave={()=>setO(false)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:"1px solid rgba(255,255,255,0.02)",background:o?"rgba(255,255,255,0.01)":"transparent",transition:"background .1s"}}><div style={{display:"flex",alignItems:"center",gap:7,flex:1,minWidth:0}}><span style={{fontSize:12,width:16,textAlign:"center",flexShrink:0}}>{i}</span><span style={{fontSize:11.5,color:"#8a8aa8",fontFamily:F1}}>{l}</span></div><div style={{textAlign:"right",flexShrink:0,maxWidth:"55%",paddingLeft:6}}><span style={{fontSize:12,fontWeight:600,color:h||"#c8c8e0",fontFamily:F1,wordBreak:"break-word"}}>{v}</span>{s&&<div style={{fontSize:8.5,color:"#3a3a54",marginTop:1}}>{s}</div>}</div></div>)}
+function Row({i,l,v,s,h}){const[o,setO]=useState(false);return(<div onMouseEnter={()=>setO(true)} onMouseLeave={()=>setO(false)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:"1px solid rgba(255,255,255,0.02)",background:o?"rgba(255,255,255,0.01)":"transparent",transition:"background .1s"}}><div style={{display:"flex",alignItems:"center",gap:7,flex:1,minWidth:0}}><span style={{fontSize:12,width:16,textAlign:"center",flexShrink:0}}>{i}</span><span style={{fontSize:13,color:"#9a9ab8",fontFamily:F1}}>{l}</span></div><div style={{textAlign:"right",flexShrink:0,maxWidth:"55%",paddingLeft:6}}><span style={{fontSize:14,fontWeight:600,color:h||"#e8e8f8",fontFamily:F1,wordBreak:"break-word"}}>{v}</span>{s&&<div style={{fontSize:8.5,color:"#3a3a54",marginTop:1}}>{s}</div>}</div></div>)}
 function Sec({t,i,c,s,ch}){return(<div style={{background:"linear-gradient(145deg,rgba(14,14,30,0.94),rgba(10,10,24,0.97))",borderRadius:13,border:`1px solid ${c}10`,overflow:"hidden",marginBottom:14}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 14px",borderBottom:`1px solid ${c}08`,background:`linear-gradient(90deg,${c}04,transparent)`}}><div style={{display:"flex",alignItems:"center",gap:7}}><span style={{fontSize:15}}>{i}</span><span style={{fontSize:10.5,fontWeight:600,color:c,fontFamily:F1,textTransform:"uppercase",letterSpacing:1}}>{t}</span></div><div style={{background:`${c}0e`,borderRadius:14,padding:"1px 9px",fontSize:12,fontWeight:700,color:c,fontFamily:F2}}>{s}/10</div></div>{ch}</div>)}
 function Chip({t,c="#60a5fa"}){return <span style={{display:"inline-block",padding:"2px 7px",borderRadius:4,fontSize:9.5,fontWeight:600,color:c,background:`${c}0c`,fontFamily:F1}}>{t}</span>}
 
@@ -156,11 +156,12 @@ export default function App() {
   const [open, setOpen] = useState(false);
   const [deptFilter, setDeptFilter] = useState("all");
   const [sortBy, setSortBy] = useState("score");
+
+  const API = "https://radar-immo76-1.onrender.com";
   const [apiResults, setApiResults] = useState([]);
   const [apiData,    setApiData]    = useState(null);
   const [apiLoading, setApiLoading] = useState(false);
   const [searching,  setSearching]  = useState(false);
-  const API = "https://radar-immo76-1.onrender.com";
 
   useEffect(() => {
     if (!search || search.length < 2) { setApiResults([]); return; }
@@ -171,13 +172,15 @@ export default function App() {
         if (r.ok) {
           const data = await r.json();
           setApiResults(data.map(c => ({
-            n: c.nom, d: c.departement?.code || "?",
-            pop: c.population || 0, _api: true
+            n: c.nom,
+            d: c.departement?.code || "?",
+            pop: c.population || 0,
+            _api: true
           })));
         }
-      } catch(e) {}
+      } catch(e) { console.error(e); }
       setSearching(false);
-    }, 300);
+    }, 350);
     return () => clearTimeout(t);
   }, [search]);
 
@@ -190,7 +193,7 @@ export default function App() {
     if (sortBy === "score") list = [...list].sort((a,b) => b.sc.g - a.sc.g);
     else if (sortBy === "renta") list = [...list].sort((a,b) => b.rb - a.rb);
     else if (sortBy === "pop") list = [...list].sort((a,b) => b.pop - a.pop);
-    else if (sortBy === "prix") list = [...list].sort((a,b) => (a.pa||9999) - (b.pa||9999));
+    else if (sortBy === "prix") list = [...list].sort((a,b) => (a.pa||9999)-(b.pa||9999));
     return list;
   }, [enriched, deptFilter, search, sortBy, apiResults]);
 
@@ -199,7 +202,7 @@ export default function App() {
     try {
       const r = await fetch(`${API}/analyse/${encodeURIComponent(nom)}`);
       if (r.ok) { const json = await r.json(); setApiData(json); }
-    } catch(e) { console.error("API error:", e); }
+    } catch(e) { console.error("API:", e); }
     setApiLoading(false);
   }
 
@@ -224,7 +227,7 @@ export default function App() {
   const loyerSource = apiData?.loyer?.source || "Carte loyers ANIL 2024";
 
     return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(170deg,#060610,#090918 40%,#0b0b20)",fontFamily:F1,color:"#c8c8e0"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(170deg,#0d0d1f,#111128 40%,#13132a)",fontFamily:F1,color:"#dcdcf0"}}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet"/>
       <style>{`*{box-sizing:border-box}input::placeholder{color:#3a3a50}select{background:#10102a;color:#a0a0c0;border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:5px 8px;font-size:11px;font-family:'Outfit',sans-serif;outline:none}`}</style>
       <div style={{position:"fixed",top:-150,right:-100,width:400,height:400,background:"radial-gradient(circle,rgba(129,140,248,0.035),transparent 70%)",pointerEvents:"none"}}/>
@@ -235,7 +238,7 @@ export default function App() {
           <span style={{fontSize:10}}>🏠</span>
           <span style={{fontSize:9,textTransform:"uppercase",letterSpacing:2.5,color:"#818cf8",fontWeight:600}}>Radar Investissement · {D.length} communes</span>
         </div>
-        <h1 style={{fontSize:30,fontFamily:F2,fontWeight:700,margin:0,background:"linear-gradient(135deg,#e8e8ff,#a5b4fc 60%,#818cf8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Radar Immobilier Normandie</h1>
+        <h1 style={{fontSize:34,fontFamily:F2,fontWeight:700,margin:0,background:"linear-gradient(135deg,#e8e8ff,#a5b4fc 60%,#818cf8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Radar Immobilier Normandie</h1>
         <p style={{fontSize:11.5,color:"#3a3a54",marginTop:6,lineHeight:1.6,maxWidth:440,margin:"6px auto 0"}}>
           Scoring multi-critères — prix DVF notarial 2024 (DGFiP), loyers ANIL 2024, zonage ABC officiel, données socio-éco INSEE.
         </p>
@@ -269,40 +272,24 @@ export default function App() {
           <div onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(12,12,30,0.85)",border:"1px solid rgba(129,140,248,0.08)",borderRadius:11,padding:"11px 14px",cursor:"pointer",backdropFilter:"blur(10px)"}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <span style={{fontSize:15}}>🏙️</span>
-              <span style={{fontSize:13,color:city?"#e0e0f0":"#3a3a58",fontWeight:city?600:400}}>{city?`${city.n}${city.d&&city.d!=="?"?" — "+(DEPTS[city.d]||"Dept "+city.d)+" ("+city.d+")":""}`:"Rechercher une commune..."}</span>
+              <span style={{fontSize:13,color:city?"#e0e0f0":"#3a3a58",fontWeight:city?600:400}}>{city?`${city.n} — ${DEPTS[city.d]} (${city.d})`:"Sélectionner une commune..."}</span>
               {sc&&<span style={{background:`${gc}12`,color:gc,padding:"1px 8px",borderRadius:9,fontSize:11,fontWeight:700,fontFamily:F2}}>{sc.g}</span>}
             </div>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{transform:open?"rotate(180deg)":"",transition:"transform .15s"}}><path d="M3 4.5L6 7.5L9 4.5" stroke="#4a4a68" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </div>
           {open&&(
             <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,background:"rgba(10,10,26,0.98)",border:"1px solid rgba(129,140,248,0.08)",borderRadius:11,overflow:"hidden",boxShadow:"0 14px 40px rgba(0,0,0,0.5)",maxHeight:360,zIndex:999}}>
-              <div style={{padding:"8px 10px",borderBottom:"1px solid rgba(255,255,255,0.02)",display:"flex",alignItems:"center",gap:6}}>
-                <input type="text" placeholder="Tapez le nom d'une commune..." value={search} onChange={e=>setSearch(e.target.value)} autoFocus style={{flex:1,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:6,padding:"8px 10px",color:"#e0e0f0",fontSize:12,outline:"none",fontFamily:F1}}/>
-                {searching&&<span style={{fontSize:11,color:"#818cf8",flexShrink:0}}>⟳</span>}
+              <div style={{padding:"8px 10px",borderBottom:"1px solid rgba(255,255,255,0.02)"}}>
+                <input type="text" placeholder="Rechercher..." value={search} onChange={e=>setSearch(e.target.value)} autoFocus style={{width:"100%",background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:6,padding:"10px 12px",color:"#f0f0ff",fontSize:14,outline:"none",fontFamily:F1}}/>
               </div>
-              {search.length<2&&<div style={{padding:"6px 14px",fontSize:10,color:"#2a2a40",borderBottom:"1px solid rgba(255,255,255,0.015)"}}>Tapez 2+ lettres pour chercher parmi les 676 communes Seine-Maritime</div>}
               <div style={{overflowY:"auto",maxHeight:300}}>
-                {filtered.map((c,i)=>{
-                  const cs=c._api?null:c.sc;
-                  const cc=cs?nc(cs.g):"#818cf8";
-                  return(
-                  <div key={c.n+i} onClick={()=>select(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.015)",background:sel?.n===c.n?"rgba(129,140,248,0.05)":"transparent"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(129,140,248,0.03)"} onMouseLeave={e=>e.currentTarget.style.background=sel?.n===c.n?"rgba(129,140,248,0.05)":"transparent"}>
-                    <div>
-                      <div style={{fontSize:12,fontWeight:600,color:"#e0e0f0"}}>
-                        {!c._api&&<span style={{color:"#3a3a54",fontSize:10,marginRight:5}}>#{i+1}</span>}
-                        {c.n}
-                      </div>
-                      <div style={{fontSize:10,color:"#3a3a54",marginTop:1}}>{c._api?`Dépt ${c.d}`:(DEPTS[c.d]||c.d)} · {(c.pop||0).toLocaleString("fr-FR")} hab.</div>
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      {c._api
-                        ?<span style={{fontSize:9,color:"#818cf8",background:"rgba(129,140,248,0.08)",padding:"2px 7px",borderRadius:4,fontWeight:600}}>DVF</span>
-                        :<><span style={{fontSize:10,color:"#3a3a54"}}>{c.rb}%</span><span style={{fontFamily:F2,fontSize:14,fontWeight:700,color:cc}}>{cs?.g}</span></>
-                      }
-                    </div>
+                {filtered.map((c,i)=>{const cs=c.sc,cc=nc(cs.g);return(
+                  <div key={c.n} onClick={()=>select(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.015)",background:sel?.n===c.n?"rgba(129,140,248,0.05)":"transparent"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(129,140,248,0.03)"} onMouseLeave={e=>e.currentTarget.style.background=sel?.n===c.n?"rgba(129,140,248,0.05)":"transparent"}>
+                    <div><div style={{fontSize:14,fontWeight:600,color:"#f0f0ff"}}><span style={{color:"#3a3a54",fontSize:10,marginRight:5}}>#{i+1}</span>{c.n}</div><div style={{fontSize:12,color:"#6a6a88",marginTop:2}}>{DEPTS[c.d]} ({c.d}) · {c.pop.toLocaleString("fr-FR")} hab.</div></div>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:10,color:"#3a3a54"}}>{c.rb}%</span><span style={{fontFamily:F2,fontSize:14,fontWeight:700,color:cc}}>{cs.g}</span></div>
                   </div>
                 );})}
-                {filtered.length===0&&!searching&&<div style={{padding:16,textAlign:"center",color:"#3a3a54",fontSize:11}}>{search.length>=2?"Aucune commune trouvée.":"Aucun résultat."}</div>}
+                {filtered.length===0&&<div style={{padding:16,textAlign:"center",color:"#3a3a54",fontSize:11}}>Aucun résultat. Demandez dans le chat pour ajouter cette ville !</div>}
               </div>
             </div>
           )}
@@ -318,10 +305,10 @@ export default function App() {
             <div style={{background:"linear-gradient(145deg,rgba(12,12,34,0.94),rgba(8,8,24,0.97))",borderRadius:16,padding:"28px 18px 22px",border:`1px solid ${gc}0c`,marginBottom:16,textAlign:"center",position:"relative",overflow:"hidden"}}>
               <div style={{position:"absolute",top:-40,left:"50%",transform:"translateX(-50%)",width:280,height:280,background:`radial-gradient(circle,${gc}03,transparent 70%)`,pointerEvents:"none"}}/>
               <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:3.5,color:"#3a3a54",fontWeight:600}}>Note globale</div>
-              <div style={{fontSize:62,fontFamily:F2,fontWeight:700,color:gc,lineHeight:1,marginTop:2}}>{sc.g}</div>
+              <div style={{fontSize:68,fontFamily:F2,fontWeight:700,color:gc,lineHeight:1,marginTop:2}}>{sc.g}</div>
               <div style={{fontSize:12,color:gc,fontWeight:600,marginTop:2}}>{nl(sc.g)}</div>
-              <div style={{fontSize:18,fontFamily:F2,color:"#e0e0ff",marginTop:8,fontWeight:600}}>{apiData?.commune||city.n}{apiLoading&&<span style={{fontSize:9,color:"#818cf8",marginLeft:8,fontFamily:F1,fontWeight:400,opacity:.7}}>⟳ chargement…</span>}</div>
-              <div style={{fontSize:10.5,color:"#3a3a54",marginTop:2}}>{DEPTS[city.d]||city.d} · {(apiData?.population||city.pop||0).toLocaleString("fr-FR")} hab.{apiData?.code_postal?" · "+apiData.code_postal:""}</div>
+              <div style={{fontSize:22,fontFamily:F2,color:"#f0f0ff",marginTop:8,fontWeight:600}}>{apiData?.commune||city.n}{apiLoading&&<span style={{fontSize:10,color:"#818cf8",marginLeft:10,fontFamily:F1,fontWeight:400,opacity:.8}}>⟳ chargement…</span>}</div>
+              <div style={{fontSize:13,color:"#5a5a78",marginTop:4}}>{DEPTS[city.d]||city.d} · {(apiData?.population||city.pop||0).toLocaleString("fr-FR")} hab.{apiData?.code_postal?" · "+apiData.code_postal:""}</div>
               <div style={{display:"flex",justifyContent:"center",gap:14,marginTop:20,flexWrap:"wrap"}}>
                 <Gauge s={sc.r} l="Rendement" c="#f472b6"/>
                 <Gauge s={sc.d} l="Démographie" c="#60a5fa"/>
