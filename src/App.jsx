@@ -468,12 +468,33 @@ export default function App() {
         </div>
 
         {/* ── Fiche commune ── */}
-        {city && (
-          <div style={{
-            background: "white", borderRadius: 14, padding: 20,
-            boxShadow: "0 2px 12px rgba(0,0,0,0.06)"
-          }}>
-            <div style={{
+        {/* ── Fiche commune ── */}
+{city && (
+  <div style={{
+    background: "white", borderRadius: 14, padding: 20,
+    boxShadow: "0 2px 12px rgba(0,0,0,0.06)"
+  }}>
+
+    {/* 👇 AJOUTE CES LIGNES */}
+    <button
+      onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
+      style={{
+        display: "flex", alignItems: "center", gap: 6,
+        background: "none", border: "1px solid #e5e7eb",
+        borderRadius: 8, padding: "6px 12px", cursor: "pointer",
+        fontSize: 13, color: "#6b7280", marginBottom: 16,
+        fontFamily: "inherit"
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = "#f9fafb"}
+      onMouseLeave={e => e.currentTarget.style.background = "none"}
+    >
+      ← Retour au classement
+    </button>
+    {/* 👆 FIN */}
+
+    {/* En-tête commune */}
+    <div style={{
+
               display: "flex", justifyContent: "space-between",
               alignItems: "flex-start", marginBottom: 16
             }}>
