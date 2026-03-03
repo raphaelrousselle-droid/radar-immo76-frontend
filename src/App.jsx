@@ -436,11 +436,10 @@ export default function App() {
 
             <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
               <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
-              <CriteriaRow label="🏦 Rendement locatif (50%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.5).toFixed(2)} pts`  : undefined} />
-              <CriteriaRow label="👥 Démographie (25%)"       note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.25).toFixed(2)} pts` : undefined} />
-              <CriteriaRow label="💼 Socio-économique (25%)"  note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.25).toFixed(2)} pts` : undefined} />
-              <div style={{ height: 1, background: "#f3f4f6", margin: "8px 0" }} />
-              <CriteriaRow label="⭐ Note globale pondérée" note={scores?.g} />
+              <CriteriaRow label="🏦 Rendement locatif (40%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.4).toFixed(2)} pts`  : undefined} />
+<CriteriaRow label="👥 Démographie (30%)"        note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.3).toFixed(2)} pts` : undefined} />
+<CriteriaRow label="💼 Socio-économique (30%)"   note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.3).toFixed(2)} pts` : undefined} />
+
             </div>
 
           </div>
