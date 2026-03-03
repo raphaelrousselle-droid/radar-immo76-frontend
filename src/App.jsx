@@ -86,21 +86,31 @@ function KpiCard({ label, value, color }) {
 }
 
 function PanelRendement({ city, apiData }) {
-  const pa   = sn(apiData?.prix?.appartement_m2);
+  const pa   = sn(apiData?.prix?.appartement_m2 ?? apiData?.prix?.maison_m2);
   const pm   = sn(apiData?.prix?.maison_m2);
   const lo   = sn(apiData?.loyer?.appartement_m2);
   const rb   = sn(apiData?.rentabilite_brute_pct);
   const nv   = sn(apiData?.prix?.nb_ventes_apt);
   const src1 = apiData?.prix?.source ?? null;
   const src2 = apiData?.loyer?.source ?? null;
+  const isApt = apiData?.prix?.appartement_m2 != null;
   const noteRb = rb != null ? Math.min(10, (rb / 12) * 10) : null;
   const notePa = pa != null ? Math.max(0, Math.min(10, 10 - (pa - 800) / 320)) : null;
   const noteLo = lo != null ? Math.min(10, (lo / 15) * 10) : null;
   return (
     <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10, padding: 16, marginTop: 8 }}>
       <h4 style={{ margin: "0 0 14px", fontSize: 14, color: "#15803d", fontWeight: 700 }}>📊 Détail — Rendement Locatif</h4>
+      {apiData?.prix?.avertissement_apt && (
+        <div style={{ background: "#fef9c3", border: "1px solid #fde047", borderRadius: 8, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: "#854d0e" }}>
+          ⚠️ {apiData.prix.avertissement_apt}
+        </div>
+      )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-        <KpiCard label="Prix appartement (DVF)" value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" + (nv ? ` · ${nv.toLocaleString("fr-FR")} ventes` : "") : null} color="#1e40af" />
+        <KpiCard
+          label={isApt ? "Prix appartement (DVF)" : "Prix maison (DVF)"}
+          value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" + (nv ? ` · ${nv.toLocaleString("fr-FR")} ventes` : "") : null}
+          color="#1e40af"
+        />
         <KpiCard label="Prix maison (DVF)" value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
         <KpiCard label="Loyer médian (ANIL)" value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} color="#7c3aed" />
         <KpiCard label="Rentabilité brute" value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(sn(apiData?.scores?.rendement))} />
@@ -111,7 +121,7 @@ function PanelRendement({ city, apiData }) {
         </div>
       )}
       <CriteriaRow label="Rentabilité brute" displayValue={rb != null ? rb.toFixed(2) + "%" : null} note={noteRb} info="Cible >8%" />
-      <CriteriaRow label="Prix d'achat appartement" displayValue={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null} note={notePa} info="Plus bas = mieux" />
+      <CriteriaRow label={isApt ? "Prix d'achat appartement" : "Prix d'achat maison"} displayValue={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null} note={notePa} info="Plus bas = mieux" />
       <CriteriaRow label="Loyer médian" displayValue={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} note={noteLo} info="Cible >10 €/m²" />
       {(src1 || src2) && (
         <div style={{ marginTop: 8, fontSize: 10, color: "#9ca3af" }}>
@@ -233,7 +243,6 @@ export default function App() {
   const [open, setOpen]                       = useState(false);
   const [communesVersion, setCommunesVersion] = useState(0);
 
-  // Préchargement scores API au démarrage
   useEffect(() => {
     const loadAll = async () => {
       for (const c of COMMUNES) {
@@ -330,13 +339,14 @@ export default function App() {
   const globalNote = sn(apiData?.scores?.global) ?? calcGlobal(sr, sd, se) ?? sn(city?.sc?.g);
   const scores = city ? { r: sr, d: sd, s: se, g: globalNote } : null;
 
-  const pa     = sn(apiData?.prix?.appartement_m2);
+  const pa     = sn(apiData?.prix?.appartement_m2 ?? apiData?.prix?.maison_m2);
   const pm     = sn(apiData?.prix?.maison_m2);
   const lo     = sn(apiData?.loyer?.appartement_m2);
   const rb     = sn(apiData?.rentabilite_brute_pct);
   const ch     = sn(apiData?.socio_eco?.chomage_pct  ?? city?.ch);
   const rv     = sn(apiData?.socio_eco?.revenu_median ?? city?.rv);
   const popAff = sn(apiData?.population ?? city?.pop);
+  const isApt  = apiData?.prix?.appartement_m2 != null;
 
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#f3f4f6", minHeight: "100vh", padding: 16 }}>
@@ -384,7 +394,6 @@ export default function App() {
         {city && (
           <div style={{ background: "white", borderRadius: 14, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
-            {/* Bouton retour */}
             <button
               onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
               style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, color: "#6b7280", marginBottom: 16, fontFamily: "inherit" }}
@@ -412,7 +421,7 @@ export default function App() {
             </div>
 
             {/* Jauges */}
-            <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9ca3af" }}>💡 Clique sur une jauge pour voir le détail des critères</p>
+            <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9ca3af" }}>💡 Clique sur une jauge ou une ligne pour voir le détail</p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
               <Gauge label="Rendement"   value={scores?.r} weight={40} active={activePanel === "rendement"}   onClick={() => setActivePanel(p => p === "rendement"   ? null : "rendement")} />
               <Gauge label="Démographie" value={scores?.d} weight={30} active={activePanel === "demographie"} onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")} />
@@ -422,8 +431,17 @@ export default function App() {
             {/* Chiffres clés */}
             <div style={{ marginBottom: 16, borderBottom: "1px solid #f3f4f6", paddingBottom: 14 }}>
               <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📋 Chiffres clés</h3>
+              {apiData?.prix?.avertissement_apt && (
+                <div style={{ background: "#fef9c3", border: "1px solid #fde047", borderRadius: 8, padding: "8px 12px", marginBottom: 10, fontSize: 12, color: "#854d0e" }}>
+                  ⚠️ {apiData.prix.avertissement_apt}
+                </div>
+              )}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-                <KpiCard label="Prix appt (DVF)"     value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
+                <KpiCard
+                  label={isApt ? "Prix appt (DVF)" : "Prix maison (DVF)"}
+                  value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null}
+                  color="#1e40af"
+                />
                 <KpiCard label="Prix maison (DVF)"   value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
                 <KpiCard label="Loyer médian (ANIL)" value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} color="#7c3aed" />
                 <KpiCard label="Rentabilité brute"   value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(scores?.r)} />
@@ -432,30 +450,24 @@ export default function App() {
               </div>
             </div>
 
-            {/* Vue synthétique — cliquable */}
+            {/* Vue synthétique cliquable */}
             <div>
               <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
 
-              <div
-                onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")}
-                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "rendement" ? "#f0fdf4" : "transparent" }}
-              >
+              <div onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")}
+                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "rendement" ? "#f0fdf4" : "transparent" }}>
                 <CriteriaRow label="🏦 Rendement locatif (40%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.4).toFixed(2)} pts` : undefined} />
               </div>
               {activePanel === "rendement" && <PanelRendement city={city} apiData={apiData} />}
 
-              <div
-                onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")}
-                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "demographie" ? "#eff6ff" : "transparent" }}
-              >
+              <div onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")}
+                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "demographie" ? "#eff6ff" : "transparent" }}>
                 <CriteriaRow label="👥 Démographie (30%)" note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.3).toFixed(2)} pts` : undefined} />
               </div>
               {activePanel === "demographie" && <PanelDemographie city={city} apiData={apiData} />}
 
-              <div
-                onClick={() => setActivePanel(p => p === "socioeco" ? null : "socioeco")}
-                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "socioeco" ? "#faf5ff" : "transparent" }}
-              >
+              <div onClick={() => setActivePanel(p => p === "socioeco" ? null : "socioeco")}
+                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "socioeco" ? "#faf5ff" : "transparent" }}>
                 <CriteriaRow label="💼 Socio-économique (30%)" note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.3).toFixed(2)} pts` : undefined} />
               </div>
               {activePanel === "socioeco" && <PanelSocioEco city={city} apiData={apiData} />}
