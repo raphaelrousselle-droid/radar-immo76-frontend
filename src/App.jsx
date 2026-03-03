@@ -178,111 +178,54 @@ function PanelSocioEco({ city, apiData }) {
   );
 }
 
-const D = [
-  { n: "Rouen",                      pop: 110169, ch: 15.2, rv: 18900, ev: -0.5, vac: 9.2,  sc: { r: 5.8, d: 4.5, s: 4.2 } },
-  { n: "Le Havre",                   pop: 170147, ch: 17.1, rv: 17200, ev: -1.2, vac: 10.8, sc: { r: 6.1, d: 4.0, s: 3.8 } },
-  { n: "Dieppe",                     pop: 29084,  ch: 16.8, rv: 16800, ev: -1.8, vac: 11.2, sc: { r: 6.8, d: 3.8, s: 3.5 } },
-  { n: "Fécamp",                     pop: 19257,  ch: 14.2, rv: 17500, ev: -0.9, vac: 9.8,  sc: { r: 6.5, d: 4.2, s: 4.0 } },
-  { n: "Elbeuf",                     pop: 16599,  ch: 18.5, rv: 16200, ev: -1.5, vac: 12.1, sc: { r: 7.2, d: 3.5, s: 3.2 } },
-  { n: "Sotteville-lès-Rouen",       pop: 28950,  ch: 16.1, rv: 17800, ev: -0.3, vac: 9.5,  sc: { r: 6.9, d: 4.4, s: 4.1 } },
-  { n: "Saint-Étienne-du-Rouvray",   pop: 28170,  ch: 19.2, rv: 16500, ev: -0.8, vac: 10.2, sc: { r: 7.0, d: 4.1, s: 3.6 } },
-  { n: "Mont-Saint-Aignan",          pop: 20220,  ch: 8.5,  rv: 24500, ev: 0.4,  vac: 6.2,  sc: { r: 4.8, d: 5.6, s: 6.8 } },
-  { n: "Maromme",                    pop: 12840,  ch: 14.8, rv: 18200, ev: -0.6, vac: 9.1,  sc: { r: 6.6, d: 4.3, s: 4.2 } },
-  { n: "Bois-Guillaume",             pop: 13250,  ch: 7.8,  rv: 26000, ev: 0.8,  vac: 5.9,  sc: { r: 4.5, d: 5.8, s: 7.2 } },
-  { n: "Déville-lès-Rouen",          pop: 10180,  ch: 11.2, rv: 20400, ev: -0.2, vac: 8.2,  sc: { r: 5.5, d: 5.0, s: 5.5 } },
-  { n: "Barentin",                   pop: 12680,  ch: 12.5, rv: 19800, ev: 0.1,  vac: 8.8,  sc: { r: 6.1, d: 5.1, s: 5.2 } },
-  { n: "Yvetot",                     pop: 10950,  ch: 13.1, rv: 19200, ev: 0.2,  vac: 9.0,  sc: { r: 6.4, d: 5.1, s: 5.0 } },
-  { n: "Lillebonne",                 pop: 9190,   ch: 11.8, rv: 20100, ev: -0.3, vac: 8.5,  sc: { r: 6.3, d: 4.9, s: 5.3 } },
-  { n: "Bolbec",                     pop: 11480,  ch: 14.9, rv: 17900, ev: -1.0, vac: 10.5, sc: { r: 7.0, d: 4.0, s: 3.9 } },
-  { n: "Harfleur",                   pop: 8780,   ch: 15.5, rv: 17600, ev: -0.5, vac: 9.8,  sc: { r: 6.8, d: 4.3, s: 4.0 } },
-  { n: "Montivilliers",              pop: 17440,  ch: 10.2, rv: 21500, ev: 0.5,  vac: 7.5,  sc: { r: 5.6, d: 5.4, s: 5.8 } },
-  { n: "Gonfreville-l'Orcher",       pop: 9540,   ch: 11.5, rv: 20800, ev: -0.1, vac: 8.0,  sc: { r: 5.9, d: 5.0, s: 5.6 } },
-  { n: "Notre-Dame-de-Gravenchon",   pop: 8600,   ch: 9.8,  rv: 22000, ev: 0.3,  vac: 7.2,  sc: { r: 5.4, d: 5.3, s: 6.0 } },
-  { n: "Doudeville",                 pop: 2850,   ch: 10.5, rv: 19500, ev: 0.1,  vac: 8.3,  sc: { r: 7.5, d: 4.2, s: 5.4 } },
-  { n: "Goderville",                 pop: 2720,   ch: 9.2,  rv: 21000, ev: 0.6,  vac: 7.5,  sc: { r: 7.3, d: 4.8, s: 5.6 } },
-  { n: "Gournay-en-Bray",            pop: 6220,   ch: 11.0, rv: 19800, ev: 0.0,  vac: 8.8,  sc: { r: 6.8, d: 4.8, s: 5.2 } },
-  { n: "Neufchâtel-en-Bray",         pop: 4940,   ch: 12.8, rv: 18700, ev: -0.7, vac: 9.5,  sc: { r: 7.1, d: 4.3, s: 4.8 } },
-  { n: "Eu",                         pop: 7580,   ch: 13.5, rv: 18200, ev: -0.8, vac: 9.8,  sc: { r: 6.9, d: 4.1, s: 4.5 } },
-  { n: "Saint-Valery-en-Caux",       pop: 4560,   ch: 11.5, rv: 19000, ev: -0.3, vac: 9.0,  sc: { r: 6.5, d: 4.5, s: 5.0 } },
-  { n: "Caudebec-en-Caux",           pop: 2560,   ch: 10.8, rv: 19200, ev: 0.2,  vac: 8.5,  sc: { r: 6.7, d: 4.6, s: 5.2 } },
-  { n: "Pavilly",                    pop: 5840,   ch: 13.0, rv: 19000, ev: 0.0,  vac: 9.2,  sc: { r: 6.6, d: 4.5, s: 4.8 } },
-  { n: "Grand-Couronne",             pop: 9860,   ch: 10.5, rv: 21200, ev: 0.4,  vac: 7.8,  sc: { r: 5.8, d: 5.3, s: 5.7 } },
-  { n: "Oissel",                     pop: 11640,  ch: 15.5, rv: 17800, ev: -0.6, vac: 10.2, sc: { r: 7.0, d: 4.2, s: 4.0 } },
-  { n: "Petit-Quevilly",             pop: 21890,  ch: 17.8, rv: 17000, ev: -1.0, vac: 10.8, sc: { r: 7.1, d: 3.9, s: 3.7 } },
-  { n: "Grand-Quevilly",             pop: 25690,  ch: 16.5, rv: 17400, ev: -0.9, vac: 10.5, sc: { r: 7.0, d: 4.0, s: 3.8 } },
-  { n: "Bihorel",                    pop: 9380,   ch: 7.2,  rv: 27500, ev: 0.9,  vac: 5.5,  sc: { r: 4.2, d: 6.0, s: 7.5 } },
-  { n: "Bonsecours",                 pop: 6950,   ch: 7.5,  rv: 26800, ev: 0.7,  vac: 5.8,  sc: { r: 4.4, d: 5.8, s: 7.3 } },
-  { n: "Canteleu",                   pop: 14450,  ch: 19.8, rv: 16200, ev: -1.2, vac: 11.5, sc: { r: 7.3, d: 3.6, s: 3.3 } },
-  { n: "Cléon",                      pop: 3870,   ch: 12.0, rv: 19600, ev: -0.2, vac: 8.8,  sc: { r: 6.5, d: 4.6, s: 5.1 } },
-  { n: "Duclair",                    pop: 3850,   ch: 10.2, rv: 20500, ev: 0.3,  vac: 7.8,  sc: { r: 6.1, d: 5.2, s: 5.5 } },
-  { n: "Fontaine-la-Mallet",         pop: 2820,   ch: 8.9,  rv: 22500, ev: 0.8,  vac: 6.8,  sc: { r: 5.5, d: 5.5, s: 6.2 } },
-  { n: "Luneray",                    pop: 2980,   ch: 10.0, rv: 20500, ev: 0.3,  vac: 8.0,  sc: { r: 7.0, d: 5.0, s: 5.5 } },
-  { n: "Octeville-sur-Mer",          pop: 4320,   ch: 8.5,  rv: 22500, ev: 0.8,  vac: 6.8,  sc: { r: 5.3, d: 5.5, s: 6.2 } },
-  { n: "Sainte-Adresse",             pop: 7830,   ch: 8.0,  rv: 25000, ev: 0.5,  vac: 6.0,  sc: { r: 4.8, d: 5.7, s: 7.0 } },
-  { n: "Saint-Aubin-lès-Elbeuf",     pop: 8390,   ch: 14.2, rv: 18500, ev: -0.5, vac: 9.5,  sc: { r: 6.8, d: 4.4, s: 4.5 } },
-  { n: "Saint-Pierre-lès-Elbeuf",    pop: 5050,   ch: 15.8, rv: 17500, ev: -1.0, vac: 10.2, sc: { r: 7.0, d: 4.0, s: 3.8 } },
-  { n: "Tourville-la-Rivière",       pop: 3890,   ch: 9.8,  rv: 21500, ev: 0.6,  vac: 7.5,  sc: { r: 5.8, d: 5.4, s: 5.8 } },
-];
-
-const COMMUNES = Array.from(new Map(D.map(c => [c.n, {
-  ...c,
-  sc: { ...c.sc, g: calcGlobal(c.sc.r, c.sc.d, c.sc.s) }
-}])).values());
-
 export default function App() {
-  const [query, setQuery]                     = useState("");
-  const [suggestions, setSuggestions]         = useState([]);
-  const [city, setCity]                       = useState(null);
-  const [apiData, setApiData]                 = useState(null);
-  const [loading, setLoading]                 = useState(false);
-  const [activePanel, setActivePanel]         = useState(null);
-  const [open, setOpen]                       = useState(false);
-  const [communesVersion, setCommunesVersion] = useState(0);
-  const [sortBy, setSortBy]                   = useState("global");
-  const [compareList, setCompareList]         = useState([]);
-  const [simSurface, setSimSurface]           = useState(50);
-  const [simApport, setSimApport]             = useState(20);
-  const [simTaux, setSimTaux]                 = useState(3.5);
-  const [simDuree, setSimDuree]               = useState(20);
+  const [communes, setCommunes]           = useState([]);
+  const [communesLoaded, setCommunesLoaded] = useState(false);
+  const [query, setQuery]                 = useState("");
+  const [suggestions, setSuggestions]     = useState([]);
+  const [city, setCity]                   = useState(null);
+  const [apiData, setApiData]             = useState(null);
+  const [loading, setLoading]             = useState(false);
+  const [activePanel, setActivePanel]     = useState(null);
+  const [open, setOpen]                   = useState(false);
+  const [sortBy, setSortBy]               = useState("global");
+  const [compareList, setCompareList]     = useState([]);
+  const [simSurface, setSimSurface]       = useState(50);
+  const [simApport, setSimApport]         = useState(20);
+  const [simTaux, setSimTaux]             = useState(3.5);
+  const [simDuree, setSimDuree]           = useState(20);
 
-  // Cache localStorage + préchargement
+  // Chargement communes depuis cache + API
   useEffect(() => {
-    const cached = localStorage.getItem("radar-immo-scores");
+    const cached = localStorage.getItem("radar-immo-communes");
     if (cached) {
       try {
-        const scores = JSON.parse(cached);
-        COMMUNES.forEach(c => {
-          if (scores[c.n]) {
-            c.sc.g = scores[c.n].g ?? c.sc.g;
-            c.sc.r = scores[c.n].r ?? c.sc.r;
-            c.sc.d = scores[c.n].d ?? c.sc.d;
-            c.sc.s = scores[c.n].s ?? c.sc.s;
-          }
-        });
-        setCommunesVersion(v => v + 1);
+        setCommunes(JSON.parse(cached));
+        setCommunesLoaded(true);
       } catch { /* ignore */ }
     }
-    const loadAll = async () => {
-      const cache = JSON.parse(localStorage.getItem("radar-immo-scores") ?? "{}");
-      for (const c of COMMUNES) {
-        try {
-          const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
-          if (res.ok) {
-            const d = await res.json();
-            if (d?.scores) {
-              c.sc.g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco) ?? c.sc.g;
-              c.sc.r = sn(d.scores.rendement)   ?? c.sc.r;
-              c.sc.d = sn(d.scores.demographie) ?? c.sc.d;
-              c.sc.s = sn(d.scores.socio_eco)   ?? c.sc.s;
-              cache[c.n] = { g: c.sc.g, r: c.sc.r, d: c.sc.d, s: c.sc.s };
-              setCommunesVersion(v => v + 1);
+    const load = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/communes`);
+        if (res.ok) {
+          const data = await res.json();
+          const list = (data.communes ?? []).map(c => ({
+            n:   c.nom,
+            pop: sn(c.population),
+            sc: {
+              r: sn(c.scores?.rendement),
+              d: sn(c.scores?.demographie),
+              s: sn(c.scores?.socio_eco),
+              g: sn(c.scores?.global) ?? calcGlobal(c.scores?.rendement, c.scores?.demographie, c.scores?.socio_eco),
             }
-          }
-        } catch { /* garde valeurs statiques */ }
-      }
-      localStorage.setItem("radar-immo-scores", JSON.stringify(cache));
+          }));
+          setCommunes(list);
+          setCommunesLoaded(true);
+          localStorage.setItem("radar-immo-communes", JSON.stringify(list));
+        }
+      } catch { /* garde le cache */ }
     };
-    loadAll();
+    load();
   }, []);
 
   const fetchSuggestions = useCallback(async (q) => {
@@ -293,9 +236,9 @@ export default function App() {
       const data = await res.json();
       setSuggestions((data.results ?? []).map(c => ({ ...c, _api: true })).slice(0, 10));
     } catch {
-      setSuggestions(COMMUNES.filter(c => c.n.toLowerCase().includes(q.toLowerCase())).slice(0, 8));
+      setSuggestions(communes.filter(c => c.n.toLowerCase().includes(q.toLowerCase())).slice(0, 8));
     }
-  }, []);
+  }, [communes]);
 
   useEffect(() => {
     const t = setTimeout(() => { if (query) fetchSuggestions(query); }, 250);
@@ -313,14 +256,11 @@ export default function App() {
         setApiData(d ?? null);
         if (d?.scores) {
           const g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco);
-          const found = COMMUNES.find(c => c.n.toLowerCase() === name.toLowerCase());
-          if (found && g != null) {
-            found.sc.g = g;
-            found.sc.r = sn(d.scores.rendement)   ?? found.sc.r;
-            found.sc.d = sn(d.scores.demographie) ?? found.sc.d;
-            found.sc.s = sn(d.scores.socio_eco)   ?? found.sc.s;
-            setCommunesVersion(v => v + 1);
-          }
+          setCommunes(prev => prev.map(c =>
+            c.n.toLowerCase() === name.toLowerCase()
+              ? { ...c, sc: { r: sn(d.scores.rendement) ?? c.sc.r, d: sn(d.scores.demographie) ?? c.sc.d, s: sn(d.scores.socio_eco) ?? c.sc.s, g: g ?? c.sc.g } }
+              : c
+          ));
         }
       }
     } catch { setApiData(null); }
@@ -331,9 +271,8 @@ export default function App() {
     try {
       const name = c.commune ?? c.n ?? "";
       const staticCity =
-        COMMUNES.find(d => d.n.toLowerCase() === name.toLowerCase()) ?? {
+        communes.find(d => d.n.toLowerCase() === name.toLowerCase()) ?? {
           n: name, pop: sn(c.population) ?? null,
-          ch: null, rv: null, ev: null, vac: null,
           sc: { r: null, d: null, s: null, g: null },
         };
       setCity(staticCity);
@@ -342,17 +281,17 @@ export default function App() {
       setOpen(false);
       fetchCommune(name);
     } catch (e) { console.error("select error", e); }
-  }, [fetchCommune]);
+  }, [communes, fetchCommune]);
 
   const sorted = useMemo(() => {
-    return [...COMMUNES].sort((a, b) => {
+    return [...communes].sort((a, b) => {
       if (sortBy === "rendement")   return (b.sc?.r ?? 0) - (a.sc?.r ?? 0);
       if (sortBy === "demographie") return (b.sc?.d ?? 0) - (a.sc?.d ?? 0);
       if (sortBy === "socioeco")    return (b.sc?.s ?? 0) - (a.sc?.s ?? 0);
       if (sortBy === "population")  return (b.pop  ?? 0)  - (a.pop  ?? 0);
       return (b.sc?.g ?? 0) - (a.sc?.g ?? 0);
     });
-  }, [communesVersion, sortBy]);
+  }, [communes, sortBy]);
 
   const displayed =
     query.length < 2 ? sorted
@@ -369,8 +308,8 @@ export default function App() {
   const pm     = sn(apiData?.prix?.maison_m2);
   const lo     = sn(apiData?.loyer?.appartement_m2);
   const rb     = sn(apiData?.rentabilite_brute_pct);
-  const ch     = sn(apiData?.socio_eco?.chomage_pct  ?? city?.ch);
-  const rv     = sn(apiData?.socio_eco?.revenu_median ?? city?.rv);
+  const ch     = sn(apiData?.socio_eco?.chomage_pct);
+  const rv     = sn(apiData?.socio_eco?.revenu_median);
   const popAff = sn(apiData?.population ?? city?.pop);
   const isApt  = apiData?.prix?.appartement_m2 != null;
 
@@ -430,7 +369,6 @@ export default function App() {
         {city && (
           <div style={{ background: "white", borderRadius: 14, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
-            {/* Nav */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <button
                 onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
@@ -447,7 +385,6 @@ export default function App() {
               </button>
             </div>
 
-            {/* En-tête */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#111827" }}>{city.n}</h2>
@@ -464,7 +401,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Jauges */}
             <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9ca3af" }}>💡 Clique sur une jauge ou une ligne pour voir le détail</p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
               <Gauge label="Rendement"   value={scores?.r} weight={40} active={activePanel === "rendement"}   onClick={() => setActivePanel(p => p === "rendement"   ? null : "rendement")} />
@@ -472,7 +408,6 @@ export default function App() {
               <Gauge label="Socio-Éco"   value={scores?.s} weight={30} active={activePanel === "socioeco"}    onClick={() => setActivePanel(p => p === "socioeco"    ? null : "socioeco")} />
             </div>
 
-            {/* Chiffres clés */}
             <div style={{ marginBottom: 16, borderBottom: "1px solid #f3f4f6", paddingBottom: 14 }}>
               <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📋 Chiffres clés</h3>
               {apiData?.prix?.avertissement_apt && (
@@ -490,7 +425,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Vue synthétique cliquable */}
             <div style={{ marginBottom: 16, borderBottom: "1px solid #f3f4f6", paddingBottom: 14 }}>
               <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
               <div onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")}
@@ -515,7 +449,6 @@ export default function App() {
               <CriteriaRow label="⭐ Note globale pondérée" note={scores?.g} />
             </div>
 
-            {/* Simulateur */}
             {pa != null && lo != null && (
               <div>
                 <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>🧮 Simulateur d'investissement</h3>
@@ -563,9 +496,16 @@ export default function App() {
         {/* Ranking */}
         {!city && (
           <div style={{ background: "white", borderRadius: 14, padding: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-            <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#374151" }}>🏆 Top communes Seine-Maritime</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#374151" }}>🏆 Classement Seine-Maritime</h3>
+              {!communesLoaded && (
+                <span style={{ fontSize: 12, color: "#f59e0b" }}>⏳ Chargement…</span>
+              )}
+              {communesLoaded && (
+                <span style={{ fontSize: 11, color: "#9ca3af" }}>{communes.length} communes</span>
+              )}
+            </div>
 
-            {/* Filtres tri */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
               {[
                 { key: "global",      label: "⭐ Global" },
@@ -583,7 +523,13 @@ export default function App() {
               ))}
             </div>
 
-            {sorted.slice(0, 20).map((c, i) => (
+            {communes.length === 0 && (
+              <div style={{ textAlign: "center", padding: 32, color: "#9ca3af", fontSize: 13 }}>
+                ⏳ Chargement des communes…
+              </div>
+            )}
+
+            {sorted.slice(0, 50).map((c, i) => (
               <div key={i} onClick={() => select(c)}
                 style={{ display: "flex", alignItems: "center", padding: "8px 4px", borderBottom: "1px solid #f3f4f6", cursor: "pointer" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "#f9fafb")}
@@ -591,7 +537,9 @@ export default function App() {
               >
                 <span style={{ width: 28, fontSize: 13, color: "#9ca3af", fontWeight: 600 }}>#{i + 1}</span>
                 <span style={{ flex: 1, fontSize: 14, color: "#111827", fontWeight: 500 }}>{c.n}</span>
-                <span style={{ fontSize: 12, color: "#6b7280", marginRight: 10 }}>{c.pop?.toLocaleString("fr-FR")} hab.</span>
+                <span style={{ fontSize: 12, color: "#6b7280", marginRight: 10 }}>
+                  {c.pop != null ? c.pop.toLocaleString("fr-FR") + " hab." : ""}
+                </span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: "white", background: nc(c.sc?.g), borderRadius: 5, padding: "2px 9px" }}>
                   {sn(c.sc?.g)?.toFixed(1) ?? "—"}
                 </span>
