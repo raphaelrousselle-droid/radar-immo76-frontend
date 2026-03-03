@@ -1,4 +1,43 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+useEffect(() => {
+  // Charger le cache au démarrage
+  const cached = localStorage.getItem("radar-immo-scores");
+  if (cached) {
+    const scores = JSON.parse(cached);
+    COMMUNES.forEach(c => {
+      if (scores[c.n]) {
+        c.sc.g = scores[c.n].g ?? c.sc.g;
+        c.sc.r = scores[c.n].r ?? c.sc.r;
+        c.sc.d = scores[c.n].d ?? c.sc.d;
+        c.sc.s = scores[c.n].s ?? c.sc.s;
+      }
+    });
+    setCommunesVersion(v => v + 1);
+  }
+
+  // Puis rafraîchir depuis l'API en arrière-plan
+  const loadAll = async () => {
+    const cache = JSON.parse(localStorage.getItem("radar-immo-scores") ?? "{}");
+    for (const c of COMMUNES) {
+      try {
+        const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
+        if (res.ok) {
+          const d = await res.json();
+          if (d?.scores) {
+            c.sc.g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco) ?? c.sc.g;
+            c.sc.r = sn(d.scores.rendement)   ?? c.sc.r;
+            c.sc.d = sn(d.scores.demographie) ?? c.sc.d;
+            c.sc.s = sn(d.scores.socio_eco)   ?? c.sc.s;
+            cache[c.n] = { g: c.sc.g, r: c.sc.r, d: c.sc.d, s: c.sc.s };
+            setCommunesVersion(v => v + 1);
+          }
+        }
+      } catch { /* garde valeurs statiques */ }
+    }
+    localStorage.setItem("radar-immo-scores", JSON.stringify(cache));
+  };
+  loadAll();
+}, []);
+
 
 const API_BASE = "https://radar-immo76-1.onrender.com";
 
