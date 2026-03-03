@@ -1,43 +1,4 @@
-useEffect(() => {
-  // Charger le cache au démarrage
-  const cached = localStorage.getItem("radar-immo-scores");
-  if (cached) {
-    const scores = JSON.parse(cached);
-    COMMUNES.forEach(c => {
-      if (scores[c.n]) {
-        c.sc.g = scores[c.n].g ?? c.sc.g;
-        c.sc.r = scores[c.n].r ?? c.sc.r;
-        c.sc.d = scores[c.n].d ?? c.sc.d;
-        c.sc.s = scores[c.n].s ?? c.sc.s;
-      }
-    });
-    setCommunesVersion(v => v + 1);
-  }
-
-  // Puis rafraîchir depuis l'API en arrière-plan
-  const loadAll = async () => {
-    const cache = JSON.parse(localStorage.getItem("radar-immo-scores") ?? "{}");
-    for (const c of COMMUNES) {
-      try {
-        const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
-        if (res.ok) {
-          const d = await res.json();
-          if (d?.scores) {
-            c.sc.g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco) ?? c.sc.g;
-            c.sc.r = sn(d.scores.rendement)   ?? c.sc.r;
-            c.sc.d = sn(d.scores.demographie) ?? c.sc.d;
-            c.sc.s = sn(d.scores.socio_eco)   ?? c.sc.s;
-            cache[c.n] = { g: c.sc.g, r: c.sc.r, d: c.sc.d, s: c.sc.s };
-            setCommunesVersion(v => v + 1);
-          }
-        }
-      } catch { /* garde valeurs statiques */ }
-    }
-    localStorage.setItem("radar-immo-scores", JSON.stringify(cache));
-  };
-  loadAll();
-}, []);
-
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 
 const API_BASE = "https://radar-immo76-1.onrender.com";
 
@@ -145,11 +106,7 @@ function PanelRendement({ city, apiData }) {
         </div>
       )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-        <KpiCard
-          label={isApt ? "Prix appartement (DVF)" : "Prix maison (DVF)"}
-          value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" + (nv ? ` · ${nv.toLocaleString("fr-FR")} ventes` : "") : null}
-          color="#1e40af"
-        />
+        <KpiCard label={isApt ? "Prix appartement (DVF)" : "Prix maison (DVF)"} value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" + (nv ? ` · ${nv.toLocaleString("fr-FR")} ventes` : "") : null} color="#1e40af" />
         <KpiCard label="Prix maison (DVF)" value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
         <KpiCard label="Loyer médian (ANIL)" value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} color="#7c3aed" />
         <KpiCard label="Rentabilité brute" value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(sn(apiData?.scores?.rendement))} />
@@ -222,49 +179,49 @@ function PanelSocioEco({ city, apiData }) {
 }
 
 const D = [
-  { n: "Rouen",                      pop: 110169, ch: 15.2, rv: 18900, ev: -0.5, vac: 9.2,  tc: 62, sc: { r: 5.8, d: 4.5, s: 4.2 } },
-  { n: "Le Havre",                   pop: 170147, ch: 17.1, rv: 17200, ev: -1.2, vac: 10.8, tc: 58, sc: { r: 6.1, d: 4.0, s: 3.8 } },
-  { n: "Dieppe",                     pop: 29084,  ch: 16.8, rv: 16800, ev: -1.8, vac: 11.2, tc: 55, sc: { r: 6.8, d: 3.8, s: 3.5 } },
-  { n: "Fécamp",                     pop: 19257,  ch: 14.2, rv: 17500, ev: -0.9, vac: 9.8,  tc: 57, sc: { r: 6.5, d: 4.2, s: 4.0 } },
-  { n: "Elbeuf",                     pop: 16599,  ch: 18.5, rv: 16200, ev: -1.5, vac: 12.1, tc: 54, sc: { r: 7.2, d: 3.5, s: 3.2 } },
-  { n: "Sotteville-lès-Rouen",       pop: 28950,  ch: 16.1, rv: 17800, ev: -0.3, vac: 9.5,  tc: 60, sc: { r: 6.9, d: 4.4, s: 4.1 } },
-  { n: "Saint-Étienne-du-Rouvray",   pop: 28170,  ch: 19.2, rv: 16500, ev: -0.8, vac: 10.2, tc: 56, sc: { r: 7.0, d: 4.1, s: 3.6 } },
-  { n: "Mont-Saint-Aignan",          pop: 20220,  ch: 8.5,  rv: 24500, ev: 0.4,  vac: 6.2,  tc: 71, sc: { r: 4.8, d: 5.6, s: 6.8 } },
-  { n: "Maromme",                    pop: 12840,  ch: 14.8, rv: 18200, ev: -0.6, vac: 9.1,  tc: 59, sc: { r: 6.6, d: 4.3, s: 4.2 } },
-  { n: "Bois-Guillaume",             pop: 13250,  ch: 7.8,  rv: 26000, ev: 0.8,  vac: 5.9,  tc: 73, sc: { r: 4.5, d: 5.8, s: 7.2 } },
-  { n: "Déville-lès-Rouen",          pop: 10180,  ch: 11.2, rv: 20400, ev: -0.2, vac: 8.2,  tc: 64, sc: { r: 5.5, d: 5.0, s: 5.5 } },
-  { n: "Barentin",                   pop: 12680,  ch: 12.5, rv: 19800, ev: 0.1,  vac: 8.8,  tc: 63, sc: { r: 6.1, d: 5.1, s: 5.2 } },
-  { n: "Yvetot",                     pop: 10950,  ch: 13.1, rv: 19200, ev: 0.2,  vac: 9.0,  tc: 61, sc: { r: 6.4, d: 5.1, s: 5.0 } },
-  { n: "Lillebonne",                 pop: 9190,   ch: 11.8, rv: 20100, ev: -0.3, vac: 8.5,  tc: 63, sc: { r: 6.3, d: 4.9, s: 5.3 } },
-  { n: "Bolbec",                     pop: 11480,  ch: 14.9, rv: 17900, ev: -1.0, vac: 10.5, tc: 57, sc: { r: 7.0, d: 4.0, s: 3.9 } },
-  { n: "Harfleur",                   pop: 8780,   ch: 15.5, rv: 17600, ev: -0.5, vac: 9.8,  tc: 58, sc: { r: 6.8, d: 4.3, s: 4.0 } },
-  { n: "Montivilliers",              pop: 17440,  ch: 10.2, rv: 21500, ev: 0.5,  vac: 7.5,  tc: 66, sc: { r: 5.6, d: 5.4, s: 5.8 } },
-  { n: "Gonfreville-l'Orcher",       pop: 9540,   ch: 11.5, rv: 20800, ev: -0.1, vac: 8.0,  tc: 65, sc: { r: 5.9, d: 5.0, s: 5.6 } },
-  { n: "Notre-Dame-de-Gravenchon",   pop: 8600,   ch: 9.8,  rv: 22000, ev: 0.3,  vac: 7.2,  tc: 67, sc: { r: 5.4, d: 5.3, s: 6.0 } },
-  { n: "Doudeville",                 pop: 2850,   ch: 10.5, rv: 19500, ev: 0.1,  vac: 8.3,  tc: 62, sc: { r: 7.5, d: 4.2, s: 5.4 } },
-  { n: "Goderville",                 pop: 2720,   ch: 9.2,  rv: 21000, ev: 0.6,  vac: 7.5,  tc: 64, sc: { r: 7.3, d: 4.8, s: 5.6 } },
-  { n: "Gournay-en-Bray",            pop: 6220,   ch: 11.0, rv: 19800, ev: 0.0,  vac: 8.8,  tc: 62, sc: { r: 6.8, d: 4.8, s: 5.2 } },
-  { n: "Neufchâtel-en-Bray",         pop: 4940,   ch: 12.8, rv: 18700, ev: -0.7, vac: 9.5,  tc: 59, sc: { r: 7.1, d: 4.3, s: 4.8 } },
-  { n: "Eu",                         pop: 7580,   ch: 13.5, rv: 18200, ev: -0.8, vac: 9.8,  tc: 58, sc: { r: 6.9, d: 4.1, s: 4.5 } },
-  { n: "Saint-Valery-en-Caux",       pop: 4560,   ch: 11.5, rv: 19000, ev: -0.3, vac: 9.0,  tc: 61, sc: { r: 6.5, d: 4.5, s: 5.0 } },
-  { n: "Caudebec-en-Caux",           pop: 2560,   ch: 10.8, rv: 19200, ev: 0.2,  vac: 8.5,  tc: 62, sc: { r: 6.7, d: 4.6, s: 5.2 } },
-  { n: "Pavilly",                    pop: 5840,   ch: 13.0, rv: 19000, ev: 0.0,  vac: 9.2,  tc: 60, sc: { r: 6.6, d: 4.5, s: 4.8 } },
-  { n: "Grand-Couronne",             pop: 9860,   ch: 10.5, rv: 21200, ev: 0.4,  vac: 7.8,  tc: 65, sc: { r: 5.8, d: 5.3, s: 5.7 } },
-  { n: "Oissel",                     pop: 11640,  ch: 15.5, rv: 17800, ev: -0.6, vac: 10.2, tc: 57, sc: { r: 7.0, d: 4.2, s: 4.0 } },
-  { n: "Petit-Quevilly",             pop: 21890,  ch: 17.8, rv: 17000, ev: -1.0, vac: 10.8, tc: 56, sc: { r: 7.1, d: 3.9, s: 3.7 } },
-  { n: "Grand-Quevilly",             pop: 25690,  ch: 16.5, rv: 17400, ev: -0.9, vac: 10.5, tc: 57, sc: { r: 7.0, d: 4.0, s: 3.8 } },
-  { n: "Bihorel",                    pop: 9380,   ch: 7.2,  rv: 27500, ev: 0.9,  vac: 5.5,  tc: 75, sc: { r: 4.2, d: 6.0, s: 7.5 } },
-  { n: "Bonsecours",                 pop: 6950,   ch: 7.5,  rv: 26800, ev: 0.7,  vac: 5.8,  tc: 74, sc: { r: 4.4, d: 5.8, s: 7.3 } },
-  { n: "Canteleu",                   pop: 14450,  ch: 19.8, rv: 16200, ev: -1.2, vac: 11.5, tc: 54, sc: { r: 7.3, d: 3.6, s: 3.3 } },
-  { n: "Cléon",                      pop: 3870,   ch: 12.0, rv: 19600, ev: -0.2, vac: 8.8,  tc: 62, sc: { r: 6.5, d: 4.6, s: 5.1 } },
-  { n: "Duclair",                    pop: 3850,   ch: 10.2, rv: 20500, ev: 0.3,  vac: 7.8,  tc: 64, sc: { r: 6.1, d: 5.2, s: 5.5 } },
-  { n: "Fontaine-la-Mallet",         pop: 2820,   ch: 8.9,  rv: 22500, ev: 0.8,  vac: 6.8,  tc: 67, sc: { r: 5.5, d: 5.5, s: 6.2 } },
-  { n: "Luneray",                    pop: 2980,   ch: 10.0, rv: 20500, ev: 0.3,  vac: 8.0,  tc: 63, sc: { r: 7.0, d: 5.0, s: 5.5 } },
-  { n: "Octeville-sur-Mer",          pop: 4320,   ch: 8.5,  rv: 22500, ev: 0.8,  vac: 6.8,  tc: 67, sc: { r: 5.3, d: 5.5, s: 6.2 } },
-  { n: "Sainte-Adresse",             pop: 7830,   ch: 8.0,  rv: 25000, ev: 0.5,  vac: 6.0,  tc: 72, sc: { r: 4.8, d: 5.7, s: 7.0 } },
-  { n: "Saint-Aubin-lès-Elbeuf",     pop: 8390,   ch: 14.2, rv: 18500, ev: -0.5, vac: 9.5,  tc: 59, sc: { r: 6.8, d: 4.4, s: 4.5 } },
-  { n: "Saint-Pierre-lès-Elbeuf",    pop: 5050,   ch: 15.8, rv: 17500, ev: -1.0, vac: 10.2, tc: 57, sc: { r: 7.0, d: 4.0, s: 3.8 } },
-  { n: "Tourville-la-Rivière",       pop: 3890,   ch: 9.8,  rv: 21500, ev: 0.6,  vac: 7.5,  tc: 65, sc: { r: 5.8, d: 5.4, s: 5.8 } },
+  { n: "Rouen",                      pop: 110169, ch: 15.2, rv: 18900, ev: -0.5, vac: 9.2,  sc: { r: 5.8, d: 4.5, s: 4.2 } },
+  { n: "Le Havre",                   pop: 170147, ch: 17.1, rv: 17200, ev: -1.2, vac: 10.8, sc: { r: 6.1, d: 4.0, s: 3.8 } },
+  { n: "Dieppe",                     pop: 29084,  ch: 16.8, rv: 16800, ev: -1.8, vac: 11.2, sc: { r: 6.8, d: 3.8, s: 3.5 } },
+  { n: "Fécamp",                     pop: 19257,  ch: 14.2, rv: 17500, ev: -0.9, vac: 9.8,  sc: { r: 6.5, d: 4.2, s: 4.0 } },
+  { n: "Elbeuf",                     pop: 16599,  ch: 18.5, rv: 16200, ev: -1.5, vac: 12.1, sc: { r: 7.2, d: 3.5, s: 3.2 } },
+  { n: "Sotteville-lès-Rouen",       pop: 28950,  ch: 16.1, rv: 17800, ev: -0.3, vac: 9.5,  sc: { r: 6.9, d: 4.4, s: 4.1 } },
+  { n: "Saint-Étienne-du-Rouvray",   pop: 28170,  ch: 19.2, rv: 16500, ev: -0.8, vac: 10.2, sc: { r: 7.0, d: 4.1, s: 3.6 } },
+  { n: "Mont-Saint-Aignan",          pop: 20220,  ch: 8.5,  rv: 24500, ev: 0.4,  vac: 6.2,  sc: { r: 4.8, d: 5.6, s: 6.8 } },
+  { n: "Maromme",                    pop: 12840,  ch: 14.8, rv: 18200, ev: -0.6, vac: 9.1,  sc: { r: 6.6, d: 4.3, s: 4.2 } },
+  { n: "Bois-Guillaume",             pop: 13250,  ch: 7.8,  rv: 26000, ev: 0.8,  vac: 5.9,  sc: { r: 4.5, d: 5.8, s: 7.2 } },
+  { n: "Déville-lès-Rouen",          pop: 10180,  ch: 11.2, rv: 20400, ev: -0.2, vac: 8.2,  sc: { r: 5.5, d: 5.0, s: 5.5 } },
+  { n: "Barentin",                   pop: 12680,  ch: 12.5, rv: 19800, ev: 0.1,  vac: 8.8,  sc: { r: 6.1, d: 5.1, s: 5.2 } },
+  { n: "Yvetot",                     pop: 10950,  ch: 13.1, rv: 19200, ev: 0.2,  vac: 9.0,  sc: { r: 6.4, d: 5.1, s: 5.0 } },
+  { n: "Lillebonne",                 pop: 9190,   ch: 11.8, rv: 20100, ev: -0.3, vac: 8.5,  sc: { r: 6.3, d: 4.9, s: 5.3 } },
+  { n: "Bolbec",                     pop: 11480,  ch: 14.9, rv: 17900, ev: -1.0, vac: 10.5, sc: { r: 7.0, d: 4.0, s: 3.9 } },
+  { n: "Harfleur",                   pop: 8780,   ch: 15.5, rv: 17600, ev: -0.5, vac: 9.8,  sc: { r: 6.8, d: 4.3, s: 4.0 } },
+  { n: "Montivilliers",              pop: 17440,  ch: 10.2, rv: 21500, ev: 0.5,  vac: 7.5,  sc: { r: 5.6, d: 5.4, s: 5.8 } },
+  { n: "Gonfreville-l'Orcher",       pop: 9540,   ch: 11.5, rv: 20800, ev: -0.1, vac: 8.0,  sc: { r: 5.9, d: 5.0, s: 5.6 } },
+  { n: "Notre-Dame-de-Gravenchon",   pop: 8600,   ch: 9.8,  rv: 22000, ev: 0.3,  vac: 7.2,  sc: { r: 5.4, d: 5.3, s: 6.0 } },
+  { n: "Doudeville",                 pop: 2850,   ch: 10.5, rv: 19500, ev: 0.1,  vac: 8.3,  sc: { r: 7.5, d: 4.2, s: 5.4 } },
+  { n: "Goderville",                 pop: 2720,   ch: 9.2,  rv: 21000, ev: 0.6,  vac: 7.5,  sc: { r: 7.3, d: 4.8, s: 5.6 } },
+  { n: "Gournay-en-Bray",            pop: 6220,   ch: 11.0, rv: 19800, ev: 0.0,  vac: 8.8,  sc: { r: 6.8, d: 4.8, s: 5.2 } },
+  { n: "Neufchâtel-en-Bray",         pop: 4940,   ch: 12.8, rv: 18700, ev: -0.7, vac: 9.5,  sc: { r: 7.1, d: 4.3, s: 4.8 } },
+  { n: "Eu",                         pop: 7580,   ch: 13.5, rv: 18200, ev: -0.8, vac: 9.8,  sc: { r: 6.9, d: 4.1, s: 4.5 } },
+  { n: "Saint-Valery-en-Caux",       pop: 4560,   ch: 11.5, rv: 19000, ev: -0.3, vac: 9.0,  sc: { r: 6.5, d: 4.5, s: 5.0 } },
+  { n: "Caudebec-en-Caux",           pop: 2560,   ch: 10.8, rv: 19200, ev: 0.2,  vac: 8.5,  sc: { r: 6.7, d: 4.6, s: 5.2 } },
+  { n: "Pavilly",                    pop: 5840,   ch: 13.0, rv: 19000, ev: 0.0,  vac: 9.2,  sc: { r: 6.6, d: 4.5, s: 4.8 } },
+  { n: "Grand-Couronne",             pop: 9860,   ch: 10.5, rv: 21200, ev: 0.4,  vac: 7.8,  sc: { r: 5.8, d: 5.3, s: 5.7 } },
+  { n: "Oissel",                     pop: 11640,  ch: 15.5, rv: 17800, ev: -0.6, vac: 10.2, sc: { r: 7.0, d: 4.2, s: 4.0 } },
+  { n: "Petit-Quevilly",             pop: 21890,  ch: 17.8, rv: 17000, ev: -1.0, vac: 10.8, sc: { r: 7.1, d: 3.9, s: 3.7 } },
+  { n: "Grand-Quevilly",             pop: 25690,  ch: 16.5, rv: 17400, ev: -0.9, vac: 10.5, sc: { r: 7.0, d: 4.0, s: 3.8 } },
+  { n: "Bihorel",                    pop: 9380,   ch: 7.2,  rv: 27500, ev: 0.9,  vac: 5.5,  sc: { r: 4.2, d: 6.0, s: 7.5 } },
+  { n: "Bonsecours",                 pop: 6950,   ch: 7.5,  rv: 26800, ev: 0.7,  vac: 5.8,  sc: { r: 4.4, d: 5.8, s: 7.3 } },
+  { n: "Canteleu",                   pop: 14450,  ch: 19.8, rv: 16200, ev: -1.2, vac: 11.5, sc: { r: 7.3, d: 3.6, s: 3.3 } },
+  { n: "Cléon",                      pop: 3870,   ch: 12.0, rv: 19600, ev: -0.2, vac: 8.8,  sc: { r: 6.5, d: 4.6, s: 5.1 } },
+  { n: "Duclair",                    pop: 3850,   ch: 10.2, rv: 20500, ev: 0.3,  vac: 7.8,  sc: { r: 6.1, d: 5.2, s: 5.5 } },
+  { n: "Fontaine-la-Mallet",         pop: 2820,   ch: 8.9,  rv: 22500, ev: 0.8,  vac: 6.8,  sc: { r: 5.5, d: 5.5, s: 6.2 } },
+  { n: "Luneray",                    pop: 2980,   ch: 10.0, rv: 20500, ev: 0.3,  vac: 8.0,  sc: { r: 7.0, d: 5.0, s: 5.5 } },
+  { n: "Octeville-sur-Mer",          pop: 4320,   ch: 8.5,  rv: 22500, ev: 0.8,  vac: 6.8,  sc: { r: 5.3, d: 5.5, s: 6.2 } },
+  { n: "Sainte-Adresse",             pop: 7830,   ch: 8.0,  rv: 25000, ev: 0.5,  vac: 6.0,  sc: { r: 4.8, d: 5.7, s: 7.0 } },
+  { n: "Saint-Aubin-lès-Elbeuf",     pop: 8390,   ch: 14.2, rv: 18500, ev: -0.5, vac: 9.5,  sc: { r: 6.8, d: 4.4, s: 4.5 } },
+  { n: "Saint-Pierre-lès-Elbeuf",    pop: 5050,   ch: 15.8, rv: 17500, ev: -1.0, vac: 10.2, sc: { r: 7.0, d: 4.0, s: 3.8 } },
+  { n: "Tourville-la-Rivière",       pop: 3890,   ch: 9.8,  rv: 21500, ev: 0.6,  vac: 7.5,  sc: { r: 5.8, d: 5.4, s: 5.8 } },
 ];
 
 const COMMUNES = Array.from(new Map(D.map(c => [c.n, {
@@ -281,9 +238,32 @@ export default function App() {
   const [activePanel, setActivePanel]         = useState(null);
   const [open, setOpen]                       = useState(false);
   const [communesVersion, setCommunesVersion] = useState(0);
+  const [sortBy, setSortBy]                   = useState("global");
+  const [compareList, setCompareList]         = useState([]);
+  const [simSurface, setSimSurface]           = useState(50);
+  const [simApport, setSimApport]             = useState(20);
+  const [simTaux, setSimTaux]                 = useState(3.5);
+  const [simDuree, setSimDuree]               = useState(20);
 
+  // Cache localStorage + préchargement
   useEffect(() => {
+    const cached = localStorage.getItem("radar-immo-scores");
+    if (cached) {
+      try {
+        const scores = JSON.parse(cached);
+        COMMUNES.forEach(c => {
+          if (scores[c.n]) {
+            c.sc.g = scores[c.n].g ?? c.sc.g;
+            c.sc.r = scores[c.n].r ?? c.sc.r;
+            c.sc.d = scores[c.n].d ?? c.sc.d;
+            c.sc.s = scores[c.n].s ?? c.sc.s;
+          }
+        });
+        setCommunesVersion(v => v + 1);
+      } catch { /* ignore */ }
+    }
     const loadAll = async () => {
+      const cache = JSON.parse(localStorage.getItem("radar-immo-scores") ?? "{}");
       for (const c of COMMUNES) {
         try {
           const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
@@ -294,11 +274,13 @@ export default function App() {
               c.sc.r = sn(d.scores.rendement)   ?? c.sc.r;
               c.sc.d = sn(d.scores.demographie) ?? c.sc.d;
               c.sc.s = sn(d.scores.socio_eco)   ?? c.sc.s;
+              cache[c.n] = { g: c.sc.g, r: c.sc.r, d: c.sc.d, s: c.sc.s };
               setCommunesVersion(v => v + 1);
             }
           }
         } catch { /* garde valeurs statiques */ }
       }
+      localStorage.setItem("radar-immo-scores", JSON.stringify(cache));
     };
     loadAll();
   }, []);
@@ -351,7 +333,7 @@ export default function App() {
       const staticCity =
         COMMUNES.find(d => d.n.toLowerCase() === name.toLowerCase()) ?? {
           n: name, pop: sn(c.population) ?? null,
-          ch: null, rv: null, ev: null, vac: null, tc: null,
+          ch: null, rv: null, ev: null, vac: null,
           sc: { r: null, d: null, s: null, g: null },
         };
       setCity(staticCity);
@@ -362,10 +344,15 @@ export default function App() {
     } catch (e) { console.error("select error", e); }
   }, [fetchCommune]);
 
-  const sorted = useMemo(
-    () => [...COMMUNES].sort((a, b) => (b.sc?.g ?? 0) - (a.sc?.g ?? 0)),
-    [communesVersion]
-  );
+  const sorted = useMemo(() => {
+    return [...COMMUNES].sort((a, b) => {
+      if (sortBy === "rendement")   return (b.sc?.r ?? 0) - (a.sc?.r ?? 0);
+      if (sortBy === "demographie") return (b.sc?.d ?? 0) - (a.sc?.d ?? 0);
+      if (sortBy === "socioeco")    return (b.sc?.s ?? 0) - (a.sc?.s ?? 0);
+      if (sortBy === "population")  return (b.pop  ?? 0)  - (a.pop  ?? 0);
+      return (b.sc?.g ?? 0) - (a.sc?.g ?? 0);
+    });
+  }, [communesVersion, sortBy]);
 
   const displayed =
     query.length < 2 ? sorted
@@ -386,6 +373,16 @@ export default function App() {
   const rv     = sn(apiData?.socio_eco?.revenu_median ?? city?.rv);
   const popAff = sn(apiData?.population ?? city?.pop);
   const isApt  = apiData?.prix?.appartement_m2 != null;
+
+  const inCompare = city ? !!compareList.find(c => c.n === city.n) : false;
+  const toggleCompare = () => {
+    if (!city) return;
+    if (inCompare) {
+      setCompareList(compareList.filter(c => c.n !== city.n));
+    } else if (compareList.length < 3) {
+      setCompareList([...compareList, { n: city.n, scores, pa, lo, rb, pop: popAff }]);
+    }
+  };
 
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#f3f4f6", minHeight: "100vh", padding: 16 }}>
@@ -433,14 +430,22 @@ export default function App() {
         {city && (
           <div style={{ background: "white", borderRadius: 14, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
-            <button
-              onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
-              style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, color: "#6b7280", marginBottom: 16, fontFamily: "inherit" }}
-              onMouseEnter={e => e.currentTarget.style.background = "#f9fafb"}
-              onMouseLeave={e => e.currentTarget.style.background = "none"}
-            >
-              ← Retour au classement
-            </button>
+            {/* Nav */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <button
+                onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, color: "#6b7280", fontFamily: "inherit" }}
+                onMouseEnter={e => e.currentTarget.style.background = "#f9fafb"}
+                onMouseLeave={e => e.currentTarget.style.background = "none"}
+              >
+                ← Retour
+              </button>
+              <button onClick={toggleCompare}
+                style={{ padding: "6px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer", fontFamily: "inherit", border: "1px solid #2563eb", background: inCompare ? "#2563eb" : "white", color: inCompare ? "white" : "#2563eb", fontWeight: 600 }}
+              >
+                {inCompare ? "✓ Dans le comparateur" : compareList.length >= 3 ? "Comparateur plein (3/3)" : "+ Comparer"}
+              </button>
+            </div>
 
             {/* En-tête */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
@@ -476,11 +481,7 @@ export default function App() {
                 </div>
               )}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-                <KpiCard
-                  label={isApt ? "Prix appt (DVF)" : "Prix maison (DVF)"}
-                  value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null}
-                  color="#1e40af"
-                />
+                <KpiCard label={isApt ? "Prix appt (DVF)" : "Prix maison (DVF)"} value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
                 <KpiCard label="Prix maison (DVF)"   value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
                 <KpiCard label="Loyer médian (ANIL)" value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} color="#7c3aed" />
                 <KpiCard label="Rentabilité brute"   value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(scores?.r)} />
@@ -490,9 +491,8 @@ export default function App() {
             </div>
 
             {/* Vue synthétique cliquable */}
-            <div>
+            <div style={{ marginBottom: 16, borderBottom: "1px solid #f3f4f6", paddingBottom: 14 }}>
               <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
-
               <div onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")}
                 style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "rendement" ? "#f0fdf4" : "transparent" }}>
                 <CriteriaRow label="🏦 Rendement locatif (40%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.4).toFixed(2)} pts` : undefined} />
@@ -515,6 +515,48 @@ export default function App() {
               <CriteriaRow label="⭐ Note globale pondérée" note={scores?.g} />
             </div>
 
+            {/* Simulateur */}
+            {pa != null && lo != null && (
+              <div>
+                <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>🧮 Simulateur d'investissement</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+                  {[
+                    { label: "Surface (m²)", value: simSurface, set: setSimSurface, min: 10,  max: 200, step: 1 },
+                    { label: "Apport (%)",   value: simApport,  set: setSimApport,  min: 0,   max: 100, step: 1 },
+                    { label: "Taux (%)",     value: simTaux,    set: setSimTaux,    min: 0.5, max: 10,  step: 0.1 },
+                    { label: "Durée (ans)",  value: simDuree,   set: setSimDuree,   min: 5,   max: 30,  step: 1 },
+                  ].map(({ label, value, set, min, max, step }) => (
+                    <div key={label}>
+                      <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 4 }}>{label}</div>
+                      <input type="number" value={value} min={min} max={max} step={step}
+                        onChange={e => set(Number(e.target.value))}
+                        style={{ width: "100%", boxSizing: "border-box", padding: "6px 10px", borderRadius: 6, border: "1px solid #e5e7eb", fontSize: 14, fontFamily: "inherit" }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                {(() => {
+                  const prixTotal    = pa * simSurface;
+                  const emprunt      = prixTotal * (1 - simApport / 100);
+                  const tauxMensuel  = simTaux / 100 / 12;
+                  const nbMois       = simDuree * 12;
+                  const mensualite   = emprunt * tauxMensuel / (1 - Math.pow(1 + tauxMensuel, -nbMois));
+                  const loyerMensuel = lo * simSurface;
+                  const cashflow     = loyerMensuel - mensualite;
+                  const rentaNette   = (loyerMensuel * 12 / prixTotal) * 100;
+                  return (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 8 }}>
+                      <KpiCard label="Prix total estimé"  value={prixTotal.toLocaleString("fr-FR") + " €"} color="#1e40af" />
+                      <KpiCard label="Mensualité crédit"  value={mensualite.toFixed(0) + " €/mois"} color="#ef4444" />
+                      <KpiCard label="Loyer estimé"       value={loyerMensuel.toFixed(0) + " €/mois"} color="#7c3aed" />
+                      <KpiCard label="Cashflow mensuel"   value={(cashflow >= 0 ? "+" : "") + cashflow.toFixed(0) + " €"} color={cashflow >= 0 ? "#22c55e" : "#ef4444"} />
+                      <KpiCard label="Rentabilité nette"  value={rentaNette.toFixed(2) + "%"} color={nc(rentaNette > 5 ? 7 : rentaNette > 3 ? 5 : 3)} />
+                      <KpiCard label="Emprunt total"      value={emprunt.toLocaleString("fr-FR") + " €"} color="#374151" />
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         )}
 
@@ -522,6 +564,25 @@ export default function App() {
         {!city && (
           <div style={{ background: "white", borderRadius: 14, padding: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
             <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#374151" }}>🏆 Top communes Seine-Maritime</h3>
+
+            {/* Filtres tri */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+              {[
+                { key: "global",      label: "⭐ Global" },
+                { key: "rendement",   label: "🏦 Rendement" },
+                { key: "demographie", label: "👥 Démo" },
+                { key: "socioeco",    label: "💼 Socio" },
+                { key: "population",  label: "👤 Population" },
+              ].map(({ key, label }) => (
+                <button key={key} onClick={() => setSortBy(key)} style={{
+                  padding: "4px 10px", borderRadius: 6, fontSize: 12, cursor: "pointer",
+                  fontFamily: "inherit", fontWeight: sortBy === key ? 700 : 400,
+                  background: sortBy === key ? "#2563eb" : "#f3f4f6",
+                  color: sortBy === key ? "white" : "#374151", border: "none"
+                }}>{label}</button>
+              ))}
+            </div>
+
             {sorted.slice(0, 20).map((c, i) => (
               <div key={i} onClick={() => select(c)}
                 style={{ display: "flex", alignItems: "center", padding: "8px 4px", borderBottom: "1px solid #f3f4f6", cursor: "pointer" }}
@@ -536,6 +597,45 @@ export default function App() {
                 </span>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Comparateur */}
+        {compareList.length >= 2 && (
+          <div style={{ background: "white", borderRadius: 14, padding: 16, marginTop: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#374151" }}>⚖️ Comparateur</h3>
+              <button onClick={() => setCompareList([])} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#9ca3af", fontFamily: "inherit" }}>Effacer</button>
+            </div>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr>
+                  <td style={{ padding: "6px 8px", color: "#6b7280" }}></td>
+                  {compareList.map(c => (
+                    <td key={c.n} style={{ padding: "6px 8px", fontWeight: 700, textAlign: "center", color: "#111827" }}>{c.n}</td>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { label: "⭐ Note globale", fn: c => c.scores?.g != null ? <span style={{ fontWeight: 800, color: nc(c.scores.g) }}>{c.scores.g.toFixed(1)}</span> : "—" },
+                  { label: "🏦 Rendement",    fn: c => c.scores?.r != null ? <span style={{ color: nc(c.scores.r) }}>{c.scores.r.toFixed(1)}</span> : "—" },
+                  { label: "👥 Démographie",  fn: c => c.scores?.d != null ? <span style={{ color: nc(c.scores.d) }}>{c.scores.d.toFixed(1)}</span> : "—" },
+                  { label: "💼 Socio-éco",    fn: c => c.scores?.s != null ? <span style={{ color: nc(c.scores.s) }}>{c.scores.s.toFixed(1)}</span> : "—" },
+                  { label: "💰 Prix m²",      fn: c => c.pa != null ? c.pa.toLocaleString("fr-FR") + " €" : "—" },
+                  { label: "🏠 Loyer m²",     fn: c => c.lo != null ? c.lo.toFixed(1) + " €" : "—" },
+                  { label: "📈 Rentabilité",  fn: c => c.rb != null ? c.rb.toFixed(2) + "%" : "—" },
+                  { label: "👤 Population",   fn: c => c.pop != null ? c.pop.toLocaleString("fr-FR") + " hab." : "—" },
+                ].map(({ label, fn }) => (
+                  <tr key={label} style={{ borderTop: "1px solid #f3f4f6" }}>
+                    <td style={{ padding: "8px 8px", color: "#6b7280", fontWeight: 500 }}>{label}</td>
+                    {compareList.map(c => (
+                      <td key={c.n} style={{ padding: "8px 8px", textAlign: "center", fontWeight: 600 }}>{fn(c)}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
