@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 
 const API_BASE = "https://radar-immo76-1.onrender.com";
+const CACHE_KEY = "radar-immo-communes-v2";
 
 const nc = (v) => {
   if (v == null) return "#818cf8";
@@ -86,13 +87,13 @@ function KpiCard({ label, value, color }) {
 }
 
 function PanelRendement({ city, apiData }) {
-  const pa   = sn(apiData?.prix?.appartement_m2 ?? apiData?.prix?.maison_m2);
-  const pm   = sn(apiData?.prix?.maison_m2);
-  const lo   = sn(apiData?.loyer?.appartement_m2);
-  const rb   = sn(apiData?.rentabilite_brute_pct);
-  const nv   = sn(apiData?.prix?.nb_ventes_apt);
-  const src1 = apiData?.prix?.source ?? null;
-  const src2 = apiData?.loyer?.source ?? null;
+  const pa    = sn(apiData?.prix?.appartement_m2 ?? apiData?.prix?.maison_m2);
+  const pm    = sn(apiData?.prix?.maison_m2);
+  const lo    = sn(apiData?.loyer?.appartement_m2);
+  const rb    = sn(apiData?.rentabilite_brute_pct);
+  const nv    = sn(apiData?.prix?.nb_ventes_apt);
+  const src1  = apiData?.prix?.source ?? null;
+  const src2  = apiData?.loyer?.source ?? null;
   const isApt = apiData?.prix?.appartement_m2 != null;
   const noteRb = rb != null ? Math.min(10, (rb / 12) * 10) : null;
   const notePa = pa != null ? Math.max(0, Math.min(10, 10 - (pa - 800) / 320)) : null;
@@ -130,9 +131,9 @@ function PanelRendement({ city, apiData }) {
 }
 
 function PanelDemographie({ city, apiData }) {
-  const pop = sn(apiData?.population ?? city?.pop);
-  const ev  = sn(apiData?.demographie?.evolution_pop_pct_an ?? city?.ev);
-  const vac = sn(apiData?.demographie?.vacance_pct ?? city?.vac);
+  const pop    = sn(apiData?.population ?? city?.pop);
+  const ev     = sn(apiData?.demographie?.evolution_pop_pct_an);
+  const vac    = sn(apiData?.demographie?.vacance_pct);
   const notePop = pop != null ? Math.min(10, Math.max(0, (Math.log10(Math.max(1, pop)) - 2) * 2.5)) : null;
   const noteEv  = ev  != null ? Math.min(10, Math.max(0, 5 + ev * 2)) : null;
   const noteVac = vac != null ? Math.max(0, Math.min(10, 10 - (vac - 5) * 0.8)) : null;
@@ -153,8 +154,8 @@ function PanelDemographie({ city, apiData }) {
 }
 
 function PanelSocioEco({ city, apiData }) {
-  const ch   = sn(apiData?.socio_eco?.chomage_pct ?? city?.ch);
-  const rv   = sn(apiData?.socio_eco?.revenu_median ?? city?.rv);
+  const ch   = sn(apiData?.socio_eco?.chomage_pct);
+  const rv   = sn(apiData?.socio_eco?.revenu_median);
   const cad  = sn(apiData?.socio_eco?.part_cadres_pct);
   const pauv = sn(apiData?.socio_eco?.taux_pauvrete_pct);
   const noteChom = ch   != null ? Math.max(0, Math.min(10, 10 - (ch - 5) * 0.7)) : null;
@@ -179,28 +180,33 @@ function PanelSocioEco({ city, apiData }) {
 }
 
 export default function App() {
-  const [communes, setCommunes]           = useState([]);
+  const [communes, setCommunes]             = useState([]);
   const [communesLoaded, setCommunesLoaded] = useState(false);
-  const [query, setQuery]                 = useState("");
-  const [suggestions, setSuggestions]     = useState([]);
-  const [city, setCity]                   = useState(null);
-  const [apiData, setApiData]             = useState(null);
-  const [loading, setLoading]             = useState(false);
-  const [activePanel, setActivePanel]     = useState(null);
-  const [open, setOpen]                   = useState(false);
-  const [sortBy, setSortBy]               = useState("global");
-  const [compareList, setCompareList]     = useState([]);
-  const [simSurface, setSimSurface]       = useState(50);
-  const [simApport, setSimApport]         = useState(20);
-  const [simTaux, setSimTaux]             = useState(3.5);
-  const [simDuree, setSimDuree]           = useState(20);
+  const [query, setQuery]                   = useState("");
+  const [suggestions, setSuggestions]       = useState([]);
+  const [city, setCity]                     = useState(null);
+  const [apiData, setApiData]               = useState(null);
+  const [loading, setLoading]               = useState(false);
+  const [activePanel, setActivePanel]       = useState(null);
+  const [open, setOpen]                     = useState(false);
+  const [sortBy, setSortBy]                 = useState("global");
+  const [compareList, setCompareList]       = useState([]);
+  const [simSurface, setSimSurface]         = useState(50);
+  const [simApport, setSimApport]           = useState(20);
+  const [simTaux, setSimTaux]               = useState(3.5);
+  const [simDuree, setSimDuree]             = useState(20);
 
- // Au chargement :
-const cached = localStorage.getItem(`radar-immo-communes-${CACHE_VERSION}`);
+  useEffect(() => {
+    // 1. Cache localStorage immédiat
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        setCommunes(JSON.parse(cached));
+        setCommunesLoaded(true);
+      }
+    } catch { /* ignore */ }
 
-// À la sauvegarde :
-localStorage.setItem(`radar-immo-communes-${CACHE_VERSION}`, JSON.stringify(list));
-    }
+    // 2. Rafraîchit depuis l'API en arrière-plan
     const load = async () => {
       try {
         const res = await fetch(`${API_BASE}/communes`);
@@ -218,7 +224,7 @@ localStorage.setItem(`radar-immo-communes-${CACHE_VERSION}`, JSON.stringify(list
           }));
           setCommunes(list);
           setCommunesLoaded(true);
-          localStorage.setItem("radar-immo-communes", JSON.stringify(list));
+          localStorage.setItem(CACHE_KEY, JSON.stringify(list));
         }
       } catch { /* garde le cache */ }
     };
@@ -295,11 +301,11 @@ localStorage.setItem(`radar-immo-communes-${CACHE_VERSION}`, JSON.stringify(list
     : suggestions.length ? suggestions
     : sorted.filter(c => c.n.toLowerCase().includes(query.toLowerCase()));
 
-  const sr = sn(apiData?.scores?.rendement   ?? city?.sc?.r);
-  const sd = sn(apiData?.scores?.demographie ?? city?.sc?.d);
-  const se = sn(apiData?.scores?.socio_eco   ?? city?.sc?.s);
+  const sr         = sn(apiData?.scores?.rendement   ?? city?.sc?.r);
+  const sd         = sn(apiData?.scores?.demographie ?? city?.sc?.d);
+  const se         = sn(apiData?.scores?.socio_eco   ?? city?.sc?.s);
   const globalNote = sn(apiData?.scores?.global) ?? calcGlobal(sr, sd, se) ?? sn(city?.sc?.g);
-  const scores = city ? { r: sr, d: sd, s: se, g: globalNote } : null;
+  const scores     = city ? { r: sr, d: sd, s: se, g: globalNote } : null;
 
   const pa     = sn(apiData?.prix?.appartement_m2 ?? apiData?.prix?.maison_m2);
   const pm     = sn(apiData?.prix?.maison_m2);
@@ -324,13 +330,11 @@ localStorage.setItem(`radar-immo-communes-${CACHE_VERSION}`, JSON.stringify(list
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#f3f4f6", minHeight: "100vh", padding: 16 }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
 
-        {/* Header */}
         <div style={{ background: "linear-gradient(135deg,#1e3a5f,#2563eb)", borderRadius: 14, padding: "20px 24px", marginBottom: 16, color: "white" }}>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>🏠 Radar Immo 76</h1>
           <p style={{ margin: "4px 0 0", fontSize: 13, opacity: 0.8 }}>Analyse investissement — Seine-Maritime</p>
         </div>
 
-        {/* Barre de recherche */}
         <div style={{ position: "relative", marginBottom: 16 }}>
           <input
             value={query}
@@ -362,19 +366,15 @@ localStorage.setItem(`radar-immo-communes-${CACHE_VERSION}`, JSON.stringify(list
           )}
         </div>
 
-        {/* Fiche commune */}
         {city && (
           <div style={{ background: "white", borderRadius: 14, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <button
                 onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
-                style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, color: "#6b7280", fontFamily: "inherit" }}
+                style={{ background: "none", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, color: "#6b7280", fontFamily: "inherit" }}
                 onMouseEnter={e => e.currentTarget.style.background = "#f9fafb"}
                 onMouseLeave={e => e.currentTarget.style.background = "none"}
-              >
-                ← Retour
-              </button>
+              >← Retour</button>
               <button onClick={toggleCompare}
                 style={{ padding: "6px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer", fontFamily: "inherit", border: "1px solid #2563eb", background: inCompare ? "#2563eb" : "white", color: inCompare ? "white" : "#2563eb", fontWeight: 600 }}
               >
@@ -490,17 +490,14 @@ localStorage.setItem(`radar-immo-communes-${CACHE_VERSION}`, JSON.stringify(list
           </div>
         )}
 
-        {/* Ranking */}
         {!city && (
           <div style={{ background: "white", borderRadius: 14, padding: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#374151" }}>🏆 Classement Seine-Maritime</h3>
-              {!communesLoaded && (
-                <span style={{ fontSize: 12, color: "#f59e0b" }}>⏳ Chargement…</span>
-              )}
-              {communesLoaded && (
-                <span style={{ fontSize: 11, color: "#9ca3af" }}>{communes.length} communes</span>
-              )}
+              {!communesLoaded
+                ? <span style={{ fontSize: 12, color: "#f59e0b" }}>⏳ Chargement…</span>
+                : <span style={{ fontSize: 11, color: "#9ca3af" }}>{communes.length} communes</span>
+              }
             </div>
 
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
@@ -545,7 +542,6 @@ localStorage.setItem(`radar-immo-communes-${CACHE_VERSION}`, JSON.stringify(list
           </div>
         )}
 
-        {/* Comparateur */}
         {compareList.length >= 2 && (
           <div style={{ background: "white", borderRadius: 14, padding: 16, marginTop: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
