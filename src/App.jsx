@@ -19,7 +19,7 @@ const sn = (v) => (v != null && !isNaN(Number(v)) ? Number(v) : null);
 const calcGlobal = (r, d, s) => {
   const nr = sn(r), nd = sn(d), ns = sn(s);
   if (nr != null && nd != null && ns != null)
-    return nr * 0.5 + nd * 0.25 + ns * 0.25;
+    return nr * 0.4 + nd * 0.3 + ns * 0.3;
   return null;
 };
 
