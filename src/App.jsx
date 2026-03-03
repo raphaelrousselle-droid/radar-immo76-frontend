@@ -233,27 +233,27 @@ export default function App() {
   const [open, setOpen]                       = useState(false);
   const [communesVersion, setCommunesVersion] = useState(0);
 
-  // ── Préchargement scores API au démarrage ──
+  // Préchargement scores API au démarrage
   useEffect(() => {
-  const loadAll = async () => {
-    for (const c of COMMUNES) {
-      try {
-        const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
-        if (res.ok) {
-          const d = await res.json();
-          if (d?.scores) {
-            c.sc.g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco) ?? c.sc.g;
-            c.sc.r = sn(d.scores.rendement)   ?? c.sc.r;
-            c.sc.d = sn(d.scores.demographie) ?? c.sc.d;
-            c.sc.s = sn(d.scores.socio_eco)   ?? c.sc.s;
-            setCommunesVersion(v => v + 1); // 👈 ici, pas à la fin
+    const loadAll = async () => {
+      for (const c of COMMUNES) {
+        try {
+          const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
+          if (res.ok) {
+            const d = await res.json();
+            if (d?.scores) {
+              c.sc.g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco) ?? c.sc.g;
+              c.sc.r = sn(d.scores.rendement)   ?? c.sc.r;
+              c.sc.d = sn(d.scores.demographie) ?? c.sc.d;
+              c.sc.s = sn(d.scores.socio_eco)   ?? c.sc.s;
+              setCommunesVersion(v => v + 1);
+            }
           }
-        }
-      } catch { /* garde valeurs statiques */ }
-    }
-  };
-  loadAll();
-}, []);
+        } catch { /* garde valeurs statiques */ }
+      }
+    };
+    loadAll();
+  }, []);
 
   const fetchSuggestions = useCallback(async (q) => {
     if (q.length < 2) { setSuggestions([]); return; }
@@ -293,9 +293,7 @@ export default function App() {
           }
         }
       }
-    } catch {
-      setApiData(null);
-    }
+    } catch { setApiData(null); }
     setLoading(false);
   }, []);
 
@@ -386,6 +384,7 @@ export default function App() {
         {city && (
           <div style={{ background: "white", borderRadius: 14, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
+            {/* Bouton retour */}
             <button
               onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
               style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13, color: "#6b7280", marginBottom: 16, fontFamily: "inherit" }}
@@ -395,6 +394,7 @@ export default function App() {
               ← Retour au classement
             </button>
 
+            {/* En-tête */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#111827" }}>{city.n}</h2>
@@ -407,53 +407,61 @@ export default function App() {
               <div style={{ textAlign: "center", minWidth: 80 }}>
                 <div style={{ fontSize: 32, fontWeight: 900, color: nc(scores?.g) }}>{scores?.g != null ? scores.g.toFixed(1) : "—"}</div>
                 <div style={{ fontSize: 11, color: "#9ca3af" }}>Note /10</div>
-               <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2 }}>40% rend · 30% démo · 30% socio</div>
+                <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2 }}>40% rend · 30% démo · 30% socio</div>
               </div>
             </div>
 
+            {/* Jauges */}
             <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9ca3af" }}>💡 Clique sur une jauge pour voir le détail des critères</p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
               <Gauge label="Rendement"   value={scores?.r} weight={40} active={activePanel === "rendement"}   onClick={() => setActivePanel(p => p === "rendement"   ? null : "rendement")} />
               <Gauge label="Démographie" value={scores?.d} weight={30} active={activePanel === "demographie"} onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")} />
               <Gauge label="Socio-Éco"   value={scores?.s} weight={30} active={activePanel === "socioeco"}    onClick={() => setActivePanel(p => p === "socioeco"    ? null : "socioeco")} />
             </div>
 
-            {activePanel === "rendement"   && <PanelRendement   city={city} apiData={apiData} />}
-            {activePanel === "demographie" && <PanelDemographie city={city} apiData={apiData} />}
-            {activePanel === "socioeco"    && <PanelSocioEco    city={city} apiData={apiData} />}
+            {/* Chiffres clés */}
+            <div style={{ marginBottom: 16, borderBottom: "1px solid #f3f4f6", paddingBottom: 14 }}>
+              <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📋 Chiffres clés</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+                <KpiCard label="Prix appt (DVF)"     value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
+                <KpiCard label="Prix maison (DVF)"   value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
+                <KpiCard label="Loyer médian (ANIL)" value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} color="#7c3aed" />
+                <KpiCard label="Rentabilité brute"   value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(scores?.r)} />
+                <KpiCard label="Chômage"             value={ch != null ? ch.toFixed(1) + "%" : null} color={ch != null && ch < 10 ? "#22c55e" : "#ef4444"} />
+                <KpiCard label="Revenu médian"       value={rv != null ? rv.toLocaleString("fr-FR") + " €/an" : null} color="#374151" />
+              </div>
+            </div>
 
-           <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
-  <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
-  
-  <div onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")}
-    style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "rendement" ? "#f0fdf4" : "transparent" }}>
-    <CriteriaRow label="🏦 Rendement locatif (40%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.4).toFixed(2)} pts` : undefined} />
-  </div>
-  {activePanel === "rendement" && <PanelRendement city={city} apiData={apiData} />}
-
-  <div onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")}
-    style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "demographie" ? "#eff6ff" : "transparent" }}>
-    <CriteriaRow label="👥 Démographie (30%)" note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.3).toFixed(2)} pts` : undefined} />
-  </div>
-  {activePanel === "demographie" && <PanelDemographie city={city} apiData={apiData} />}
-
-  <div onClick={() => setActivePanel(p => p === "socioeco" ? null : "socioeco")}
-    style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "socioeco" ? "#faf5ff" : "transparent" }}>
-    <CriteriaRow label="💼 Socio-économique (30%)" note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.3).toFixed(2)} pts` : undefined} />
-  </div>
-  {activePanel === "socioeco" && <PanelSocioEco city={city} apiData={apiData} />}
-
-  <div style={{ height: 1, background: "#f3f4f6", margin: "8px 0" }} />
-  <CriteriaRow label="⭐ Note globale pondérée" note={scores?.g} />
-</div>
-
-
-            <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
+            {/* Vue synthétique — cliquable */}
+            <div>
               <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
-              <CriteriaRow label="🏦 Rendement locatif (40%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.4).toFixed(2)} pts`  : undefined} />
-<CriteriaRow label="👥 Démographie (30%)"        note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.3).toFixed(2)} pts` : undefined} />
-<CriteriaRow label="💼 Socio-économique (30%)"   note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.3).toFixed(2)} pts` : undefined} />
 
+              <div
+                onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")}
+                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "rendement" ? "#f0fdf4" : "transparent" }}
+              >
+                <CriteriaRow label="🏦 Rendement locatif (40%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.4).toFixed(2)} pts` : undefined} />
+              </div>
+              {activePanel === "rendement" && <PanelRendement city={city} apiData={apiData} />}
+
+              <div
+                onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")}
+                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "demographie" ? "#eff6ff" : "transparent" }}
+              >
+                <CriteriaRow label="👥 Démographie (30%)" note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.3).toFixed(2)} pts` : undefined} />
+              </div>
+              {activePanel === "demographie" && <PanelDemographie city={city} apiData={apiData} />}
+
+              <div
+                onClick={() => setActivePanel(p => p === "socioeco" ? null : "socioeco")}
+                style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "socioeco" ? "#faf5ff" : "transparent" }}
+              >
+                <CriteriaRow label="💼 Socio-économique (30%)" note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.3).toFixed(2)} pts` : undefined} />
+              </div>
+              {activePanel === "socioeco" && <PanelSocioEco city={city} apiData={apiData} />}
+
+              <div style={{ height: 1, background: "#f3f4f6", margin: "8px 0" }} />
+              <CriteriaRow label="⭐ Note globale pondérée" note={scores?.g} />
             </div>
 
           </div>
