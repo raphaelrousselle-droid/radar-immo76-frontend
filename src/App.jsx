@@ -407,15 +407,15 @@ export default function App() {
               <div style={{ textAlign: "center", minWidth: 80 }}>
                 <div style={{ fontSize: 32, fontWeight: 900, color: nc(scores?.g) }}>{scores?.g != null ? scores.g.toFixed(1) : "—"}</div>
                 <div style={{ fontSize: 11, color: "#9ca3af" }}>Note /10</div>
-                <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2 }}>50% rend · 25% démo · 25% socio</div>
+               <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2 }}>40% rend · 30% démo · 30% socio</div>
               </div>
             </div>
 
             <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9ca3af" }}>💡 Clique sur une jauge pour voir le détail des critères</p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
-              <Gauge label="Rendement"   value={scores?.r} weight={50} active={activePanel === "rendement"}   onClick={() => setActivePanel(p => p === "rendement"   ? null : "rendement")} />
-              <Gauge label="Démographie" value={scores?.d} weight={25} active={activePanel === "demographie"} onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")} />
-              <Gauge label="Socio-Éco"   value={scores?.s} weight={25} active={activePanel === "socioeco"}    onClick={() => setActivePanel(p => p === "socioeco"    ? null : "socioeco")} />
+              <Gauge label="Rendement"   value={scores?.r} weight={40} active={activePanel === "rendement"}   onClick={() => setActivePanel(p => p === "rendement"   ? null : "rendement")} />
+              <Gauge label="Démographie" value={scores?.d} weight={30} active={activePanel === "demographie"} onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")} />
+              <Gauge label="Socio-Éco"   value={scores?.s} weight={30} active={activePanel === "socioeco"}    onClick={() => setActivePanel(p => p === "socioeco"    ? null : "socioeco")} />
             </div>
 
             {activePanel === "rendement"   && <PanelRendement   city={city} apiData={apiData} />}
