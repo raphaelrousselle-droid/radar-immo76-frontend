@@ -298,38 +298,28 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    const t = setTimeout(() => { if (query) fetchSuggestions(query); }, 250);
-    return () => clearTimeout(t);
-  }, [query, fetchSuggestions]);
-
-  const fetchCommune = useCallback(async (name) => {
-    setLoading(true);
-    setApiData(null);
-    setActivePanel(null);
-    try {
-      const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(name)}`);
-      if (res.ok) {
-        const d = await res.json();
-        setApiData(d ?? null);
-        // Sync score classement avec données API réelles
-        if (d?.scores) {
-          const g = calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco);
-          const found = COMMUNES.find(c => c.n.toLowerCase() === name.toLowerCase());
-          if (found && g != null) {
-            found.sc.g = g;
-            found.sc.r = sn(d.scores.rendement)   ?? found.sc.r;
-            found.sc.d = sn(d.scores.demographie)  ?? found.sc.d;
-            found.sc.s = sn(d.scores.socio_eco)    ?? found.sc.s;
-            setCommunesVersion(v => v + 1);
+// Préchargement des scores API pour toutes les communes
+useEffect(() => {
+  const loadAll = async () => {
+    for (const c of COMMUNES) {
+      try {
+        const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
+        if (res.ok) {
+          const d = await res.json();
+          if (d?.scores) {
+            c.sc.g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco) ?? c.sc.g;
+            c.sc.r = sn(d.scores.rendement)   ?? c.sc.r;
+            c.sc.d = sn(d.scores.demographie) ?? c.sc.d;
+            c.sc.s = sn(d.scores.socio_eco)   ?? c.sc.s;
           }
         }
-      }
-    } catch {
-      setApiData(null);
+      } catch { /* on garde les valeurs statiques */ }
     }
-    setLoading(false);
-  }, []);
+    setCommunesVersion(v => v + 1);
+  };
+  loadAll();
+}, []);
+
 
   const select = useCallback((c) => {
     try {
