@@ -422,17 +422,31 @@ export default function App() {
             {activePanel === "demographie" && <PanelDemographie city={city} apiData={apiData} />}
             {activePanel === "socioeco"    && <PanelSocioEco    city={city} apiData={apiData} />}
 
-            <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
-              <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📋 Chiffres clés</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-                <KpiCard label="Prix appt (DVF)"     value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
-                <KpiCard label="Prix maison (DVF)"   value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
-                <KpiCard label="Loyer médian (ANIL)" value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} color="#7c3aed" />
-                <KpiCard label="Rentabilité brute"   value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(scores?.r)} />
-                <KpiCard label="Chômage"             value={ch != null ? ch.toFixed(1) + "%" : null} color={ch != null && ch < 10 ? "#22c55e" : "#ef4444"} />
-                <KpiCard label="Revenu médian"       value={rv != null ? rv.toLocaleString("fr-FR") + " €/an" : null} color="#374151" />
-              </div>
-            </div>
+           <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
+  <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
+  
+  <div onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")}
+    style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "rendement" ? "#f0fdf4" : "transparent" }}>
+    <CriteriaRow label="🏦 Rendement locatif (40%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.4).toFixed(2)} pts` : undefined} />
+  </div>
+  {activePanel === "rendement" && <PanelRendement city={city} apiData={apiData} />}
+
+  <div onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")}
+    style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "demographie" ? "#eff6ff" : "transparent" }}>
+    <CriteriaRow label="👥 Démographie (30%)" note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.3).toFixed(2)} pts` : undefined} />
+  </div>
+  {activePanel === "demographie" && <PanelDemographie city={city} apiData={apiData} />}
+
+  <div onClick={() => setActivePanel(p => p === "socioeco" ? null : "socioeco")}
+    style={{ cursor: "pointer", borderRadius: 8, padding: "4px 8px", margin: "0 -8px", background: activePanel === "socioeco" ? "#faf5ff" : "transparent" }}>
+    <CriteriaRow label="💼 Socio-économique (30%)" note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.3).toFixed(2)} pts` : undefined} />
+  </div>
+  {activePanel === "socioeco" && <PanelSocioEco city={city} apiData={apiData} />}
+
+  <div style={{ height: 1, background: "#f3f4f6", margin: "8px 0" }} />
+  <CriteriaRow label="⭐ Note globale pondérée" note={scores?.g} />
+</div>
+
 
             <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
               <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
