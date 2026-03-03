@@ -235,25 +235,25 @@ export default function App() {
 
   // ── Préchargement scores API au démarrage ──
   useEffect(() => {
-    const loadAll = async () => {
-      for (const c of COMMUNES) {
-        try {
-          const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
-          if (res.ok) {
-            const d = await res.json();
-            if (d?.scores) {
-              c.sc.g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco) ?? c.sc.g;
-              c.sc.r = sn(d.scores.rendement)    ?? c.sc.r;
-              c.sc.d = sn(d.scores.demographie)  ?? c.sc.d;
-              c.sc.s = sn(d.scores.socio_eco)    ?? c.sc.s;
-            }
+  const loadAll = async () => {
+    for (const c of COMMUNES) {
+      try {
+        const res = await fetch(`${API_BASE}/analyse/${encodeURIComponent(c.n)}`);
+        if (res.ok) {
+          const d = await res.json();
+          if (d?.scores) {
+            c.sc.g = sn(d.scores.global) ?? calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco) ?? c.sc.g;
+            c.sc.r = sn(d.scores.rendement)   ?? c.sc.r;
+            c.sc.d = sn(d.scores.demographie) ?? c.sc.d;
+            c.sc.s = sn(d.scores.socio_eco)   ?? c.sc.s;
+            setCommunesVersion(v => v + 1); // 👈 ici, pas à la fin
           }
-        } catch { /* garde les valeurs statiques */ }
-      }
-      setCommunesVersion(v => v + 1);
-    };
-    loadAll();
-  }, []);
+        }
+      } catch { /* garde valeurs statiques */ }
+    }
+  };
+  loadAll();
+}, []);
 
   const fetchSuggestions = useCallback(async (q) => {
     if (q.length < 2) { setSuggestions([]); return; }
