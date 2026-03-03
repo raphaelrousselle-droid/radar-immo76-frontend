@@ -367,7 +367,7 @@ export default function App() {
   const sr = sn(apiData?.scores?.rendement   ?? city?.sc?.r);
   const sd = sn(apiData?.scores?.demographie ?? city?.sc?.d);
   const se = sn(apiData?.scores?.socio_eco   ?? city?.sc?.s);
-  const globalNote = calcGlobal(sr, sd, se) ?? sn(city?.sc?.g);
+  const globalNote = sn(apiData?.scores?.global) ?? calcGlobal(sr, sd, se) ?? sn(city?.sc?.g);
   const scores = city ? { r: sr, d: sd, s: se, g: globalNote } : null;
 
   const pa     = sn(apiData?.prix?.appartement_m2);
