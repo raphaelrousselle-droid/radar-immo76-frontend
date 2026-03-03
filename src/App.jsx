@@ -330,7 +330,7 @@ export default function App() {
     return () => clearTimeout(t);
   }, [query, fetchSuggestions]);
 
-  const fetchCommune = useCallback(async (name) => {
+ const fetchCommune = useCallback(async (name) => {
     setLoading(true);
     setApiData(null);
     setActivePanel(null);
@@ -339,12 +339,19 @@ export default function App() {
       if (res.ok) {
         const d = await res.json();
         setApiData(d ?? null);
+        // Sync score classement avec données API réelles
+        if (d?.scores) {
+          const g = calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco);
+          const found = COMMUNES.find(c => c.n.toLowerCase() === name.toLowerCase());
+          if (found && g != null) found.sc.g = g;
+        }
       }
     } catch {
       setApiData(null);
     }
     setLoading(false);
   }, []);
+
 
   const select = useCallback((c) => {
     try {
