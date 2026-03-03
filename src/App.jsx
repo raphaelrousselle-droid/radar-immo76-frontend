@@ -195,14 +195,11 @@ export default function App() {
   const [simTaux, setSimTaux]             = useState(3.5);
   const [simDuree, setSimDuree]           = useState(20);
 
-  // Chargement communes depuis cache + API
-  useEffect(() => {
-    const cached = localStorage.getItem("radar-immo-communes");
-    if (cached) {
-      try {
-        setCommunes(JSON.parse(cached));
-        setCommunesLoaded(true);
-      } catch { /* ignore */ }
+ // Au chargement :
+const cached = localStorage.getItem(`radar-immo-communes-${CACHE_VERSION}`);
+
+// À la sauvegarde :
+localStorage.setItem(`radar-immo-communes-${CACHE_VERSION}`, JSON.stringify(list));
     }
     const load = async () => {
       try {
