@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 
 const API_BASE = "https://radar-immo76-1.onrender.com";
 
@@ -122,11 +122,11 @@ function KpiCard({ label, value, color }) {
 
 // ─── Panneau détail Rendement ─────────────────────────────────────────────────
 function PanelRendement({ city, apiData }) {
-  const pa  = sn(apiData?.prix?.appartement_m2);
-  const pm  = sn(apiData?.prix?.maison_m2);
-  const lo  = sn(apiData?.loyer?.appartement_m2);
-  const rb  = sn(apiData?.rentabilite_brute_pct);
-  const nv  = sn(apiData?.prix?.nb_ventes_apt);
+  const pa   = sn(apiData?.prix?.appartement_m2);
+  const pm   = sn(apiData?.prix?.maison_m2);
+  const lo   = sn(apiData?.loyer?.appartement_m2);
+  const rb   = sn(apiData?.rentabilite_brute_pct);
+  const nv   = sn(apiData?.prix?.nb_ventes_apt);
   const src1 = apiData?.prix?.source ?? null;
   const src2 = apiData?.loyer?.source ?? null;
 
@@ -135,40 +135,18 @@ function PanelRendement({ city, apiData }) {
   const noteLo = lo != null ? Math.min(10, (lo / 15) * 10) : null;
 
   return (
-    <div style={{
-      background: "#f0fdf4", border: "1px solid #bbf7d0",
-      borderRadius: 10, padding: 16, marginTop: 8
-    }}>
+    <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10, padding: 16, marginTop: 8 }}>
       <h4 style={{ margin: "0 0 14px", fontSize: 14, color: "#15803d", fontWeight: 700 }}>
         📊 Détail — Rendement Locatif
       </h4>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-        <KpiCard
-          label="Prix appartement (DVF)"
-          value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" + (nv ? ` · ${nv.toLocaleString("fr-FR")} ventes` : "") : null}
-          color="#1e40af"
-        />
-        <KpiCard
-          label="Prix maison (DVF)"
-          value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null}
-          color="#1e40af"
-        />
-        <KpiCard
-          label="Loyer médian (ANIL)"
-          value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null}
-          color="#7c3aed"
-        />
-        <KpiCard
-          label="Rentabilité brute"
-          value={rb != null ? rb.toFixed(2) + "%" : null}
-          color={nc(sn(apiData?.scores?.rendement))}
-        />
+        <KpiCard label="Prix appartement (DVF)" value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" + (nv ? ` · ${nv.toLocaleString("fr-FR")} ventes` : "") : null} color="#1e40af" />
+        <KpiCard label="Prix maison (DVF)" value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
+        <KpiCard label="Loyer médian (ANIL)" value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} color="#7c3aed" />
+        <KpiCard label="Rentabilité brute" value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(sn(apiData?.scores?.rendement))} />
       </div>
       {rb != null && lo != null && pa != null && (
-        <div style={{
-          background: "white", borderRadius: 8, padding: 10, marginBottom: 14,
-          fontSize: 12, color: "#6b7280", textAlign: "center"
-        }}>
+        <div style={{ background: "white", borderRadius: 8, padding: 10, marginBottom: 14, fontSize: 12, color: "#6b7280", textAlign: "center" }}>
           Calcul : {lo.toFixed(1)} × 12 / {pa.toLocaleString("fr-FR")} × 100 = <strong style={{ color: nc(noteRb) }}>{rb.toFixed(2)}%</strong>
         </div>
       )}
@@ -196,10 +174,7 @@ function PanelDemographie({ city, apiData }) {
   const noteVac = vac != null ? Math.max(0, Math.min(10, 10 - (vac - 5) * 0.8)) : null;
 
   return (
-    <div style={{
-      background: "#eff6ff", border: "1px solid #bfdbfe",
-      borderRadius: 10, padding: 16, marginTop: 8
-    }}>
+    <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: 16, marginTop: 8 }}>
       <h4 style={{ margin: "0 0 14px", fontSize: 14, color: "#1d4ed8", fontWeight: 700 }}>
         📊 Détail — Attractivité Démographique
       </h4>
@@ -229,10 +204,7 @@ function PanelSocioEco({ city, apiData }) {
   const notePauv = pauv != null ? Math.max(0, Math.min(10, 10 - pauv * 0.4)) : null;
 
   return (
-    <div style={{
-      background: "#faf5ff", border: "1px solid #e9d5ff",
-      borderRadius: 10, padding: 16, marginTop: 8
-    }}>
+    <div style={{ background: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: 10, padding: 16, marginTop: 8 }}>
       <h4 style={{ margin: "0 0 14px", fontSize: 14, color: "#7c3aed", fontWeight: 700 }}>
         📊 Détail — Score Socio-Économique
       </h4>
@@ -250,7 +222,7 @@ function PanelSocioEco({ city, apiData }) {
   );
 }
 
-// ─── Données statiques (Seine-Maritime >1000 hab) ─────────────────────────────
+// ─── Données statiques ────────────────────────────────────────────────────────
 const D = [
   { n: "Rouen",                      pop: 110169, ch: 15.2, rv: 18900, ev: -0.5, vac: 9.2,  tc: 62, sc: { r: 5.8, d: 4.5, s: 4.2 } },
   { n: "Le Havre",                   pop: 170147, ch: 17.1, rv: 17200, ev: -1.2, vac: 10.8, tc: 58, sc: { r: 6.1, d: 4.0, s: 3.8 } },
@@ -262,7 +234,7 @@ const D = [
   { n: "Mont-Saint-Aignan",          pop: 20220,  ch: 8.5,  rv: 24500, ev: 0.4,  vac: 6.2,  tc: 71, sc: { r: 4.8, d: 5.6, s: 6.8 } },
   { n: "Maromme",                    pop: 12840,  ch: 14.8, rv: 18200, ev: -0.6, vac: 9.1,  tc: 59, sc: { r: 6.6, d: 4.3, s: 4.2 } },
   { n: "Bois-Guillaume",             pop: 13250,  ch: 7.8,  rv: 26000, ev: 0.8,  vac: 5.9,  tc: 73, sc: { r: 4.5, d: 5.8, s: 7.2 } },
-  { n: "Déville-lès-Rouen",         pop: 10180,  ch: 11.2, rv: 20400, ev: -0.2, vac: 8.2,  tc: 64, sc: { r: 5.5, d: 5.0, s: 5.5 } },
+  { n: "Déville-lès-Rouen",          pop: 10180,  ch: 11.2, rv: 20400, ev: -0.2, vac: 8.2,  tc: 64, sc: { r: 5.5, d: 5.0, s: 5.5 } },
   { n: "Barentin",                   pop: 12680,  ch: 12.5, rv: 19800, ev: 0.1,  vac: 8.8,  tc: 63, sc: { r: 6.1, d: 5.1, s: 5.2 } },
   { n: "Yvetot",                     pop: 10950,  ch: 13.1, rv: 19200, ev: 0.2,  vac: 9.0,  tc: 61, sc: { r: 6.4, d: 5.1, s: 5.0 } },
   { n: "Lillebonne",                 pop: 9190,   ch: 11.8, rv: 20100, ev: -0.3, vac: 8.5,  tc: 63, sc: { r: 6.3, d: 4.9, s: 5.3 } },
@@ -274,7 +246,7 @@ const D = [
   { n: "Doudeville",                 pop: 2850,   ch: 10.5, rv: 19500, ev: 0.1,  vac: 8.3,  tc: 62, sc: { r: 7.5, d: 4.2, s: 5.4 } },
   { n: "Goderville",                 pop: 2720,   ch: 9.2,  rv: 21000, ev: 0.6,  vac: 7.5,  tc: 64, sc: { r: 7.3, d: 4.8, s: 5.6 } },
   { n: "Gournay-en-Bray",            pop: 6220,   ch: 11.0, rv: 19800, ev: 0.0,  vac: 8.8,  tc: 62, sc: { r: 6.8, d: 4.8, s: 5.2 } },
-  { n: "Neufchâtel-en-Bray",        pop: 4940,   ch: 12.8, rv: 18700, ev: -0.7, vac: 9.5,  tc: 59, sc: { r: 7.1, d: 4.3, s: 4.8 } },
+  { n: "Neufchâtel-en-Bray",         pop: 4940,   ch: 12.8, rv: 18700, ev: -0.7, vac: 9.5,  tc: 59, sc: { r: 7.1, d: 4.3, s: 4.8 } },
   { n: "Eu",                         pop: 7580,   ch: 13.5, rv: 18200, ev: -0.8, vac: 9.8,  tc: 58, sc: { r: 6.9, d: 4.1, s: 4.5 } },
   { n: "Saint-Valery-en-Caux",       pop: 4560,   ch: 11.5, rv: 19000, ev: -0.3, vac: 9.0,  tc: 61, sc: { r: 6.5, d: 4.5, s: 5.0 } },
   { n: "Caudebec-en-Caux",           pop: 2560,   ch: 10.8, rv: 19200, ev: 0.2,  vac: 8.5,  tc: 62, sc: { r: 6.7, d: 4.6, s: 5.2 } },
@@ -292,8 +264,8 @@ const D = [
   { n: "Luneray",                    pop: 2980,   ch: 10.0, rv: 20500, ev: 0.3,  vac: 8.0,  tc: 63, sc: { r: 7.0, d: 5.0, s: 5.5 } },
   { n: "Octeville-sur-Mer",          pop: 4320,   ch: 8.5,  rv: 22500, ev: 0.8,  vac: 6.8,  tc: 67, sc: { r: 5.3, d: 5.5, s: 6.2 } },
   { n: "Sainte-Adresse",             pop: 7830,   ch: 8.0,  rv: 25000, ev: 0.5,  vac: 6.0,  tc: 72, sc: { r: 4.8, d: 5.7, s: 7.0 } },
-  { n: "Saint-Aubin-lès-Elbeuf",    pop: 8390,   ch: 14.2, rv: 18500, ev: -0.5, vac: 9.5,  tc: 59, sc: { r: 6.8, d: 4.4, s: 4.5 } },
-  { n: "Saint-Pierre-lès-Elbeuf",   pop: 5050,   ch: 15.8, rv: 17500, ev: -1.0, vac: 10.2, tc: 57, sc: { r: 7.0, d: 4.0, s: 3.8 } },
+  { n: "Saint-Aubin-lès-Elbeuf",     pop: 8390,   ch: 14.2, rv: 18500, ev: -0.5, vac: 9.5,  tc: 59, sc: { r: 6.8, d: 4.4, s: 4.5 } },
+  { n: "Saint-Pierre-lès-Elbeuf",    pop: 5050,   ch: 15.8, rv: 17500, ev: -1.0, vac: 10.2, tc: 57, sc: { r: 7.0, d: 4.0, s: 3.8 } },
   { n: "Tourville-la-Rivière",       pop: 3890,   ch: 9.8,  rv: 21500, ev: 0.6,  vac: 7.5,  tc: 65, sc: { r: 5.8, d: 5.4, s: 5.8 } },
 ];
 
@@ -305,13 +277,14 @@ const COMMUNES = Array.from(new Map(D.map(c => [c.n, {
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 export default function App() {
-  const [query, setQuery]             = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [city, setCity]               = useState(null);
-  const [apiData, setApiData]         = useState(null);
-  const [loading, setLoading]         = useState(false);
-  const [activePanel, setActivePanel] = useState(null);
-  const [open, setOpen]               = useState(false);
+  const [query, setQuery]                 = useState("");
+  const [suggestions, setSuggestions]     = useState([]);
+  const [city, setCity]                   = useState(null);
+  const [apiData, setApiData]             = useState(null);
+  const [loading, setLoading]             = useState(false);
+  const [activePanel, setActivePanel]     = useState(null);
+  const [open, setOpen]                   = useState(false);
+  const [communesVersion, setCommunesVersion] = useState(0);
 
   const fetchSuggestions = useCallback(async (q) => {
     if (q.length < 2) { setSuggestions([]); return; }
@@ -330,7 +303,7 @@ export default function App() {
     return () => clearTimeout(t);
   }, [query, fetchSuggestions]);
 
- const fetchCommune = useCallback(async (name) => {
+  const fetchCommune = useCallback(async (name) => {
     setLoading(true);
     setApiData(null);
     setActivePanel(null);
@@ -343,7 +316,13 @@ export default function App() {
         if (d?.scores) {
           const g = calcGlobal(d.scores.rendement, d.scores.demographie, d.scores.socio_eco);
           const found = COMMUNES.find(c => c.n.toLowerCase() === name.toLowerCase());
-          if (found && g != null) found.sc.g = g;
+          if (found && g != null) {
+            found.sc.g = g;
+            found.sc.r = sn(d.scores.rendement)   ?? found.sc.r;
+            found.sc.d = sn(d.scores.demographie)  ?? found.sc.d;
+            found.sc.s = sn(d.scores.socio_eco)    ?? found.sc.s;
+            setCommunesVersion(v => v + 1);
+          }
         }
       }
     } catch {
@@ -351,7 +330,6 @@ export default function App() {
     }
     setLoading(false);
   }, []);
-
 
   const select = useCallback((c) => {
     try {
@@ -373,7 +351,11 @@ export default function App() {
     }
   }, [fetchCommune]);
 
-  const sorted = [...COMMUNES].sort((a, b) => (b.sc?.g ?? 0) - (a.sc?.g ?? 0));
+  const sorted = useMemo(
+    () => [...COMMUNES].sort((a, b) => (b.sc?.g ?? 0) - (a.sc?.g ?? 0)),
+    [communesVersion]
+  );
+
   const displayed =
     query.length < 2
       ? sorted
@@ -388,19 +370,16 @@ export default function App() {
   const globalNote = calcGlobal(sr, sd, se) ?? sn(city?.sc?.g);
   const scores = city ? { r: sr, d: sd, s: se, g: globalNote } : null;
 
-  const pa = sn(apiData?.prix?.appartement_m2);
-  const pm = sn(apiData?.prix?.maison_m2);
-  const lo = sn(apiData?.loyer?.appartement_m2);
-  const rb = sn(apiData?.rentabilite_brute_pct);
-  const ch = sn(apiData?.socio_eco?.chomage_pct   ?? city?.ch);
-  const rv = sn(apiData?.socio_eco?.revenu_median  ?? city?.rv);
+  const pa     = sn(apiData?.prix?.appartement_m2);
+  const pm     = sn(apiData?.prix?.maison_m2);
+  const lo     = sn(apiData?.loyer?.appartement_m2);
+  const rb     = sn(apiData?.rentabilite_brute_pct);
+  const ch     = sn(apiData?.socio_eco?.chomage_pct  ?? city?.ch);
+  const rv     = sn(apiData?.socio_eco?.revenu_median ?? city?.rv);
   const popAff = sn(apiData?.population ?? city?.pop);
 
   return (
-    <div style={{
-      fontFamily: "Inter, system-ui, sans-serif",
-      background: "#f3f4f6", minHeight: "100vh", padding: 16
-    }}>
+    <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#f3f4f6", minHeight: "100vh", padding: 16 }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
 
         {/* ── Header ── */}
@@ -409,9 +388,7 @@ export default function App() {
           borderRadius: 14, padding: "20px 24px", marginBottom: 16, color: "white"
         }}>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>🏠 Radar Immo 76</h1>
-          <p style={{ margin: "4px 0 0", fontSize: 13, opacity: 0.8 }}>
-            Analyse investissement — Seine-Maritime
-          </p>
+          <p style={{ margin: "4px 0 0", fontSize: 13, opacity: 0.8 }}>Analyse investissement — Seine-Maritime</p>
         </div>
 
         {/* ── Barre de recherche ── */}
@@ -450,21 +427,15 @@ export default function App() {
                     onMouseEnter={e => (e.currentTarget.style.background = "#f9fafb")}
                     onMouseLeave={e => (e.currentTarget.style.background = "white")}
                   >
-                    <span style={{ fontSize: 14, color: "#111827" }}>
-                      {c.commune ?? c.n}
-                    </span>
+                    <span style={{ fontSize: 14, color: "#111827" }}>{c.commune ?? c.n}</span>
                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                       {isApi && (
-                        <span style={{
-                          fontSize: 10, background: "#dbeafe", color: "#1d4ed8",
-                          borderRadius: 4, padding: "1px 6px", fontWeight: 600
-                        }}>DVF</span>
+                        <span style={{ fontSize: 10, background: "#dbeafe", color: "#1d4ed8", borderRadius: 4, padding: "1px 6px", fontWeight: 600 }}>DVF</span>
                       )}
                       {scG != null && (
-                        <span style={{
-                          fontSize: 12, fontWeight: 700, color: "white",
-                          background: nc(scG), borderRadius: 4, padding: "2px 8px"
-                        }}>{scG.toFixed(1)}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "white", background: nc(scG), borderRadius: 4, padding: "2px 8px" }}>
+                          {scG.toFixed(1)}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -475,51 +446,33 @@ export default function App() {
         </div>
 
         {/* ── Fiche commune ── */}
-        {/* ── Fiche commune ── */}
-{city && (
-  <div style={{
-    background: "white", borderRadius: 14, padding: 20,
-    boxShadow: "0 2px 12px rgba(0,0,0,0.06)"
-  }}>
+        {city && (
+          <div style={{ background: "white", borderRadius: 14, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
-    {/* 👇 AJOUTE CES LIGNES */}
-    <button
-      onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
-      style={{
-        display: "flex", alignItems: "center", gap: 6,
-        background: "none", border: "1px solid #e5e7eb",
-        borderRadius: 8, padding: "6px 12px", cursor: "pointer",
-        fontSize: 13, color: "#6b7280", marginBottom: 16,
-        fontFamily: "inherit"
-      }}
-      onMouseEnter={e => e.currentTarget.style.background = "#f9fafb"}
-      onMouseLeave={e => e.currentTarget.style.background = "none"}
-    >
-      ← Retour au classement
-    </button>
-    {/* 👆 FIN */}
+            {/* Bouton retour */}
+            <button
+              onClick={() => { setCity(null); setApiData(null); setQuery(""); setActivePanel(null); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                background: "none", border: "1px solid #e5e7eb",
+                borderRadius: 8, padding: "6px 12px", cursor: "pointer",
+                fontSize: 13, color: "#6b7280", marginBottom: 16, fontFamily: "inherit"
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = "#f9fafb"}
+              onMouseLeave={e => e.currentTarget.style.background = "none"}
+            >
+              ← Retour au classement
+            </button>
 
-    {/* En-tête commune */}
-    <div style={{
-
-              display: "flex", justifyContent: "space-between",
-              alignItems: "flex-start", marginBottom: 16
-            }}>
+            {/* En-tête commune */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#111827" }}>
-                  {city.n}
-                </h2>
+                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#111827" }}>{city.n}</h2>
                 <div style={{ fontSize: 13, color: "#6b7280", marginTop: 2 }}>
                   {popAff != null ? popAff.toLocaleString("fr-FR") + " hab. · " : ""}
                   Seine-Maritime (76)
-                  {loading && (
-                    <span style={{ marginLeft: 8, color: "#f59e0b" }}>⏳ Chargement…</span>
-                  )}
-                  {!loading && apiData && (
-                    <span style={{ marginLeft: 8, color: "#22c55e", fontWeight: 600 }}>
-                      ✅ DVF + ANIL
-                    </span>
-                  )}
+                  {loading && <span style={{ marginLeft: 8, color: "#f59e0b" }}>⏳ Chargement…</span>}
+                  {!loading && apiData && <span style={{ marginLeft: 8, color: "#22c55e", fontWeight: 600 }}>✅ DVF + ANIL</span>}
                 </div>
               </div>
               <div style={{ textAlign: "center", minWidth: 80 }}>
@@ -527,79 +480,66 @@ export default function App() {
                   {scores?.g != null ? scores.g.toFixed(1) : "—"}
                 </div>
                 <div style={{ fontSize: 11, color: "#9ca3af" }}>Note /10</div>
-                <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2 }}>
-                  50% rend · 25% démo · 25% socio
-                </div>
+                <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2 }}>50% rend · 25% démo · 25% socio</div>
               </div>
             </div>
 
+            {/* Jauges */}
             <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9ca3af" }}>
               💡 Clique sur une jauge pour voir le détail des critères
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
-              <Gauge label="Rendement" value={scores?.r} weight={50} active={activePanel === "rendement"} onClick={() => setActivePanel(p => p === "rendement" ? null : "rendement")} />
+              <Gauge label="Rendement"   value={scores?.r} weight={50} active={activePanel === "rendement"}   onClick={() => setActivePanel(p => p === "rendement"   ? null : "rendement")} />
               <Gauge label="Démographie" value={scores?.d} weight={25} active={activePanel === "demographie"} onClick={() => setActivePanel(p => p === "demographie" ? null : "demographie")} />
-              <Gauge label="Socio-Éco" value={scores?.s} weight={25} active={activePanel === "socioeco"} onClick={() => setActivePanel(p => p === "socioeco" ? null : "socioeco")} />
+              <Gauge label="Socio-Éco"   value={scores?.s} weight={25} active={activePanel === "socioeco"}    onClick={() => setActivePanel(p => p === "socioeco"    ? null : "socioeco")} />
             </div>
 
             {activePanel === "rendement"   && <PanelRendement   city={city} apiData={apiData} />}
             {activePanel === "demographie" && <PanelDemographie city={city} apiData={apiData} />}
             {activePanel === "socioeco"    && <PanelSocioEco    city={city} apiData={apiData} />}
 
+            {/* Chiffres clés */}
             <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
-              <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>
-                📋 Chiffres clés
-              </h3>
+              <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📋 Chiffres clés</h3>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-                <KpiCard label="Prix appt (DVF)" value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
-                <KpiCard label="Prix maison (DVF)" value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
+                <KpiCard label="Prix appt (DVF)"     value={pa != null ? pa.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
+                <KpiCard label="Prix maison (DVF)"   value={pm != null ? pm.toLocaleString("fr-FR") + " €/m²" : null} color="#1e40af" />
                 <KpiCard label="Loyer médian (ANIL)" value={lo != null ? lo.toFixed(1) + " €/m²/mois" : null} color="#7c3aed" />
-                <KpiCard label="Rentabilité brute" value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(scores?.r)} />
-                <KpiCard label="Chômage" value={ch != null ? ch.toFixed(1) + "%" : null} color={ch != null && ch < 10 ? "#22c55e" : "#ef4444"} />
-                <KpiCard label="Revenu médian" value={rv != null ? rv.toLocaleString("fr-FR") + " €/an" : null} color="#374151" />
+                <KpiCard label="Rentabilité brute"   value={rb != null ? rb.toFixed(2) + "%" : null} color={nc(scores?.r)} />
+                <KpiCard label="Chômage"             value={ch != null ? ch.toFixed(1) + "%" : null} color={ch != null && ch < 10 ? "#22c55e" : "#ef4444"} />
+                <KpiCard label="Revenu médian"       value={rv != null ? rv.toLocaleString("fr-FR") + " €/an" : null} color="#374151" />
               </div>
             </div>
 
+            {/* Vue synthétique */}
             <div style={{ marginTop: 16, borderTop: "1px solid #f3f4f6", paddingTop: 14 }}>
-              <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>
-                📊 Vue synthétique
-              </h3>
-              <CriteriaRow label="🏦 Rendement locatif (50%)" note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.5).toFixed(2)} pts` : undefined} />
-              <CriteriaRow label="👥 Démographie (25%)" note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.25).toFixed(2)} pts` : undefined} />
-              <CriteriaRow label="💼 Socio-économique (25%)" note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.25).toFixed(2)} pts` : undefined} />
+              <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700, color: "#374151" }}>📊 Vue synthétique</h3>
+              <CriteriaRow label="🏦 Rendement locatif (50%)"  note={scores?.r} info={scores?.r != null ? `→ ${(scores.r * 0.5).toFixed(2)} pts`  : undefined} />
+              <CriteriaRow label="👥 Démographie (25%)"        note={scores?.d} info={scores?.d != null ? `→ ${(scores.d * 0.25).toFixed(2)} pts` : undefined} />
+              <CriteriaRow label="💼 Socio-économique (25%)"   note={scores?.s} info={scores?.s != null ? `→ ${(scores.s * 0.25).toFixed(2)} pts` : undefined} />
               <div style={{ height: 1, background: "#f3f4f6", margin: "8px 0" }} />
               <CriteriaRow label="⭐ Note globale pondérée" note={scores?.g} />
             </div>
+
           </div>
         )}
 
         {/* ── Ranking ── */}
         {!city && (
-          <div style={{
-            background: "white", borderRadius: 14, padding: 16,
-            boxShadow: "0 2px 12px rgba(0,0,0,0.06)"
-          }}>
-            <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#374151" }}>
-              🏆 Top communes Seine-Maritime
-            </h3>
+          <div style={{ background: "white", borderRadius: 14, padding: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#374151" }}>🏆 Top communes Seine-Maritime</h3>
             {sorted.slice(0, 20).map((c, i) => (
               <div
                 key={i}
                 onClick={() => select(c)}
-                style={{
-                  display: "flex", alignItems: "center",
-                  padding: "8px 4px", borderBottom: "1px solid #f3f4f6", cursor: "pointer"
-                }}
+                style={{ display: "flex", alignItems: "center", padding: "8px 4px", borderBottom: "1px solid #f3f4f6", cursor: "pointer" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "#f9fafb")}
                 onMouseLeave={e => (e.currentTarget.style.background = "white")}
               >
                 <span style={{ width: 28, fontSize: 13, color: "#9ca3af", fontWeight: 600 }}>#{i + 1}</span>
                 <span style={{ flex: 1, fontSize: 14, color: "#111827", fontWeight: 500 }}>{c.n}</span>
                 <span style={{ fontSize: 12, color: "#6b7280", marginRight: 10 }}>{c.pop?.toLocaleString("fr-FR")} hab.</span>
-                <span style={{
-                  fontSize: 13, fontWeight: 700, color: "white",
-                  background: nc(c.sc?.g), borderRadius: 5, padding: "2px 9px"
-                }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "white", background: nc(c.sc?.g), borderRadius: 5, padding: "2px 9px" }}>
                   {sn(c.sc?.g)?.toFixed(1) ?? "—"}
                 </span>
               </div>
