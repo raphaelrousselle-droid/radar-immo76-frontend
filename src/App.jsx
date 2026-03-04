@@ -632,7 +632,9 @@ function SimulationProjet() {
               { label: "Trésorerie/an", value: fmtEur(regime.tresorerie), color: couleurTreso },
               { label: "Rendement brut", value: fmtPct(regime.rendBrut), color: "#64748b" },
               { label: "Rendement net", value: fmtPct(regime.rendNet), color: "#16a34a" },
-              { label: "TRI", value: regime.tri ? fmt(regime.tri, 1) + " ans" : "—", color: "#64748b" },
+             r.tri != null ? fmtPct(r.tri * 100) : "—"
+// et pour le bilan :
+regime.tri != null ? fmtPct(regime.tri * 100) : "—"
             ].map(function(c) {
               return (
                 <div key={c.label} style={{ background: "rgba(255,255,255,0.7)", borderRadius: 14, padding: "10px 12px" }}>
