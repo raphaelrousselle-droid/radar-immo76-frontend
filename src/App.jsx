@@ -1,3 +1,564 @@
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+
+const API_BASE = "https://radar-immo76-1.onrender.com";
+const CACHE_KEY = "radar-immo-communes-v2";
+const PROJETS_KEY = "radar-immo-projets-v1";
+
+const nc = (v) => { if (v == null) return "#94a3b8"; if (v >= 7) return "#16a34a"; if (v >= 5) return "#d97706"; return "#dc2626"; };
+const nLabel = (v) => { if (v == null) return "—"; if (v >= 7) return "Bon"; if (v >= 5) return "Moyen"; return "Faible"; };
+const sn = (v) => (v != null && !isNaN(Number(v)) ? Number(v) : null);
+const pf = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const fmt = (n, d) => { const dd = d !== undefined ? d : 0; return n == null ? "—" : n.toLocaleString("fr-FR", { minimumFractionDigits: dd, maximumFractionDigits: dd }); };
+const fmtEur = (n) => n == null ? "—" : fmt(n) + " €";
+const fmtPct = (n) => n == null ? "—" : fmt(n, 2) + " %";
+const fmtK = (v) => v >= 1000 || v <= -1000 ? (v / 1000).toFixed(1) + "k €" : Math.round(v) + " €";
+
+function ProgressBar({ value, clickable, onClick }) {
+  const n = sn(value);
+  const pct = Math.min(100, Math.max(0, ((n != null ? n : 0) / 10) * 100));
+  return (
+    <div onClick={onClick} style={{ background: "rgba(148,163,184,0.25)", borderRadius: 999, height: 7, width: "100%", overflow: "hidden", cursor: clickable ? "pointer" : "default" }}>
+      <div style={{ width: pct + "%", background: "linear-gradient(90deg,#38bdf8,#818cf8)", height: 7, borderRadius: 999, transition: "width 0.3s" }} />
+    </div>
+  );
+}
+
+function ScoreDetail({ scoreKey, detail, onClose }) {
+  const se = detail && detail.socio_eco ? detail.socio_eco : {};
+  const dem = detail && detail.demographie ? detail.demographie : {};
+  const pri = detail && detail.prix ? detail.prix : {};
+  const configs = {
+    rendement: {
+      title: "Détail — Rendement", color: "#0ea5e9",
+      items: [
+        { label: "Prix appartement/m²", value: pri.appartement_m2 ? pri.appartement_m2.toLocaleString("fr-FR") + " €" : "—" },
+        { label: "Prix maison/m²", value: pri.maison_m2 ? pri.maison_m2.toLocaleString("fr-FR") + " €" : "—" },
+        { label: "Loyer médian/m²", value: detail && detail.loyer && detail.loyer.appartement_m2 != null ? Number(detail.loyer.appartement_m2).toFixed(1) + " €/m²/mois" : "—" },
+        { label: "Rentabilité brute", value: detail && detail.rentabilite_brute_pct ? detail.rentabilite_brute_pct + " %" : "—", highlight: true },
+        { label: "Nb ventes appartements", value: pri.nb_ventes_apt != null ? pri.nb_ventes_apt : "—" },
+        { label: "Nb ventes maisons", value: pri.nb_ventes_mai != null ? pri.nb_ventes_mai : "—" },
+      ],
+      note: "Rendement brut ≈ (loyer × 12) / prix m².",
+    },
+    demographie: {
+      title: "Détail — Démographie", color: "#8b5cf6",
+      items: [
+        { label: "Population", value: detail && detail.population ? detail.population.toLocaleString("fr-FR") + " hab." : "—" },
+        { label: "Évolution population/an", value: dem.evolution_pop_pct_an != null ? dem.evolution_pop_pct_an + " %" : "—", highlight: true },
+        { label: "Vacance logements", value: dem.vacance_pct != null ? dem.vacance_pct + " %" : "—", highlight: true },
+        { label: "Tension locative", value: dem.tension_locative_pct != null ? dem.tension_locative_pct + " %" : "—", highlight: true },
+        { label: "Zone ABC", value: detail && detail.zonage_abc ? detail.zonage_abc : "—" },
+      ],
+      note: "Score basé sur dynamique démographique, vacance et locataires.",
+    },
+    socio_eco: {
+      title: "Détail — Socio-économique", color: "#22c55e",
+      items: [
+        { label: "Revenu médian", value: se.revenu_median ? se.revenu_median.toLocaleString("fr-FR") + " €" : "—", highlight: true },
+        { label: "Taux de chômage", value: se.chomage_pct != null ? se.chomage_pct + " %" : "—", highlight: true },
+        { label: "Taux de pauvreté", value: se.taux_pauvrete_pct != null ? se.taux_pauvrete_pct + " %" : "—", highlight: true },
+        { label: "Part cadres", value: se.part_cadres_pct != null ? se.part_cadres_pct + " %" : "—" },
+        { label: "Indice de Gini", value: se.gini != null ? se.gini : "—" },
+      ],
+      note: "Plus le revenu est élevé et le chômage faible, meilleur est le score.",
+    },
+  };
+  const cfg = configs[scoreKey];
+  if (!cfg) return null;
+  return (
+    <div style={{ background: "rgba(255,255,255,0.85)", borderRadius: 14, padding: 12, marginTop: 8, border: "1px solid " + cfg.color + "55", backdropFilter: "blur(16px)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, alignItems: "center" }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: cfg.color }}>{cfg.title}</div>
+        <button onClick={onClose} style={{ border: "none", background: "transparent", color: "#94a3b8", cursor: "pointer", fontSize: 14 }}>✕</button>
+      </div>
+      {cfg.items.map(function(item) {
+        return (
+          <div key={item.label} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid rgba(148,163,184,0.2)", fontSize: 12 }}>
+            <span style={{ color: "#64748b" }}>{item.label}</span>
+            <span style={{ fontWeight: item.highlight ? 600 : 500, color: item.highlight ? "#0f172a" : "#334155" }}>{item.value}</span>
+          </div>
+        );
+      })}
+      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 5, fontStyle: "italic" }}>{cfg.note}</div>
+    </div>
+  );
+}
+function calculerSimulation(i) {
+  const pv = pf(i.prixVente);
+  const depenseNette = pv + pf(i.fraisNotaire) + pf(i.travaux) + pf(i.amenagements) + (pv * pf(i.fraisAgencePct) / 100);
+  const sommeEmpruntee = depenseNette - pf(i.apport);
+  const tc = pf(i.tauxCredit);
+  const dur = pf(i.dureeAnnees);
+  const nMois = dur * 12;
+  const tMensuel = tc / 100 / 12;
+  const mensualite = tMensuel === 0 ? sommeEmpruntee / nMois : (sommeEmpruntee * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
+  const remboursementAnnuel = mensualite * 12;
+  const coutPretTotal = remboursementAnnuel * dur - sommeEmpruntee;
+  const interetsAnnuels = coutPretTotal / dur;
+  const loyersAnnuels = pf(i.loyerMensuelHC) * pf(i.tauxOccupation);
+  const assurancePNO = pf(i.assurancePNOAn) > 0 ? pf(i.assurancePNOAn) : depenseNette * 0.0012;
+  const gestionAn = (loyersAnnuels * pf(i.gestionLocativePct)) / 100;
+  const totalFraisAnnuels = pf(i.chargesImmeubleAn) + pf(i.taxeFonciereAn) + assurancePNO + gestionAn + pf(i.provisionTravauxAn) + pf(i.fraisBancairesAn) + pf(i.expertComptableAn);
+  const amortissement = (depenseNette * pf(i.coefAmortissement)) / 100;
+  const tis = pf(i.tauxIS);
+  const tmi = pf(i.tmi);
+  const mkR = function(impot) {
+    const tresorerie = loyersAnnuels - totalFraisAnnuels - remboursementAnnuel - impot;
+    const rendBrut = depenseNette > 0 ? (loyersAnnuels / depenseNette) * 100 : 0;
+    const rendNet = depenseNette > 0 ? (tresorerie / depenseNette) * 100 : 0;
+    const tri = tresorerie > 0 ? depenseNette / tresorerie : null;
+    const regle70 = loyersAnnuels > 0 ? remboursementAnnuel / loyersAnnuels : null;
+    return { ebe: loyersAnnuels - totalFraisAnnuels, impot: impot, tresorerie: tresorerie, rendBrut: rendBrut, rendNet: rendNet, tri: tri, regle70: regle70 };
+  };
+  const bIS = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels - amortissement);
+  const bFR = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels);
+  return {
+    depenseNette: depenseNette, sommeEmpruntee: sommeEmpruntee, mensualite: mensualite,
+    coutPretTotal: coutPretTotal, remboursementAnnuel: remboursementAnnuel,
+    loyersAnnuels: loyersAnnuels, totalFraisAnnuels: totalFraisAnnuels, amortissement: amortissement,
+    rendBrut: depenseNette > 0 ? (loyersAnnuels / depenseNette) * 100 : 0,
+    regimes: {
+      "SAS / SCI IS": mkR(bIS * (tis / 100)),
+      "LMNP Réel": mkR(bIS * ((tmi + 17.2) / 100)),
+      "LMNP Micro BIC": mkR(Math.max(0, loyersAnnuels * 0.5) * ((tmi + 17.2) / 100)),
+      "Foncier Réel": mkR(bFR * ((tmi + 17.2) / 100)),
+      "Micro Foncier": mkR(Math.max(0, loyersAnnuels * 0.7) * ((tmi + 17.2) / 100)),
+    },
+  };
+}
+
+function calculerNote(result, regimeActif) {
+  const r = result.regimes[regimeActif];
+  if (!r) return 0;
+  var score = 0;
+  var rb = result.rendBrut;
+  score += Math.min(25, Math.max(0, (rb / 8) * 25));
+  var treso = r.tresorerie;
+  if (treso >= 3600) score += 30;
+  else if (treso >= 0) score += 15 + (treso / 3600) * 15;
+  else score += Math.max(0, 15 + (treso / 3600) * 15);
+  var rg = r.regle70;
+  if (rg != null) {
+    if (rg <= 0.60) score += 20;
+    else if (rg <= 0.70) score += 15;
+    else if (rg <= 0.80) score += 8;
+  }
+  var rn = r.rendNet;
+  score += Math.min(15, Math.max(0, (rn / 4) * 15));
+  var tri = r.tri;
+  if (tri != null) {
+    if (tri <= 15) score += 10;
+    else if (tri <= 25) score += 5;
+    else score += 2;
+  }
+  return Math.round(Math.min(100, Math.max(0, score)));
+}
+
+function getNoteColor(note) {
+  if (note >= 75) return "#16a34a";
+  if (note >= 50) return "#d97706";
+  if (note >= 30) return "#f97316";
+  return "#dc2626";
+}
+
+function getNoteLabel(note) {
+  if (note >= 80) return "Excellent";
+  if (note >= 65) return "Très bon";
+  if (note >= 50) return "Correct";
+  if (note >= 35) return "Passable";
+  return "Risqué";
+}
+
+function projeterCashFlow(inputs, regimeNom) {
+  const pv = pf(inputs.prixVente);
+  const depenseNette = pv + pf(inputs.fraisNotaire) + pf(inputs.travaux) + pf(inputs.amenagements) + (pv * pf(inputs.fraisAgencePct) / 100);
+  const sommeEmpruntee = depenseNette - pf(inputs.apport);
+  const tc = pf(inputs.tauxCredit);
+  const dur = Math.max(1, Math.round(pf(inputs.dureeAnnees)));
+  const nMois = dur * 12;
+  const tMensuel = tc / 100 / 12;
+  const mensualite = tMensuel === 0 ? sommeEmpruntee / nMois : (sommeEmpruntee * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
+  const remboursementAnnuel = mensualite * 12;
+  const amortissement = (depenseNette * pf(inputs.coefAmortissement)) / 100;
+  const tis = pf(inputs.tauxIS);
+  const tmi = pf(inputs.tmi);
+  const assurancePNOBase = pf(inputs.assurancePNOAn) > 0 ? pf(inputs.assurancePNOAn) : depenseNette * 0.0012;
+  var solde = sommeEmpruntee;
+  const nbAnnees = dur + 5;
+  const data = [];
+  for (var y = 1; y <= nbAnnees; y++) {
+    const loyersAn = pf(inputs.loyerMensuelHC) * pf(inputs.tauxOccupation) * Math.pow(1.01, y - 1);
+    const gestionAn = (loyersAn * pf(inputs.gestionLocativePct)) / 100;
+    const fraisAn = pf(inputs.chargesImmeubleAn) + pf(inputs.taxeFonciereAn) + assurancePNOBase + gestionAn + pf(inputs.provisionTravauxAn) + pf(inputs.fraisBancairesAn) + pf(inputs.expertComptableAn);
+    var interetsAn = 0;
+    const creditAn = y <= dur ? remboursementAnnuel : 0;
+    if (y <= dur && tMensuel > 0) {
+      for (var m = 0; m < 12; m++) {
+        const intM = solde * tMensuel;
+        interetsAn += intM;
+        const capital = mensualite - intM;
+        solde = Math.max(0, solde - capital);
+      }
+    }
+    const baseDeductible = Math.max(0, loyersAn - fraisAn - interetsAn - amortissement);
+    const baseFoncierR = Math.max(0, loyersAn - fraisAn - interetsAn);
+    var impots = 0;
+    if (regimeNom === "SAS / SCI IS") impots = baseDeductible * (tis / 100);
+    else if (regimeNom === "LMNP Réel") impots = baseDeductible * ((tmi + 17.2) / 100);
+    else if (regimeNom === "LMNP Micro BIC") impots = Math.max(0, loyersAn * 0.5) * ((tmi + 17.2) / 100);
+    else if (regimeNom === "Foncier Réel") impots = baseFoncierR * ((tmi + 17.2) / 100);
+    else if (regimeNom === "Micro Foncier") impots = Math.max(0, loyersAn * 0.7) * ((tmi + 17.2) / 100);
+    const cashflow = loyersAn - fraisAn - creditAn - impots;
+    data.push({ year: y, loyers: loyersAn, frais: fraisAn, credit: creditAn, impots: impots, cashflow: cashflow });
+  }
+  return data;
+}
+
+function CashFlowChart({ data }) {
+  const [hovered, setHovered] = useState(null);
+  if (!data || data.length === 0) return null;
+  const W = 700; const H = 300;
+  const padL = 72; const padR = 140; const padT = 20; const padB = 54;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  const allVals = [];
+  for (var ii = 0; ii < data.length; ii++) {
+    allVals.push(data[ii].loyers);
+    allVals.push(-(data[ii].frais + data[ii].credit + data[ii].impots));
+    allVals.push(data[ii].cashflow);
+  }
+  allVals.push(0);
+  const maxV = Math.max.apply(null, allVals) * 1.15;
+  const minV = Math.min.apply(null, allVals) * 1.15;
+  const range = maxV - minV || 1;
+  const toY = function(v) { return padT + chartH - ((v - minV) / range) * chartH; };
+  const zeroY = toY(0);
+  const barCenterX = function(i) { return padL + (i / data.length) * chartW + (chartW / data.length) / 2; };
+  const barW = Math.max(4, chartW / data.length - 3);
+  const TOOLTIP_W = 162;
+  const TOOLTIP_H = 132;
+  const h = hovered != null ? data[hovered] : null;
+  var ttX = hovered != null ? barCenterX(hovered) - TOOLTIP_W / 2 : 0;
+  if (ttX < padL) ttX = padL;
+  if (ttX + TOOLTIP_W > W - padR) ttX = W - padR - TOOLTIP_W;
+  const ttY = padT - 8;
+  const tooltipRows = h == null ? [] : [
+    { label: "Loyers",    value: h.loyers,   color: "#16a34a" },
+    { label: "Charges",   value: -h.frais,   color: "#64748b" },
+    { label: "Crédit",    value: -h.credit,  color: "#d97706" },
+    { label: "Impôts",    value: -h.impots,  color: "#dc2626" },
+    { label: "Cash-Flow", value: h.cashflow, color: h.cashflow >= 0 ? "#0369a1" : "#dc2626" },
+  ];
+  const legend = [
+    { color: "#4ade80", label: "Loyers" },
+    { color: "#94a3b8", label: "Charges" },
+    { color: "#fbbf24", label: "Crédit" },
+    { color: "#f87171", label: "Impôts" },
+    { color: "#38bdf8", label: "Cash-Flow" },
+  ];
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <svg viewBox={"0 0 " + W + " " + H} style={{ width: "100%", minWidth: 500, fontFamily: "system-ui,sans-serif", cursor: "default" }} onMouseLeave={function() { setHovered(null); }}>
+        <rect x={padL} y={padT} width={chartW} height={chartH} fill="rgba(255,255,255,0.45)" rx="8" />
+        {[0, 0.25, 0.5, 0.75, 1].map(function(t) {
+          const v = minV + t * range; const y = toY(v);
+          return (
+            <g key={t}>
+              <line x1={padL} y1={y} x2={padL + chartW} y2={y} stroke="rgba(148,163,184,0.3)" strokeWidth={1} strokeDasharray="4 3" />
+              <text x={padL - 6} y={y + 4} textAnchor="end" fontSize={10} fill="#64748b">{fmtK(v)}</text>
+            </g>
+          );
+        })}
+        <line x1={padL} y1={zeroY} x2={padL + chartW} y2={zeroY} stroke="#94a3b8" strokeWidth={1.5} />
+        {hovered != null && (
+          <rect x={padL + (hovered / data.length) * chartW} y={padT} width={chartW / data.length} height={chartH} fill="rgba(99,102,241,0.08)" rx={4} />
+        )}
+        {data.map(function(d, i) {
+          const x = padL + (i / data.length) * chartW + (chartW / data.length - barW) / 2;
+          const isH = hovered === i;
+          const opacity = hovered != null && !isH ? 0.4 : 1;
+          const hLoyers = Math.max(0, zeroY - toY(d.loyers));
+          const yLoyers = toY(d.loyers);
+          const hFrais = Math.max(0, (d.frais / range) * chartH);
+          const hCredit = Math.max(0, (d.credit / range) * chartH);
+          const hImpots = Math.max(0, (Math.max(0, d.impots) / range) * chartH);
+          return (
+            <g key={i} opacity={opacity} onMouseEnter={function() { setHovered(i); }} style={{ cursor: "pointer" }}>
+              {hLoyers > 0 && <rect x={x} y={yLoyers} width={barW} height={hLoyers} fill="#4ade80" rx={2} />}
+              {hFrais > 0 && <rect x={x} y={zeroY} width={barW} height={hFrais} fill="#94a3b8" rx={2} />}
+              {hCredit > 0 && <rect x={x} y={zeroY + hFrais} width={barW} height={hCredit} fill="#fbbf24" rx={2} />}
+              {hImpots > 0 && <rect x={x} y={zeroY + hFrais + hCredit} width={barW} height={hImpots} fill="#f87171" rx={2} />}
+            </g>
+          );
+        })}
+        <polyline points={data.map(function(d, i) { return barCenterX(i) + "," + toY(d.cashflow); }).join(" ")} fill="none" stroke="#38bdf8" strokeWidth={2.5} strokeLinejoin="round" />
+        {data.map(function(d, i) {
+          return (
+            <circle key={i} cx={barCenterX(i)} cy={toY(d.cashflow)} r={hovered === i ? 5.5 : 3.5} fill={hovered === i ? "#0ea5e9" : "#38bdf8"} stroke="white" strokeWidth={1.5} onMouseEnter={function() { setHovered(i); }} style={{ cursor: "pointer" }} />
+          );
+        })}
+        {data.map(function(d, i) {
+          if (i === 0 || (i + 1) % 5 === 0) {
+            return <text key={i} x={barCenterX(i)} y={H - padB + 16} textAnchor="middle" fontSize={10} fill="#64748b">{d.year}</text>;
+          }
+          return null;
+        })}
+        <text x={padL + chartW / 2} y={H - 6} textAnchor="middle" fontSize={11} fill="#64748b">Année</text>
+        {legend.map(function(l, i) {
+          return (
+            <g key={l.label} transform={"translate(" + (W - padR + 14) + "," + (padT + 18 + i * 22) + ")"}>
+              <rect x={0} y={-10} width={14} height={14} fill={l.color} rx={3} />
+              <text x={20} y={2} fontSize={11} fill="#334155">{l.label}</text>
+            </g>
+          );
+        })}
+        {h != null && (
+          <g>
+            <rect x={ttX} y={ttY} width={TOOLTIP_W} height={TOOLTIP_H} rx={10} fill="rgba(255,255,255,0.97)" stroke="rgba(148,163,184,0.5)" strokeWidth={1} />
+            <text x={ttX + 10} y={ttY + 18} fontSize={12} fontWeight="700" fill="#0f172a">Année {h.year}</text>
+            {tooltipRows.map(function(row, idx) {
+              return (
+                <g key={row.label} transform={"translate(" + (ttX + 10) + "," + (ttY + 34 + idx * 18) + ")"}>
+                  <circle cx={4} cy={-4} r={4} fill={row.color} />
+                  <text x={14} y={0} fontSize={10} fill="#334155">{row.label}</text>
+                  <text x={TOOLTIP_W - 20} y={0} fontSize={10} fontWeight="600" fill={row.color} textAnchor="end">{fmtK(row.value)}</text>
+                </g>
+              );
+            })}
+          </g>
+        )}
+      </svg>
+    </div>
+  );
+}
+function InputField({ label, name, value, onChange, unit, step, min }) {
+  const u = unit !== undefined ? unit : "€";
+  const s = step !== undefined ? step : "1000";
+  const m = min !== undefined ? min : "0";
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <label style={{ display: "block", fontSize: 12, color: "#334155", marginBottom: 4 }}>{label}</label>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <input type="number" name={name} value={value} step={s} min={m} onChange={onChange} style={{ width: "100%", background: "rgba(255,255,255,0.75)", border: "1px solid rgba(148,163,184,0.5)", borderRadius: 999, padding: "7px 12px", color: "#0f172a", fontSize: 13, outline: "none" }} />
+        {u && <span style={{ color: "#64748b", fontSize: 11, minWidth: 28, textAlign: "right" }}>{u}</span>}
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ children }) {
+  return <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "#64748b", margin: "10px 0 4px" }}>{children}</div>;
+}
+
+const DEFAULT_INPUTS = {
+  prixVente: "175000", fraisNotaire: "13300", travaux: "0", amenagements: "0",
+  fraisAgencePct: "5", apport: "14000", tauxCredit: "4.2", dureeAnnees: "25",
+  loyerMensuelHC: "1000", tauxOccupation: "11.5", chargesImmeubleAn: "250",
+  taxeFonciereAn: "1400", assurancePNOAn: "0", gestionLocativePct: "0",
+  provisionTravauxAn: "0", fraisBancairesAn: "300", expertComptableAn: "600",
+  coefAmortissement: "4.75", tauxIS: "15", tmi: "11",
+};
+
+function SimulationProjet() {
+  const [inputs, setInputs] = useState(DEFAULT_INPUTS);
+  const [regimeActif, setRegimeActif] = useState("SAS / SCI IS");
+  const [nomProjet, setNomProjet] = useState("");
+  const [projets, setProjets] = useState(function() {
+    try { return JSON.parse(localStorage.getItem(PROJETS_KEY)) || []; } catch(e) { return []; }
+  });
+  const handleChange = function(e) {
+    const name = e.target.name; const value = e.target.value;
+    setInputs(function(prev) { return Object.assign({}, prev, { [name]: value }); });
+  };
+  const sauvegarder = function() {
+    if (!nomProjet.trim()) return;
+    const nouveau = { id: Date.now(), nom: nomProjet.trim(), inputs: Object.assign({}, inputs), regimeActif: regimeActif, savedAt: new Date().toLocaleDateString("fr-FR") };
+    const liste = [nouveau].concat(projets.filter(function(p) { return p.nom !== nomProjet.trim(); }));
+    setProjets(liste);
+    localStorage.setItem(PROJETS_KEY, JSON.stringify(liste));
+    setNomProjet("");
+  };
+  const charger = function(p) { setInputs(p.inputs); setRegimeActif(p.regimeActif); };
+  const supprimer = function(id) {
+    const liste = projets.filter(function(p) { return p.id !== id; });
+    setProjets(liste);
+    localStorage.setItem(PROJETS_KEY, JSON.stringify(liste));
+  };
+  const result = useMemo(function() { return calculerSimulation(inputs); }, [inputs]);
+  const regime = result.regimes[regimeActif];
+  const cashFlowData = useMemo(function() { return projeterCashFlow(inputs, regimeActif); }, [inputs, regimeActif]);
+  const note = useMemo(function() { return calculerNote(result, regimeActif); }, [result, regimeActif]);
+  const noteColor = getNoteColor(note);
+  const noteLabel = getNoteLabel(note);
+  const couleurTreso = pf(regime.tresorerie) >= 0 ? "#16a34a" : "#f97316";
+  const couleur70 = regime.regle70 != null && regime.regle70 < 0.7 ? "#16a34a" : "#ef4444";
+  const circumference = 2 * Math.PI * 28;
+  const dash = (Math.min(100, Math.max(0, note)) / 100) * circumference;
+  const glassCard = { background: "rgba(255,255,255,0.55)", borderRadius: 20, padding: 16, boxShadow: "0 8px 32px rgba(99,102,241,0.08), 0 0 0 1px rgba(148,163,184,0.25)", backdropFilter: "blur(18px)" };
+  const glassCardAlt = { background: "rgba(241,245,249,0.75)", borderRadius: 18, padding: 16, boxShadow: "0 8px 24px rgba(99,102,241,0.10), 0 0 0 1px rgba(148,163,184,0.3)", backdropFilter: "blur(18px)" };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {projets.length > 0 && (
+        <div style={Object.assign({}, glassCard, { padding: "12px 16px" })}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 10 }}>📁 Projets sauvegardés</div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {projets.map(function(p) {
+              return (
+                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 999, padding: "5px 10px" }}>
+                  <button onClick={function() { charger(p); }} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: "#4338ca", cursor: "pointer" }}>📂 {p.nom}</button>
+                  <span style={{ fontSize: 10, color: "#94a3b8" }}>{p.savedAt}</span>
+                  <button onClick={function() { supprimer(p.id); }} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 12 }}>✕</button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      <div style={glassCard}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: "#1e293b" }}>Paramètres du projet</div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <input value={nomProjet} onChange={function(e) { setNomProjet(e.target.value); }} placeholder="Nom du projet…" style={{ background: "rgba(255,255,255,0.8)", border: "1px solid rgba(148,163,184,0.5)", borderRadius: 999, padding: "6px 12px", fontSize: 13, color: "#0f172a", width: 180, outline: "none" }} />
+            <button onClick={sauvegarder} style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 999, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 500, opacity: nomProjet.trim() ? 1 : 0.5 }}>💾 Sauvegarder</button>
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", columnGap: 18, rowGap: 6 }}>
+          <div>
+            <SectionTitle>Achat</SectionTitle>
+            <InputField label="Prix de vente" name="prixVente" value={inputs.prixVente} onChange={handleChange} />
+            <InputField label="Frais de notaire" name="fraisNotaire" value={inputs.fraisNotaire} onChange={handleChange} />
+            <InputField label="Travaux" name="travaux" value={inputs.travaux} onChange={handleChange} />
+            <InputField label="Aménagements" name="amenagements" value={inputs.amenagements} onChange={handleChange} />
+            <InputField label="Frais d'agence (%)" name="fraisAgencePct" value={inputs.fraisAgencePct} onChange={handleChange} unit="%" step="0.5" />
+            <InputField label="Apport" name="apport" value={inputs.apport} onChange={handleChange} />
+          </div>
+          <div>
+            <SectionTitle>Prêt & Fiscalité</SectionTitle>
+            <InputField label="Taux crédit (%)" name="tauxCredit" value={inputs.tauxCredit} onChange={handleChange} unit="%" step="0.05" />
+            <InputField label="Durée (années)" name="dureeAnnees" value={inputs.dureeAnnees} onChange={handleChange} unit="ans" step="1" />
+            <InputField label="Coef amortissement (%)" name="coefAmortissement" value={inputs.coefAmortissement} onChange={handleChange} unit="%" step="0.25" />
+            <InputField label="Taux IS (%)" name="tauxIS" value={inputs.tauxIS} onChange={handleChange} unit="%" step="1" />
+            <InputField label="TMI (%)" name="tmi" value={inputs.tmi} onChange={handleChange} unit="%" step="1" />
+          </div>
+          <div>
+            <SectionTitle>Exploitation</SectionTitle>
+            <InputField label="Loyer mensuel HC total" name="loyerMensuelHC" value={inputs.loyerMensuelHC} onChange={handleChange} step="50" />
+            <InputField label="Taux d'occupation (mois/an)" name="tauxOccupation" value={inputs.tauxOccupation} onChange={handleChange} unit="mois" step="0.5" />
+            <InputField label="Charges immeuble/an" name="chargesImmeubleAn" value={inputs.chargesImmeubleAn} onChange={handleChange} step="100" />
+            <InputField label="Taxe foncière/an" name="taxeFonciereAn" value={inputs.taxeFonciereAn} onChange={handleChange} step="100" />
+            <InputField label="Assurance PNO/an (0=auto)" name="assurancePNOAn" value={inputs.assurancePNOAn} onChange={handleChange} step="50" />
+            <InputField label="Gestion locative (%)" name="gestionLocativePct" value={inputs.gestionLocativePct} onChange={handleChange} unit="%" step="0.5" />
+            <InputField label="Provision travaux/an" name="provisionTravauxAn" value={inputs.provisionTravauxAn} onChange={handleChange} step="100" />
+            <InputField label="Frais bancaires/an" name="fraisBancairesAn" value={inputs.fraisBancairesAn} onChange={handleChange} step="50" />
+            <InputField label="Expert-comptable + CFE/an" name="expertComptableAn" value={inputs.expertComptableAn} onChange={handleChange} step="50" />
+          </div>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 10 }}>
+        {[
+          { label: "Dépense nette", value: fmtEur(result.depenseNette) },
+          { label: "Somme empruntée", value: fmtEur(result.sommeEmpruntee) },
+          { label: "Mensualité crédit", value: fmtEur(result.mensualite) },
+          { label: "Coût total prêt", value: fmtEur(result.coutPretTotal) },
+          { label: "Loyers annuels", value: fmtEur(result.loyersAnnuels) },
+          { label: "Total frais/an", value: fmtEur(result.totalFraisAnnuels) },
+          { label: "Amortissement/an", value: fmtEur(result.amortissement) },
+          { label: "Rendement brut", value: fmtPct(result.rendBrut) },
+        ].map(function(c) {
+          return (
+            <div key={c.label} style={{ background: "rgba(255,255,255,0.65)", borderRadius: 14, padding: "10px 12px", boxShadow: "0 4px 14px rgba(99,102,241,0.08)", backdropFilter: "blur(14px)" }}>
+              <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>{c.label}</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: "#0f172a" }}>{c.value}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {Object.keys(result.regimes).map(function(r) {
+          return (
+            <button key={r} onClick={function() { setRegimeActif(r); }} style={{ padding: "6px 14px", borderRadius: 999, border: regimeActif === r ? "1.5px solid #6366f1" : "1px solid rgba(148,163,184,0.4)", background: regimeActif === r ? "rgba(99,102,241,0.12)" : "rgba(255,255,255,0.6)", color: regimeActif === r ? "#4338ca" : "#475569", fontSize: 12, fontWeight: 500, cursor: "pointer" }}>{r}</button>
+          );
+        })}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "start" }}>
+        <div style={glassCardAlt}>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#1e293b" }}>Bilan — {regimeActif}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 10 }}>
+            {[
+              { label: "EBE", value: fmtEur(regime.ebe), color: "#0ea5e9" },
+              { label: "Fiscalité annuelle", value: fmtEur(regime.impot), color: "#d97706" },
+              { label: "Trésorerie/an", value: fmtEur(regime.tresorerie), color: couleurTreso },
+              { label: "Rendement brut", value: fmtPct(regime.rendBrut), color: "#64748b" },
+              { label: "Rendement net", value: fmtPct(regime.rendNet), color: "#16a34a" },
+              { label: "TRI", value: regime.tri ? fmt(regime.tri, 1) + " ans" : "—", color: "#64748b" },
+            ].map(function(c) {
+              return (
+                <div key={c.label} style={{ background: "rgba(255,255,255,0.7)", borderRadius: 14, padding: "10px 12px" }}>
+                  <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>{c.label}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: c.color }}>{c.value}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 14, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ fontSize: 12, color: "#334155", minWidth: 110 }}>Règle des 70 %</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: couleur70 }}>{regime.regle70 != null ? fmt(regime.regle70, 2) : "—"}</div>
+            <div style={{ fontSize: 11, color: couleur70, minWidth: 120 }}>{regime.regle70 != null ? (regime.regle70 < 0.7 ? "✓ OK (< 0,70)" : "✗ Trop élevé") : ""}</div>
+            <div style={{ flex: 1, background: "rgba(148,163,184,0.25)", borderRadius: 999, height: 7, overflow: "hidden" }}>
+              <div style={{ width: Math.min(100, (regime.regle70 || 0) * 100) + "%", background: couleur70, height: 7, borderRadius: 999, transition: "width 0.3s" }} />
+            </div>
+          </div>
+        </div>
+        <div style={{ background: "rgba(255,255,255,0.65)", borderRadius: 20, padding: "16px 20px", boxShadow: "0 8px 32px rgba(99,102,241,0.10), 0 0 0 1px rgba(148,163,184,0.25)", backdropFilter: "blur(18px)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, minWidth: 130 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>Note globale</div>
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(148,163,184,0.25)" strokeWidth="7" />
+            <circle cx="36" cy="36" r="28" fill="none" stroke={noteColor} strokeWidth="7" strokeDasharray={dash + " " + circumference} strokeLinecap="round" transform="rotate(-90 36 36)" style={{ transition: "stroke-dasharray 0.5s ease, stroke 0.3s" }} />
+            <text x="36" y="40" textAnchor="middle" fontSize="18" fontWeight="700" fill={noteColor}>{note}</text>
+          </svg>
+          <div style={{ fontSize: 13, fontWeight: 600, color: noteColor }}>{noteLabel}</div>
+          <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", lineHeight: 1.4 }}>Rendement · Tréso<br />Règle 70% · TRI</div>
+        </div>
+      </div>
+      <div style={glassCard}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: "#1e293b", marginBottom: 4 }}>
+          Évolution du Cash-Flow — <span style={{ color: "#6366f1" }}>{regimeActif}</span>
+        </div>
+        <div style={{ fontSize: 11, color: "#64748b", marginBottom: 10 }}>Survole une colonne pour le détail · Loyers indexés +1%/an</div>
+        <CashFlowChart data={cashFlowData} />
+      </div>
+      <div style={glassCard}>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: "#1e293b" }}>Comparatif des régimes fiscaux</div>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+          <thead>
+            <tr style={{ color: "#64748b", borderBottom: "1px solid rgba(148,163,184,0.35)" }}>
+              {["Régime", "Tréso/an", "Impôt/an", "Rdt net", "TRI", "Règle 70%", "Note"].map(function(h) {
+                return <th key={h} style={{ textAlign: h === "Régime" ? "left" : "right", padding: "6px 8px", fontWeight: 500 }}>{h}</th>;
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(result.regimes).map(function(entry) {
+              const nom = entry[0]; const r = entry[1];
+              const n = calculerNote(result, nom);
+              return (
+                <tr key={nom} onClick={function() { setRegimeActif(nom); }} style={{ borderBottom: "1px solid rgba(148,163,184,0.2)", background: regimeActif === nom ? "rgba(99,102,241,0.07)" : "transparent", cursor: "pointer" }}>
+                  <td style={{ padding: "8px 8px", fontWeight: 500, color: "#1e293b" }}>{nom}</td>
+                  <td style={{ padding: "8px 8px", textAlign: "right", color: r.tresorerie >= 0 ? "#16a34a" : "#dc2626", fontWeight: 600 }}>{fmtEur(r.tresorerie)}</td>
+                  <td style={{ padding: "8px 8px", textAlign: "right", color: "#d97706" }}>{fmtEur(r.impot)}</td>
+                  <td style={{ padding: "8px 8px", textAlign: "right", color: "#334155" }}>{fmtPct(r.rendNet)}</td>
+                  <td style={{ padding: "8px 8px", textAlign: "right", color: "#334155" }}>{r.tri ? fmt(r.tri, 1) + " ans" : "—"}</td>
+                  <td style={{ padding: "8px 8px", textAlign: "right", color: r.regle70 != null && r.regle70 < 0.7 ? "#16a34a" : "#dc2626", fontWeight: 600 }}>{r.regle70 != null ? fmt(r.regle70, 2) : "—"}</td>
+                  <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: getNoteColor(n) }}>{n}/100</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 function AnalyseCommunes() {
   const [communes, setCommunes] = useState([]);
   const [loading, setLoading] = useState(true);
