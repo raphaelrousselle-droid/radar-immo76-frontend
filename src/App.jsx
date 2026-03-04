@@ -175,10 +175,10 @@ function calculerNote(result, regimeActif) {
     else if (rg <= 0.80) score += 8;
   }
   score += Math.min(15, Math.max(0, (r.rendNet / 4) * 15));
-  if (r.tri != null) {
-    if (r.tri <= 15) score += 10;
-    else if (r.tri <= 25) score += 5;
-    else score += 2;
+   if (r.tri != null && isFinite(r.tri)) {
+    if (r.tri >= 0.08) score += 10;
+    else if (r.tri >= 0.05) score += 5;
+    else if (r.tri > 0) score += 2;
   }
   return Math.round(Math.min(100, Math.max(0, score)));
 }
