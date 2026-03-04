@@ -665,7 +665,7 @@ function SimulationProjet() {
               { label: "Fiscalité annuelle", value: fmtEur(regime.impot), color: "#d97706" },
               { label: "Trésorerie/an", value: fmtEur(regime.tresorerie), color: couleurTreso },
               { label: "Rendement brut", value: fmtPct(regime.rendBrut), color: "#64748b" },
-            { label: "TRI", value: regime.tri != null ? fmtPct(regime.tri * 100) : "—", color: "#64748b" },
+            { label: "TRI", value: regime.tri != null ? fmt(regime.tri, 1) + " ans" : "—"
             ].map(function(c) {
               return (
                 <div key={c.label} style={{ background: "rgba(255,255,255,0.7)", borderRadius: 14, padding: "10px 12px" }}>
