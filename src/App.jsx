@@ -86,22 +86,27 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
   );
 }
 function calculerIRR(cashFlows) {
+  if (!cashFlows || cashFlows.length < 2) return null;
+  if (cashFlows[0] >= 0) return null;
   var guess = 0.1;
-  for (var iter = 0; iter < 1000; iter++) {
+  for (var iter = 0; iter < 2000; iter++) {
     var npv = 0;
     var dnpv = 0;
     for (var t = 0; t < cashFlows.length; t++) {
-      var disc = Math.pow(1 + guess, t);
-      npv += cashFlows[t] / disc;
-      dnpv -= t * cashFlows[t] / (disc * (1 + guess));
+      var pow = Math.pow(1 + guess, t);
+      if (!isFinite(pow) || pow === 0) return null;
+      npv += cashFlows[t] / pow;
+      if (t > 0) dnpv -= t * cashFlows[t] / (pow * (1 + guess));
     }
-    if (Math.abs(dnpv) < 1e-10) break;
-    var newGuess = guess - npv / dnpv;
-    if (Math.abs(newGuess - guess) < 1e-8) { guess = newGuess; break; }
-    guess = newGuess;
-    if (guess <= -1) guess = -0.9;
+    if (!isFinite(npv) || !isFinite(dnpv)) return null;
+    if (Math.abs(dnpv) < 1e-12) break;
+    var delta = npv / dnpv;
+    guess = guess - delta;
+    if (guess <= -0.999) guess = 0.01;
+    if (Math.abs(delta) < 1e-9) break;
   }
-  return (guess > -1 && guess < 10) ? guess : null;
+  if (!isFinite(guess) || guess <= -1 || guess > 5) return null;
+  return guess;
 }
 function calculerSimulation(i) {
   const pv = pf(i.prixVente);
