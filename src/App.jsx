@@ -474,27 +474,81 @@ function SimulationProjet() {
       ? "#16a34a"
       : "#dc2626";
 
-  return (
-    <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
-      {/* Formulaire */}
+   return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Formulaire plein largeur */}
       <div
         style={{
-          width: 320,
-          minWidth: 280,
           background: "#ffffff",
           borderRadius: 16,
           padding: 16,
           boxShadow:
-            "0 10px 25px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15,23,42,0.08)",
+            "0 4px 12px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06)",
         }}
       >
         <div
           style={{
             fontSize: 14,
             fontWeight: 600,
-            marginBottom: 8,
+            marginBottom: 12,
             color: "#111827",
           }}
+        >
+          Paramètres du projet
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            columnGap: 16,
+            rowGap: 8,
+          }}
+        >
+          {/* Achat */}
+          <div>
+            <SectionTitle>Achat</SectionTitle>
+            <InputField label="Prix de vente" name="prixVente" value={inputs.prixVente} onChange={handleChange} />
+            <InputField label="Frais de notaire" name="fraisNotaire" value={inputs.fraisNotaire} onChange={handleChange} />
+            <InputField label="Travaux" name="travaux" value={inputs.travaux} onChange={handleChange} />
+            <InputField label="Aménagements" name="amenagements" value={inputs.amenagements} onChange={handleChange} />
+            <InputField label="Frais d'agence (%)" name="fraisAgencePct" value={inputs.fraisAgencePct} onChange={handleChange} unit="%" step="0.5" />
+            <InputField label="Apport" name="apport" value={inputs.apport} onChange={handleChange} />
+          </div>
+
+          {/* Prêt */}
+          <div>
+            <SectionTitle>Prêt</SectionTitle>
+            <InputField label="Taux crédit (%)" name="tauxCredit" value={inputs.tauxCredit} onChange={handleChange} unit="%" step="0.05" />
+            <InputField label="Durée (années)" name="dureeAnnees" value={inputs.dureeAnnees} onChange={handleChange} unit="ans" step="1" />
+            <SectionTitle>Fiscalité</SectionTitle>
+            <InputField label="Coef amortissement (%)" name="coefAmortissement" value={inputs.coefAmortissement} onChange={handleChange} unit="%" step="0.25" />
+            <InputField label="Taux IS (%)" name="tauxIS" value={inputs.tauxIS} onChange={handleChange} unit="%" step="1" />
+            <InputField label="TMI (%)" name="tmi" value={inputs.tmi} onChange={handleChange} unit="%" step="1" />
+          </div>
+
+          {/* Exploitation */}
+          <div>
+            <SectionTitle>Exploitation</SectionTitle>
+            <InputField label="Loyer mensuel HC total" name="loyerMensuelHC" value={inputs.loyerMensuelHC} onChange={handleChange} step="50" />
+            <InputField label="Taux d'occupation (mois/an)" name="tauxOccupation" value={inputs.tauxOccupation} onChange={handleChange} unit="mois" step="0.5" />
+            <InputField label="Charges immeuble/an" name="chargesImmeubleAn" value={inputs.chargesImmeubleAn} onChange={handleChange} step="100" />
+            <InputField label="Taxe foncière/an" name="taxeFonciereAn" value={inputs.taxeFonciereAn} onChange={handleChange} step="100" />
+            <InputField label="Assurance PNO/an (0=auto)" name="assurancePNOAn" value={inputs.assurancePNOAn} onChange={handleChange} step="50" />
+            <InputField label="Gestion locative (%)" name="gestionLocativePct" value={inputs.gestionLocativePct} onChange={handleChange} unit="%" step="0.5" />
+            <InputField label="Provision travaux/an" name="provisionTravauxAn" value={inputs.provisionTravauxAn} onChange={handleChange} step="100" />
+            <InputField label="Frais bancaires/an" name="fraisBancairesAn" value={inputs.fraisBancairesAn} onChange={handleChange} step="50" />
+            <InputField label="Expert-comptable + CFE/an" name="expertComptableAn" value={inputs.expertComptableAn} onChange={handleChange} step="50" />
+          </div>
+        </div>
+      </div>
+
+      {/* Résultats en dessous */}
+      {/* (garde tout ce que tu avais déjà pour les KPI, le bilan et le tableau comparatif) */}
+      {/* ... colle ici la partie KPI + sélecteur de régime + bilan + tableau que tu avais */}
+
+    </div>
+  );
+
         >
           Paramètres du projet
         </div>
