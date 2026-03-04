@@ -13,6 +13,8 @@ const fmtEur = (n) => n == null ? "—" : fmt(n) + " €";
 const fmtPct = (n) => n == null ? "—" : fmt(n, 2) + " %";
 const fmtK = (v) => v >= 1000 || v <= -1000 ? (v / 1000).toFixed(1) + "k €" : Math.round(v) + " €";
 
+const LOT_DEFAULT = { id: 1, nom: "Lot 1", surface: "", loyer: "", travaux: "", charges: "" };
+
 function ProgressBar({ value, clickable, onClick }) {
   const n = sn(value);
   const pct = Math.min(100, Math.max(0, ((n != null ? n : 0) / 10) * 100));
@@ -131,8 +133,7 @@ function calculerNote(result, regimeActif) {
   const r = result.regimes[regimeActif];
   if (!r) return 0;
   var score = 0;
-  var rb = result.rendBrut;
-  score += Math.min(25, Math.max(0, (rb / 8) * 25));
+  score += Math.min(25, Math.max(0, (result.rendBrut / 8) * 25));
   var treso = r.tresorerie;
   if (treso >= 3600) score += 30;
   else if (treso >= 0) score += 15 + (treso / 3600) * 15;
@@ -143,12 +144,10 @@ function calculerNote(result, regimeActif) {
     else if (rg <= 0.70) score += 15;
     else if (rg <= 0.80) score += 8;
   }
-  var rn = r.rendNet;
-  score += Math.min(15, Math.max(0, (rn / 4) * 15));
-  var tri = r.tri;
-  if (tri != null) {
-    if (tri <= 15) score += 10;
-    else if (tri <= 25) score += 5;
+  score += Math.min(15, Math.max(0, (r.rendNet / 4) * 15));
+  if (r.tri != null) {
+    if (r.tri <= 15) score += 10;
+    else if (r.tri <= 25) score += 5;
     else score += 2;
   }
   return Math.round(Math.min(100, Math.max(0, score)));
@@ -196,8 +195,7 @@ function projeterCashFlow(inputs, regimeNom) {
       for (var m = 0; m < 12; m++) {
         const intM = solde * tMensuel;
         interetsAn += intM;
-        const capital = mensualite - intM;
-        solde = Math.max(0, solde - capital);
+        solde = Math.max(0, solde - (mensualite - intM));
       }
     }
     const baseDeductible = Math.max(0, loyersAn - fraisAn - interetsAn - amortissement);
@@ -208,8 +206,7 @@ function projeterCashFlow(inputs, regimeNom) {
     else if (regimeNom === "LMNP Micro BIC") impots = Math.max(0, loyersAn * 0.5) * ((tmi + 17.2) / 100);
     else if (regimeNom === "Foncier Réel") impots = baseFoncierR * ((tmi + 17.2) / 100);
     else if (regimeNom === "Micro Foncier") impots = Math.max(0, loyersAn * 0.7) * ((tmi + 17.2) / 100);
-    const cashflow = loyersAn - fraisAn - creditAn - impots;
-    data.push({ year: y, loyers: loyersAn, frais: fraisAn, credit: creditAn, impots: impots, cashflow: cashflow });
+    data.push({ year: y, loyers: loyersAn, frais: fraisAn, credit: creditAn, impots: impots, cashflow: loyersAn - fraisAn - creditAn - impots });
   }
   return data;
 }
@@ -218,7 +215,7 @@ function CashFlowChart({ data }) {
   const [hovered, setHovered] = useState(null);
   if (!data || data.length === 0) return null;
   const W = 700; const H = 300;
-  const padL = 72; const padR = 140; const padT = 20; const padB = 54;
+  const padL = 72; const padR = 140; const padT = 24; const padB = 54;
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
   const allVals = [];
@@ -235,13 +232,13 @@ function CashFlowChart({ data }) {
   const zeroY = toY(0);
   const barCenterX = function(i) { return padL + (i / data.length) * chartW + (chartW / data.length) / 2; };
   const barW = Math.max(4, chartW / data.length - 3);
-  const TOOLTIP_W = 162;
-  const TOOLTIP_H = 132;
+  const TOOLTIP_W = 148;
+  const TOOLTIP_H = 112;
   const h = hovered != null ? data[hovered] : null;
   var ttX = hovered != null ? barCenterX(hovered) - TOOLTIP_W / 2 : 0;
   if (ttX < padL) ttX = padL;
   if (ttX + TOOLTIP_W > W - padR) ttX = W - padR - TOOLTIP_W;
-  const ttY = padT - 8;
+  const ttY = 2;
   const tooltipRows = h == null ? [] : [
     { label: "Loyers",    value: h.loyers,   color: "#16a34a" },
     { label: "Charges",   value: -h.frais,   color: "#64748b" },
@@ -314,14 +311,14 @@ function CashFlowChart({ data }) {
         })}
         {h != null && (
           <g>
-            <rect x={ttX} y={ttY} width={TOOLTIP_W} height={TOOLTIP_H} rx={10} fill="rgba(255,255,255,0.97)" stroke="rgba(148,163,184,0.5)" strokeWidth={1} />
-            <text x={ttX + 10} y={ttY + 18} fontSize={12} fontWeight="700" fill="#0f172a">Année {h.year}</text>
+            <rect x={ttX} y={ttY} width={TOOLTIP_W} height={TOOLTIP_H} rx={8} fill="rgba(255,255,255,0.97)" stroke="rgba(148,163,184,0.4)" strokeWidth={1} />
+            <text x={ttX + 8} y={ttY + 15} fontSize={11} fontWeight="700" fill="#0f172a">Année {h.year}</text>
             {tooltipRows.map(function(row, idx) {
               return (
-                <g key={row.label} transform={"translate(" + (ttX + 10) + "," + (ttY + 34 + idx * 18) + ")"}>
-                  <circle cx={4} cy={-4} r={4} fill={row.color} />
-                  <text x={14} y={0} fontSize={10} fill="#334155">{row.label}</text>
-                  <text x={TOOLTIP_W - 20} y={0} fontSize={10} fontWeight="600" fill={row.color} textAnchor="end">{fmtK(row.value)}</text>
+                <g key={row.label} transform={"translate(" + (ttX + 8) + "," + (ttY + 27 + idx * 16) + ")"}>
+                  <circle cx={4} cy={-4} r={3.5} fill={row.color} />
+                  <text x={12} y={0} fontSize={9.5} fill="#334155">{row.label}</text>
+                  <text x={TOOLTIP_W - 12} y={0} fontSize={9.5} fontWeight="600" fill={row.color} textAnchor="end">{fmtK(row.value)}</text>
                 </g>
               );
             })}
@@ -331,6 +328,7 @@ function CashFlowChart({ data }) {
     </div>
   );
 }
+
 function InputField({ label, name, value, onChange, unit, step, min }) {
   const u = unit !== undefined ? unit : "€";
   const s = step !== undefined ? step : "1000";
@@ -349,10 +347,113 @@ function InputField({ label, name, value, onChange, unit, step, min }) {
 function SectionTitle({ children }) {
   return <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "#64748b", margin: "10px 0 4px" }}>{children}</div>;
 }
+function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
+  const totalSurface = lots.reduce(function(s, l) { return s + pf(l.surface); }, 0);
+  const totalLoyer = lots.reduce(function(s, l) { return s + pf(l.loyer); }, 0);
+  const totalTravaux = lots.reduce(function(s, l) { return s + pf(l.travaux); }, 0);
+  const totalCharges = lots.reduce(function(s, l) { return s + pf(l.charges); }, 0);
+  const surfOk = surfaceGlobale > 0 ? Math.abs(totalSurface - surfaceGlobale) < 1 : true;
+  const loyerOk = loyerGlobal > 0 ? Math.abs(totalLoyer - loyerGlobal) < 1 : true;
+
+  const addLot = function() {
+    const newId = lots.length > 0 ? Math.max.apply(null, lots.map(function(l) { return l.id; })) + 1 : 1;
+    onChange(lots.concat([{ id: newId, nom: "Lot " + newId, surface: "", loyer: "", travaux: "", charges: "" }]));
+  };
+  const removeLot = function(id) {
+    if (lots.length <= 1) return;
+    onChange(lots.filter(function(l) { return l.id !== id; }));
+  };
+  const updateLot = function(id, field, value) {
+    onChange(lots.map(function(l) { return l.id === id ? Object.assign({}, l, { [field]: value }) : l; }));
+  };
+
+  return (
+    <div style={{ marginTop: 4 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "#334155" }}>🏘️ Lots / Biens du projet</div>
+        <button onClick={addLot} style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 999, padding: "5px 12px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>+ Ajouter un lot</button>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {lots.map(function(lot) {
+          return (
+            <div key={lot.id} style={{ background: "rgba(241,245,249,0.9)", borderRadius: 14, padding: "10px 12px", border: "1px solid rgba(148,163,184,0.3)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <input
+                  value={lot.nom}
+                  onChange={function(e) { updateLot(lot.id, "nom", e.target.value); }}
+                  style={{ fontWeight: 600, fontSize: 13, color: "#0f172a", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed #94a3b8", minWidth: 80 }}
+                />
+                <button onClick={function() { removeLot(lot.id); }} style={{ background: "rgba(239,68,68,0.1)", border: "none", borderRadius: 999, padding: "3px 9px", color: "#dc2626", cursor: lots.length > 1 ? "pointer" : "not-allowed", fontSize: 12, opacity: lots.length > 1 ? 1 : 0.3 }}>✕</button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8 }}>
+                {[
+                  { label: "Surface (m²)", field: "surface", unit: "m²", step: "1" },
+                  { label: "Loyer mensuel HC", field: "loyer", unit: "€", step: "50" },
+                  { label: "Travaux", field: "travaux", unit: "€", step: "500" },
+                  { label: "Charges/an", field: "charges", unit: "€", step: "100" },
+                ].map(function(col) {
+                  return (
+                    <div key={col.field}>
+                      <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>{col.label}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <input
+                          type="number" value={lot[col.field]} step={col.step} min="0"
+                          onChange={function(e) { updateLot(lot.id, col.field, e.target.value); }}
+                          style={{ width: "100%", background: "rgba(255,255,255,0.85)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "5px 8px", fontSize: 12, color: "#0f172a", outline: "none" }}
+                        />
+                        <span style={{ fontSize: 10, color: "#94a3b8", minWidth: 20 }}>{col.unit}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ marginTop: 10, background: "rgba(255,255,255,0.7)", borderRadius: 12, padding: "8px 12px", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
+        <div>
+          <div style={{ fontSize: 10, color: "#64748b" }}>Total surface lots</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: surfOk ? "#16a34a" : "#dc2626" }}>{fmt(totalSurface, 0)} m²
+            {surfaceGlobale > 0 && <span style={{ fontSize: 10, fontWeight: 400, color: surfOk ? "#16a34a" : "#dc2626", marginLeft: 4 }}>{surfOk ? "✓" : "≠ " + fmt(surfaceGlobale, 0) + " m²"}</span>}
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "#64748b" }}>Total loyers lots</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: loyerOk ? "#16a34a" : "#dc2626" }}>{fmtEur(totalLoyer)}
+            {loyerGlobal > 0 && <span style={{ fontSize: 10, fontWeight: 400, color: loyerOk ? "#16a34a" : "#dc2626", marginLeft: 4 }}>{loyerOk ? "✓" : "≠ " + fmtEur(loyerGlobal)}</span>}
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "#64748b" }}>Total travaux lots</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>{fmtEur(totalTravaux)}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "#64748b" }}>Total charges lots</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>{fmtEur(totalCharges)}</div>
+        </div>
+      </div>
+
+      {(!surfOk && surfaceGlobale > 0) && (
+        <div style={{ marginTop: 6, background: "rgba(254,243,199,0.9)", borderRadius: 10, padding: "6px 10px", fontSize: 11, color: "#92400e", border: "1px solid rgba(251,191,36,0.4)" }}>
+          ⚠ La somme des surfaces des lots ({fmt(totalSurface, 0)} m²) ne correspond pas à la surface globale renseignée ({fmt(surfaceGlobale, 0)} m²).
+        </div>
+      )}
+      {(!loyerOk && loyerGlobal > 0) && (
+        <div style={{ marginTop: 6, background: "rgba(254,243,199,0.9)", borderRadius: 10, padding: "6px 10px", fontSize: 11, color: "#92400e", border: "1px solid rgba(251,191,36,0.4)" }}>
+          ⚠ La somme des loyers des lots ({fmtEur(totalLoyer)}) ne correspond pas au loyer mensuel global renseigné ({fmtEur(loyerGlobal)}).
+        </div>
+      )}
+    </div>
+  );
+}
 
 const DEFAULT_INPUTS = {
   prixVente: "175000", fraisNotaire: "13300", travaux: "0", amenagements: "0",
   fraisAgencePct: "5", apport: "14000", tauxCredit: "4.2", dureeAnnees: "25",
+  surfaceGlobale: "0",
   loyerMensuelHC: "1000", tauxOccupation: "11.5", chargesImmeubleAn: "250",
   taxeFonciereAn: "1400", assurancePNOAn: "0", gestionLocativePct: "0",
   provisionTravauxAn: "0", fraisBancairesAn: "300", expertComptableAn: "600",
@@ -361,29 +462,31 @@ const DEFAULT_INPUTS = {
 
 function SimulationProjet() {
   const [inputs, setInputs] = useState(DEFAULT_INPUTS);
+  const [lots, setLots] = useState([Object.assign({}, LOT_DEFAULT)]);
   const [regimeActif, setRegimeActif] = useState("SAS / SCI IS");
   const [nomProjet, setNomProjet] = useState("");
   const [projets, setProjets] = useState(function() {
     try { return JSON.parse(localStorage.getItem(PROJETS_KEY)) || []; } catch(e) { return []; }
   });
+
   const handleChange = function(e) {
     const name = e.target.name; const value = e.target.value;
     setInputs(function(prev) { return Object.assign({}, prev, { [name]: value }); });
   };
   const sauvegarder = function() {
     if (!nomProjet.trim()) return;
-    const nouveau = { id: Date.now(), nom: nomProjet.trim(), inputs: Object.assign({}, inputs), regimeActif: regimeActif, savedAt: new Date().toLocaleDateString("fr-FR") };
+    const nouveau = { id: Date.now(), nom: nomProjet.trim(), inputs: Object.assign({}, inputs), lots: lots, regimeActif: regimeActif, savedAt: new Date().toLocaleDateString("fr-FR") };
     const liste = [nouveau].concat(projets.filter(function(p) { return p.nom !== nomProjet.trim(); }));
     setProjets(liste);
     localStorage.setItem(PROJETS_KEY, JSON.stringify(liste));
     setNomProjet("");
   };
-  const charger = function(p) { setInputs(p.inputs); setRegimeActif(p.regimeActif); };
+  const charger = function(p) { setInputs(p.inputs); setRegimeActif(p.regimeActif); if (p.lots) setLots(p.lots); };
   const supprimer = function(id) {
     const liste = projets.filter(function(p) { return p.id !== id; });
-    setProjets(liste);
-    localStorage.setItem(PROJETS_KEY, JSON.stringify(liste));
+    setProjets(liste); localStorage.setItem(PROJETS_KEY, JSON.stringify(liste));
   };
+
   const result = useMemo(function() { return calculerSimulation(inputs); }, [inputs]);
   const regime = result.regimes[regimeActif];
   const cashFlowData = useMemo(function() { return projeterCashFlow(inputs, regimeActif); }, [inputs, regimeActif]);
@@ -396,6 +499,7 @@ function SimulationProjet() {
   const dash = (Math.min(100, Math.max(0, note)) / 100) * circumference;
   const glassCard = { background: "rgba(255,255,255,0.55)", borderRadius: 20, padding: 16, boxShadow: "0 8px 32px rgba(99,102,241,0.08), 0 0 0 1px rgba(148,163,184,0.25)", backdropFilter: "blur(18px)" };
   const glassCardAlt = { background: "rgba(241,245,249,0.75)", borderRadius: 18, padding: 16, boxShadow: "0 8px 24px rgba(99,102,241,0.10), 0 0 0 1px rgba(148,163,184,0.3)", backdropFilter: "blur(18px)" };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {projets.length > 0 && (
@@ -414,6 +518,7 @@ function SimulationProjet() {
           </div>
         </div>
       )}
+
       <div style={glassCard}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: "#1e293b" }}>Paramètres du projet</div>
@@ -427,10 +532,11 @@ function SimulationProjet() {
             <SectionTitle>Achat</SectionTitle>
             <InputField label="Prix de vente" name="prixVente" value={inputs.prixVente} onChange={handleChange} />
             <InputField label="Frais de notaire" name="fraisNotaire" value={inputs.fraisNotaire} onChange={handleChange} />
-            <InputField label="Travaux" name="travaux" value={inputs.travaux} onChange={handleChange} />
+            <InputField label="Travaux (global)" name="travaux" value={inputs.travaux} onChange={handleChange} />
             <InputField label="Aménagements" name="amenagements" value={inputs.amenagements} onChange={handleChange} />
             <InputField label="Frais d'agence (%)" name="fraisAgencePct" value={inputs.fraisAgencePct} onChange={handleChange} unit="%" step="0.5" />
             <InputField label="Apport" name="apport" value={inputs.apport} onChange={handleChange} />
+            <InputField label="Surface globale (m²)" name="surfaceGlobale" value={inputs.surfaceGlobale} onChange={handleChange} unit="m²" step="1" />
           </div>
           <div>
             <SectionTitle>Prêt & Fiscalité</SectionTitle>
@@ -441,7 +547,7 @@ function SimulationProjet() {
             <InputField label="TMI (%)" name="tmi" value={inputs.tmi} onChange={handleChange} unit="%" step="1" />
           </div>
           <div>
-            <SectionTitle>Exploitation</SectionTitle>
+            <SectionTitle>Exploitation (global)</SectionTitle>
             <InputField label="Loyer mensuel HC total" name="loyerMensuelHC" value={inputs.loyerMensuelHC} onChange={handleChange} step="50" />
             <InputField label="Taux d'occupation (mois/an)" name="tauxOccupation" value={inputs.tauxOccupation} onChange={handleChange} unit="mois" step="0.5" />
             <InputField label="Charges immeuble/an" name="chargesImmeubleAn" value={inputs.chargesImmeubleAn} onChange={handleChange} step="100" />
@@ -453,7 +559,17 @@ function SimulationProjet() {
             <InputField label="Expert-comptable + CFE/an" name="expertComptableAn" value={inputs.expertComptableAn} onChange={handleChange} step="50" />
           </div>
         </div>
+
+        <div style={{ marginTop: 14, borderTop: "1px solid rgba(148,163,184,0.25)", paddingTop: 14 }}>
+          <GestionLots
+            lots={lots}
+            onChange={setLots}
+            surfaceGlobale={pf(inputs.surfaceGlobale)}
+            loyerGlobal={pf(inputs.loyerMensuelHC)}
+          />
+        </div>
       </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 10 }}>
         {[
           { label: "Dépense nette", value: fmtEur(result.depenseNette) },
@@ -473,6 +589,7 @@ function SimulationProjet() {
           );
         })}
       </div>
+
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {Object.keys(result.regimes).map(function(r) {
           return (
@@ -480,6 +597,7 @@ function SimulationProjet() {
           );
         })}
       </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "start" }}>
         <div style={glassCardAlt}>
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#1e293b" }}>Bilan — {regimeActif}</div>
@@ -520,6 +638,7 @@ function SimulationProjet() {
           <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", lineHeight: 1.4 }}>Rendement · Tréso<br />Règle 70% · TRI</div>
         </div>
       </div>
+
       <div style={glassCard}>
         <div style={{ fontSize: 14, fontWeight: 600, color: "#1e293b", marginBottom: 4 }}>
           Évolution du Cash-Flow — <span style={{ color: "#6366f1" }}>{regimeActif}</span>
@@ -527,6 +646,7 @@ function SimulationProjet() {
         <div style={{ fontSize: 11, color: "#64748b", marginBottom: 10 }}>Survole une colonne pour le détail · Loyers indexés +1%/an</div>
         <CashFlowChart data={cashFlowData} />
       </div>
+
       <div style={glassCard}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: "#1e293b" }}>Comparatif des régimes fiscaux</div>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
