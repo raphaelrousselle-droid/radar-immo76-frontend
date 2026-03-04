@@ -139,6 +139,7 @@ function calculerSimulation(i) {
     const triVal = calculerIRR(cfIRR);
     return { ebe: loyersAnnuels - totalFraisAnnuels, impot: impot, tresorerie: tresorerie, rendBrut: rendBrut, rendNet: rendNet, tri: triVal, regle70: regle70 };
   };
+   return {
     depenseNette: depenseNette, sommeEmpruntee: sommeEmpruntee, mensualite: mensualite,
     coutPretTotal: coutPretTotal, remboursementAnnuel: remboursementAnnuel,
     loyersAnnuels: loyersAnnuels, totalFraisAnnuels: totalFraisAnnuels, amortissement: amortissement,
