@@ -87,26 +87,31 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
 }
 function calculerIRR(cashFlows) {
   if (!cashFlows || cashFlows.length < 2) return null;
-  if (cashFlows[0] >= 0) return null;
-  var guess = 0.1;
-  for (var iter = 0; iter < 2000; iter++) {
-    var npv = 0;
-    var dnpv = 0;
-    for (var t = 0; t < cashFlows.length; t++) {
-      var pow = Math.pow(1 + guess, t);
-      if (!isFinite(pow) || pow === 0) return null;
-      npv += cashFlows[t] / pow;
-      if (t > 0) dnpv -= t * cashFlows[t] / (pow * (1 + guess));
-    }
-    if (!isFinite(npv) || !isFinite(dnpv)) return null;
-    if (Math.abs(dnpv) < 1e-12) break;
-    var delta = npv / dnpv;
-    guess = guess - delta;
-    if (guess <= -0.999) guess = 0.01;
-    if (Math.abs(delta) < 1e-9) break;
+  // Vérifie qu'il y a au moins un flux négatif et un positif
+  var hasNeg = false; var hasPos = false;
+  for (var k = 0; k < cashFlows.length; k++) {
+    if (cashFlows[k] < 0) hasNeg = true;
+    if (cashFlows[k] > 0) hasPos = true;
   }
-  if (!isFinite(guess) || guess <= -1 || guess > 5) return null;
-  return guess;
+  if (!hasNeg || !hasPos) return null;
+  // Méthode de Newton-Raphson
+  var r = 0.1;
+  for (var iter = 0; iter < 2000; iter++) {
+    var npv = 0; var dnpv = 0;
+    for (var t = 0; t < cashFlows.length; t++) {
+      var denom = Math.pow(1 + r, t);
+      if (!isFinite(denom) || denom === 0) return null;
+      npv  += cashFlows[t] / denom;
+      if (t > 0) dnpv -= t * cashFlows[t] / (denom * (1 + r));
+    }
+    if (!isFinite(npv) || !isFinite(dnpv) || Math.abs(dnpv) < 1e-12) break;
+    var step = npv / dnpv;
+    r -= step;
+    if (r <= -0.999) r = 0.001;
+    if (Math.abs(step) < 1e-9) break;
+  }
+  if (!isFinite(r) || r <= -1 || r > 10) return null;
+  return r;
 }
 function calculerSimulation(i) {
   const pv = pf(i.prixVente);
