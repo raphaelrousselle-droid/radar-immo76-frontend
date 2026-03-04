@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 
-const API_BASE  = "https://radar-immo76-1.onrender.com";
+const API_BASE = "https://radar-immo76-1.onrender.com";
 const CACHE_KEY = "radar-immo-communes-v2";
 
 // ─── Helpers généraux ─────────────────────────────────────────────────────────
 const nc = (v) => {
   if (v == null) return "#9ca3af";
-  if (v >= 7) return "#16a34a"; // vert
-  if (v >= 5) return "#f59e0b"; // orange
-  return "#dc2626";            // rouge
+  if (v >= 7) return "#16a34a";
+  if (v >= 5) return "#f59e0b";
+  return "#dc2626";
 };
 const nLabel = (v) => {
   if (v == null) return "—";
@@ -365,9 +365,17 @@ function calculerSimulation(i) {
   };
 }
 
-function InputField({ label, name, value, onChange, unit = "€", step = "1000", min = "0" }) {
+function InputField({
+  label,
+  name,
+  value,
+  onChange,
+  unit = "€",
+  step = "1000",
+  min = "0",
+}) {
   return (
-    <div style={{ marginBottom: 12 }}>
+    <div style={{ marginBottom: 10 }}>
       <label
         style={{
           display: "block",
@@ -424,7 +432,7 @@ function SectionTitle({ children }) {
         textTransform: "uppercase",
         letterSpacing: 0.5,
         color: "#6b7280",
-        margin: "18px 0 6px",
+        margin: "10px 0 4px",
       }}
     >
       {children}
@@ -474,9 +482,15 @@ function SimulationProjet() {
       ? "#16a34a"
       : "#dc2626";
 
-   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Formulaire plein largeur */}
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+      }}
+    >
+      {/* Formulaire en haut */}
       <div
         style={{
           background: "#ffffff",
@@ -490,7 +504,7 @@ function SimulationProjet() {
           style={{
             fontSize: 14,
             fontWeight: 600,
-            marginBottom: 12,
+            marginBottom: 10,
             color: "#111827",
           }}
         >
@@ -499,217 +513,184 @@ function SimulationProjet() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(220px, 1fr))",
             columnGap: 16,
-            rowGap: 8,
+            rowGap: 6,
           }}
         >
-          {/* Achat */}
           <div>
             <SectionTitle>Achat</SectionTitle>
-            <InputField label="Prix de vente" name="prixVente" value={inputs.prixVente} onChange={handleChange} />
-            <InputField label="Frais de notaire" name="fraisNotaire" value={inputs.fraisNotaire} onChange={handleChange} />
-            <InputField label="Travaux" name="travaux" value={inputs.travaux} onChange={handleChange} />
-            <InputField label="Aménagements" name="amenagements" value={inputs.amenagements} onChange={handleChange} />
-            <InputField label="Frais d'agence (%)" name="fraisAgencePct" value={inputs.fraisAgencePct} onChange={handleChange} unit="%" step="0.5" />
-            <InputField label="Apport" name="apport" value={inputs.apport} onChange={handleChange} />
+            <InputField
+              label="Prix de vente"
+              name="prixVente"
+              value={inputs.prixVente}
+              onChange={handleChange}
+            />
+            <InputField
+              label="Frais de notaire"
+              name="fraisNotaire"
+              value={inputs.fraisNotaire}
+              onChange={handleChange}
+            />
+            <InputField
+              label="Travaux"
+              name="travaux"
+              value={inputs.travaux}
+              onChange={handleChange}
+            />
+            <InputField
+              label="Aménagements"
+              name="amenagements"
+              value={inputs.amenagements}
+              onChange={handleChange}
+            />
+            <InputField
+              label="Frais d'agence (%)"
+              name="fraisAgencePct"
+              value={inputs.fraisAgencePct}
+              onChange={handleChange}
+              unit="%"
+              step="0.5"
+            />
+            <InputField
+              label="Apport"
+              name="apport"
+              value={inputs.apport}
+              onChange={handleChange}
+            />
           </div>
 
-          {/* Prêt */}
           <div>
             <SectionTitle>Prêt</SectionTitle>
-            <InputField label="Taux crédit (%)" name="tauxCredit" value={inputs.tauxCredit} onChange={handleChange} unit="%" step="0.05" />
-            <InputField label="Durée (années)" name="dureeAnnees" value={inputs.dureeAnnees} onChange={handleChange} unit="ans" step="1" />
+            <InputField
+              label="Taux crédit (%)"
+              name="tauxCredit"
+              value={inputs.tauxCredit}
+              onChange={handleChange}
+              unit="%"
+              step="0.05"
+            />
+            <InputField
+              label="Durée (années)"
+              name="dureeAnnees"
+              value={inputs.dureeAnnees}
+              onChange={handleChange}
+              unit="ans"
+              step="1"
+            />
             <SectionTitle>Fiscalité</SectionTitle>
-            <InputField label="Coef amortissement (%)" name="coefAmortissement" value={inputs.coefAmortissement} onChange={handleChange} unit="%" step="0.25" />
-            <InputField label="Taux IS (%)" name="tauxIS" value={inputs.tauxIS} onChange={handleChange} unit="%" step="1" />
-            <InputField label="TMI (%)" name="tmi" value={inputs.tmi} onChange={handleChange} unit="%" step="1" />
+            <InputField
+              label="Coef amortissement (%)"
+              name="coefAmortissement"
+              value={inputs.coefAmortissement}
+              onChange={handleChange}
+              unit="%"
+              step="0.25"
+            />
+            <InputField
+              label="Taux IS (%)"
+              name="tauxIS"
+              value={inputs.tauxIS}
+              onChange={handleChange}
+              unit="%"
+              step="1"
+            />
+            <InputField
+              label="TMI (%)"
+              name="tmi"
+              value={inputs.tmi}
+              onChange={handleChange}
+              unit="%"
+              step="1"
+            />
           </div>
 
-          {/* Exploitation */}
           <div>
             <SectionTitle>Exploitation</SectionTitle>
-            <InputField label="Loyer mensuel HC total" name="loyerMensuelHC" value={inputs.loyerMensuelHC} onChange={handleChange} step="50" />
-            <InputField label="Taux d'occupation (mois/an)" name="tauxOccupation" value={inputs.tauxOccupation} onChange={handleChange} unit="mois" step="0.5" />
-            <InputField label="Charges immeuble/an" name="chargesImmeubleAn" value={inputs.chargesImmeubleAn} onChange={handleChange} step="100" />
-            <InputField label="Taxe foncière/an" name="taxeFonciereAn" value={inputs.taxeFonciereAn} onChange={handleChange} step="100" />
-            <InputField label="Assurance PNO/an (0=auto)" name="assurancePNOAn" value={inputs.assurancePNOAn} onChange={handleChange} step="50" />
-            <InputField label="Gestion locative (%)" name="gestionLocativePct" value={inputs.gestionLocativePct} onChange={handleChange} unit="%" step="0.5" />
-            <InputField label="Provision travaux/an" name="provisionTravauxAn" value={inputs.provisionTravauxAn} onChange={handleChange} step="100" />
-            <InputField label="Frais bancaires/an" name="fraisBancairesAn" value={inputs.fraisBancairesAn} onChange={handleChange} step="50" />
-            <InputField label="Expert-comptable + CFE/an" name="expertComptableAn" value={inputs.expertComptableAn} onChange={handleChange} step="50" />
+            <InputField
+              label="Loyer mensuel HC total"
+              name="loyerMensuelHC"
+              value={inputs.loyerMensuelHC}
+              onChange={handleChange}
+              step="50"
+            />
+            <InputField
+              label="Taux d'occupation (mois/an)"
+              name="tauxOccupation"
+              value={inputs.tauxOccupation}
+              onChange={handleChange}
+              unit="mois"
+              step="0.5"
+            />
+            <InputField
+              label="Charges immeuble/an"
+              name="chargesImmeubleAn"
+              value={inputs.chargesImmeubleAn}
+              onChange={handleChange}
+              step="100"
+            />
+            <InputField
+              label="Taxe foncière/an"
+              name="taxeFonciereAn"
+              value={inputs.taxeFonciereAn}
+              onChange={handleChange}
+              step="100"
+            />
+            <InputField
+              label="Assurance PNO/an (0=auto)"
+              name="assurancePNOAn"
+              value={inputs.assurancePNOAn}
+              onChange={handleChange}
+              step="50"
+            />
+            <InputField
+              label="Gestion locative (%)"
+              name="gestionLocativePct"
+              value={inputs.gestionLocativePct}
+              onChange={handleChange}
+              unit="%"
+              step="0.5"
+            />
+            <InputField
+              label="Provision travaux/an"
+              name="provisionTravauxAn"
+              value={inputs.provisionTravauxAn}
+              onChange={handleChange}
+              step="100"
+            />
+            <InputField
+              label="Frais bancaires/an"
+              name="fraisBancairesAn"
+              value={inputs.fraisBancairesAn}
+              onChange={handleChange}
+              step="50"
+            />
+            <InputField
+              label="Expert-comptable + CFE/an"
+              name="expertComptableAn"
+              value={inputs.expertComptableAn}
+              onChange={handleChange}
+              step="50"
+            />
           </div>
         </div>
       </div>
 
-      {/* Résultats en dessous */}
-      {/* (garde tout ce que tu avais déjà pour les KPI, le bilan et le tableau comparatif) */}
-      {/* ... colle ici la partie KPI + sélecteur de régime + bilan + tableau que tu avais */}
-
-    </div>
-  );
-
-        >
-          Paramètres du projet
-        </div>
-        <SectionTitle>Achat</SectionTitle>
-        <InputField
-          label="Prix de vente"
-          name="prixVente"
-          value={inputs.prixVente}
-          onChange={handleChange}
-        />
-        <InputField
-          label="Frais de notaire"
-          name="fraisNotaire"
-          value={inputs.fraisNotaire}
-          onChange={handleChange}
-        />
-        <InputField
-          label="Travaux"
-          name="travaux"
-          value={inputs.travaux}
-          onChange={handleChange}
-        />
-        <InputField
-          label="Aménagements"
-          name="amenagements"
-          value={inputs.amenagements}
-          onChange={handleChange}
-        />
-        <InputField
-          label="Frais d'agence (%)"
-          name="fraisAgencePct"
-          value={inputs.fraisAgencePct}
-          onChange={handleChange}
-          unit="%"
-          step="0.5"
-        />
-        <InputField
-          label="Apport"
-          name="apport"
-          value={inputs.apport}
-          onChange={handleChange}
-        />
-        <SectionTitle>Prêt</SectionTitle>
-        <InputField
-          label="Taux crédit (%)"
-          name="tauxCredit"
-          value={inputs.tauxCredit}
-          onChange={handleChange}
-          unit="%"
-          step="0.05"
-        />
-        <InputField
-          label="Durée (années)"
-          name="dureeAnnees"
-          value={inputs.dureeAnnees}
-          onChange={handleChange}
-          unit="ans"
-          step="1"
-        />
-        <SectionTitle>Exploitation</SectionTitle>
-        <InputField
-          label="Loyer mensuel HC total"
-          name="loyerMensuelHC"
-          value={inputs.loyerMensuelHC}
-          onChange={handleChange}
-          step="50"
-        />
-        <InputField
-          label="Taux d'occupation (mois/an)"
-          name="tauxOccupation"
-          value={inputs.tauxOccupation}
-          onChange={handleChange}
-          unit="mois"
-          step="0.5"
-        />
-        <InputField
-          label="Charges immeuble/an"
-          name="chargesImmeubleAn"
-          value={inputs.chargesImmeubleAn}
-          onChange={handleChange}
-          step="100"
-        />
-        <InputField
-          label="Taxe foncière/an"
-          name="taxeFonciereAn"
-          value={inputs.taxeFonciereAn}
-          onChange={handleChange}
-          step="100"
-        />
-        <InputField
-          label="Assurance PNO/an (0=auto)"
-          name="assurancePNOAn"
-          value={inputs.assurancePNOAn}
-          onChange={handleChange}
-          step="50"
-        />
-        <InputField
-          label="Gestion locative (%)"
-          name="gestionLocativePct"
-          value={inputs.gestionLocativePct}
-          onChange={handleChange}
-          unit="%"
-          step="0.5"
-        />
-        <InputField
-          label="Provision travaux/an"
-          name="provisionTravauxAn"
-          value={inputs.provisionTravauxAn}
-          onChange={handleChange}
-          step="100"
-        />
-        <InputField
-          label="Frais bancaires/an"
-          name="fraisBancairesAn"
-          value={inputs.fraisBancairesAn}
-          onChange={handleChange}
-          step="50"
-        />
-        <InputField
-          label="Expert-comptable + CFE/an"
-          name="expertComptableAn"
-          value={inputs.expertComptableAn}
-          onChange={handleChange}
-          step="50"
-        />
-        <SectionTitle>Fiscalité</SectionTitle>
-        <InputField
-          label="Coef amortissement (%)"
-          name="coefAmortissement"
-          value={inputs.coefAmortissement}
-          onChange={handleChange}
-          unit="%"
-          step="0.25"
-        />
-        <InputField
-          label="Taux IS (%)"
-          name="tauxIS"
-          value={inputs.tauxIS}
-          onChange={handleChange}
-          unit="%"
-          step="1"
-        />
-        <InputField
-          label="TMI (%)"
-          name="tmi"
-          value={inputs.tmi}
-          onChange={handleChange}
-          unit="%"
-          step="1"
-        />
-      </div>
-
-      {/* Résultats */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Résultats dessous */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+        }}
+      >
         {/* KPIs projet */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, minmax(0,1fr))",
             gap: 12,
-            marginBottom: 16,
           }}
         >
           {[
@@ -769,13 +750,12 @@ function SimulationProjet() {
           ))}
         </div>
 
-        {/* Sélecteur de régime */}
+        {/* Sélecteur régime */}
         <div
           style={{
             display: "flex",
             flexWrap: "wrap",
             gap: 8,
-            marginBottom: 12,
           }}
         >
           {Object.keys(result.regimes).map((r) => (
@@ -809,7 +789,6 @@ function SimulationProjet() {
             background: "#ffffff",
             borderRadius: 16,
             padding: 16,
-            marginBottom: 16,
             boxShadow:
               "0 8px 20px rgba(15,23,42,0.05), 0 1px 3px rgba(15,23,42,0.08)",
           }}
@@ -893,7 +872,7 @@ function SimulationProjet() {
             ))}
           </div>
 
-          {/* Règle des 70% */}
+          {/* Règle 70% */}
           <div
             style={{
               marginTop: 14,
@@ -1096,7 +1075,7 @@ function SimulationProjet() {
   );
 }
 
-// ─── Analyse Communes (thème clair) ───────────────────────────────────────────
+// ─── Analyse Communes ─────────────────────────────────────────────────────────
 function AnalyseCommunes() {
   const [communes, setCommunes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1178,6 +1157,9 @@ function AnalyseCommunes() {
         return vb - va;
       });
   }, [communes, search, sortKey, filterMin]);
+
+  // TOP 10 seulement
+  const top10 = useMemo(() => filtered.slice(0, 10), [filtered]);
 
   const toggleCompare = (c) => {
     setCompareList((prev) =>
@@ -1321,9 +1303,8 @@ function AnalyseCommunes() {
                 marginBottom: 8,
               }}
             >
-              {filtered.length} commune
-              {filtered.length > 1 ? "s" : ""} · Clic = détail ·
-              Clic droit = comparer
+              {filtered.length} communes correspondantes · affichage du
+              top 10 · Clic = détail · clic droit = comparer
             </div>
             <div
               style={{
@@ -1333,7 +1314,7 @@ function AnalyseCommunes() {
                 gap: 12,
               }}
             >
-              {filtered.map((c) => {
+              {top10.map((c) => {
                 const g = sn(c.scores?.global);
                 const isSelected = selected?.nom === c.nom;
                 const isCompared = !!compareList.find(
@@ -2100,7 +2081,7 @@ function AnalyseCommunes() {
   );
 }
 
-// ─── App principale avec thème clair ──────────────────────────────────────────
+// ─── App principale ───────────────────────────────────────────────────────────
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
   const navItems = [
@@ -2227,7 +2208,7 @@ export default function App() {
             }}
           >
             {onglet === "analyse"
-              ? "Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer"
+              ? "Top 10 des communes selon tes filtres · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer"
               : "Renseigne les paramètres de ton projet pour visualiser trésorerie, rendements et règle des 70 %."}
           </p>
         </div>
