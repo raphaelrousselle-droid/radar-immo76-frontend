@@ -183,9 +183,11 @@ function projeterCashFlow(inputs, regimeNom) {
 
 // ─── CashFlow Chart SVG ───────────────────────────────────────────────────────
 function CashFlowChart({ data }) {
+  const [hovered, setHovered] = useState(null);
   if (!data || data.length === 0) return null;
-  const W = 700; const H = 280;
-  const padL = 68; const padR = 130; const padT = 16; const padB = 50;
+
+  const W = 700; const H = 300;
+  const padL = 72; const padR = 140; const padT = 20; const padB = 54;
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
 
@@ -195,12 +197,12 @@ function CashFlowChart({ data }) {
   const range = maxV - minV || 1;
 
   const toY = (v) => padT + chartH - ((v - minV) / range) * chartH;
-  const toX = (i) => padL + (i / (data.length - 1)) * chartW;
   const zeroY = toY(0);
-
   const barW = Math.max(4, chartW / data.length - 3);
+  const barCenterX = (i) => padL + (i / data.length) * chartW + (chartW / data.length) / 2;
 
-  // Légende
+  const fmtK = (v) => v >= 1000 || v <= -1000 ? `${(v / 1000).toFixed(1)}k €` : `${Math.round(v)} €`;
+
   const legend = [
     { color: "#4ade80", label: "Loyers" },
     { color: "#94a3b8", label: "Charges" },
@@ -209,25 +211,135 @@ function CashFlowChart({ data }) {
     { color: "#38bdf8", label: "Cash-Flow" },
   ];
 
-  return (
-    <div style={{ overflowX: "auto" }}>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", minWidth: 500, fontFamily: "system-ui,sans-serif" }}>
-        {/* Fond */}
-        <rect x={padL} y={padT} width={chartW} height={chartH} fill="rgba(255,255,255,0.55)" rx="8" />
+  // Tooltip
+  const TOOLTIP_W = 160;
+  const h = hovered != null ? data[hovered] : null;
+  let ttX = hovered != null ? barCenterX(hovered) - TOOLTIP_W / 2 : 0;
+  if (ttX < padL) ttX = padL;
+  if (ttX + TOOLTIP_W > W - padR) ttX = W - padR - TOOLTIP_W;
 
-        {/* Grille horizontale */}
+  return (
+    <div style={{ overflowX: "auto", position: "relative" }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        style={{ width: "100%", minWidth: 500, fontFamily: "system-ui,sans-serif", cursor: "crosshair" }}
+        onMouseLeave={() => setHovered(null)}
+      >
+        {/* Fond chart */}
+        <rect x={padL} y={padT} width={chartW} height={chartH} fill="rgba(255,255,255,0.45)" rx="8" />
+
+        {/* Grille */}
         {[0, 0.25, 0.5, 0.75, 1].map((t) => {
           const v = minV + t * range;
           const y = toY(v);
           return (
             <g key={t}>
-              <line x1={padL} y1={y} x2={padL + chartW} y2={y} stroke="rgba(148,163,184,0.35)" strokeWidth={1} />
-              <text x={padL - 5} y={y + 4} textAnchor="end" fontSize={10} fill="#64748b">
-                {v >= 1000 ? `${Math.round(v / 1000)}k €` : v <= -1000 ? `${Math.round(v / 1000)}k €` : `${Math.round(v)} €`}
-              </text>
+              <line x1={padL} y1={y} x2={padL + chartW} y2={y} stroke="rgba(148,163,184,0.3)" strokeWidth={1} strokeDasharray="4 3" />
+              <text x={padL - 6} y={y + 4} textAnchor="end" fontSize={10} fill="#64748b">{fmtK(v)}</text>
             </g>
           );
         })}
+
+        {/* Ligne zéro */}
+        <line x1={padL} y1={zeroY} x2={padL + chartW} y2={zeroY} stroke="#94a3b8" strokeWidth={1.5} />
+
+        {/* Zone hover highlight */}
+        {hovered != null && (
+          <rect
+            x={padL + (hovered / data.length) * chartW}
+            y={padT}
+            width={chartW / data.length}
+            height={chartH}
+            fill="rgba(99,102,241,0.07)"
+            rx={4}
+          />
+        )}
+
+        {/* Barres */}
+        {data.map((d, i) => {
+          const x = padL + (i / data.length) * chartW + (chartW / data.length - barW) / 2;
+          const isH = hovered === i;
+          const opacity = hovered != null && !isH ? 0.45 : 1;
+
+          const hLoyers = Math.max(0, zeroY - toY(d.loyers));
+          const yLoyers = toY(d.loyers);
+          const hFrais = Math.max(0, (d.frais / range) * chartH);
+          const hCredit = Math.max(0, (d.credit / range) * chartH);
+          const hImpots = Math.max(0, (Math.max(0, d.impots) / range) * chartH);
+
+          return (
+            <g key={i} opacity={opacity}
+              onMouseEnter={() => setHovered(i)}
+              style={{ transition: "opacity 0.15s" }}
+            >
+              {hLoyers > 0 && <rect x={x} y={yLoyers} width={barW} height={hLoyers} fill="#4ade80" rx={2} />}
+              {hFrais > 0 && <rect x={x} y={zeroY} width={barW} height={hFrais} fill="#94a3b8" rx={2} />}
+              {hCredit > 0 && <rect x={x} y={zeroY + hFrais} width={barW} height={hCredit} fill="#fbbf24" rx={2} />}
+              {hImpots > 0 && <rect x={x} y={zeroY + hFrais + hCredit} width={barW} height={hImpots} fill="#f87171" rx={2} />}
+            </g>
+          );
+        })}
+
+        {/* Ligne Cash-Flow */}
+        <polyline
+          points={data.map((d, i) => `${barCenterX(i)},${toY(d.cashflow)}`).join(" ")}
+          fill="none" stroke="#38bdf8" strokeWidth={2.5} strokeLinejoin="round"
+        />
+        {data.map((d, i) => (
+          <circle key={i}
+            cx={barCenterX(i)} cy={toY(d.cashflow)} r={hovered === i ? 5.5 : 3.5}
+            fill={hovered === i ? "#0ea5e9" : "#38bdf8"}
+            stroke="white" strokeWidth={1.5}
+            onMouseEnter={() => setHovered(i)}
+            style={{ transition: "r 0.15s" }}
+          />
+        ))}
+
+        {/* Labels axe X */}
+        {data.map((d, i) => (
+          (i === 0 || (i + 1) % 5 === 0) && (
+            <text key={i} x={barCenterX(i)} y={H - padB + 16} textAnchor="middle" fontSize={10} fill="#64748b">{d.year}</text>
+          )
+        ))}
+        <text x={padL + chartW / 2} y={H - 6} textAnchor="middle" fontSize={11} fill="#64748b">Année</text>
+
+        {/* Légende */}
+        {legend.map((l, i) => (
+          <g key={l.label} transform={`translate(${W - padR + 14}, ${padT + 18 + i * 22})`}>
+            <rect x={0} y={-10} width={14} height={14} fill={l.color} rx={3} />
+            <text x={20} y={2} fontSize={11} fill="#334155">{l.label}</text>
+          </g>
+        ))}
+
+        {/* Tooltip SVG */}
+        {h && (
+          <g>
+            <rect x={ttX} y={padT + 4} width={TOOLTIP_W} height={130} rx={10}
+              fill="rgba(255,255,255,0.95)" stroke="rgba(148,163,184,0.5)" strokeWidth={1}
+              style={{ filter: "drop-shadow(0 4px 12px rgba(99,102,241,0.18))" }}
+            />
+            <text x={ttX + 10} y={padT + 22} fontSize={12} fontWeight="700" fill="#0f172a">Année {h.year}</text>
+            {[
+              { label: "Loyers", value: h.loyers, color: "#16a34a" },
+              { label: "Charges", value: -h.frais, color: "#64748b" },
+              { label: "Crédit", value: -h.credit, color: "#d97706" },
+              { label: "Impôts", value: -h.impots, color: "#dc2626" },
+              { label: "Cash-Flow", value: h.cashflow, color: h.cashflow >= 0 ? "#0369a1" : "#dc2626" },
+            ].map((row, idx) => (
+              <g key={row.label} transform={`translate(${ttX + 10}, ${padT + 38 + idx * 18})`}>
+                <circle cx={4} cy={-4} r={4} fill={row.color} />
+                <text x={14} y={0} fontSize={10} fill="#334155">{row.label}</text>
+                <text x={TOOLTIP_W - 20} y={0} fontSize={10} fontWeight="600" fill={row.color} textAnchor="end">
+                  {fmtK(row.value)}
+                </text>
+              </g>
+            ))}
+          </g>
+        )}
+      </svg>
+    </div>
+  );
+}
 
         {/* Ligne zéro */}
         <line x1={padL} y1={zeroY} x2={padL + chartW} y2={zeroY} stroke="rgba(100,116,139,0.7)" strokeWidth={1.5} />
