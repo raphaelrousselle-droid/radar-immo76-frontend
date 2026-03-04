@@ -85,6 +85,24 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
     </div>
   );
 }
+function calculerIRR(cashFlows) {
+  var guess = 0.1;
+  for (var iter = 0; iter < 1000; iter++) {
+    var npv = 0;
+    var dnpv = 0;
+    for (var t = 0; t < cashFlows.length; t++) {
+      var disc = Math.pow(1 + guess, t);
+      npv += cashFlows[t] / disc;
+      dnpv -= t * cashFlows[t] / (disc * (1 + guess));
+    }
+    if (Math.abs(dnpv) < 1e-10) break;
+    var newGuess = guess - npv / dnpv;
+    if (Math.abs(newGuess - guess) < 1e-8) { guess = newGuess; break; }
+    guess = newGuess;
+    if (guess <= -1) guess = -0.9;
+  }
+  return (guess > -1 && guess < 10) ? guess : null;
+}
 function calculerSimulation(i) {
   const pv = pf(i.prixVente);
   const depenseNette = pv + pf(i.fraisNotaire) + pf(i.travaux) + pf(i.amenagements) + (pv * pf(i.fraisAgencePct) / 100);
@@ -104,17 +122,23 @@ function calculerSimulation(i) {
   const amortissement = (depenseNette * pf(i.coefAmortissement)) / 100;
   const tis = pf(i.tauxIS);
   const tmi = pf(i.tmi);
-  const mkR = function(impot) {
+    const mkR = function(impot) {
     const tresorerie = loyersAnnuels - totalFraisAnnuels - remboursementAnnuel - impot;
     const rendBrut = depenseNette > 0 ? (loyersAnnuels / depenseNette) * 100 : 0;
     const rendNet = depenseNette > 0 ? (tresorerie / depenseNette) * 100 : 0;
-    const tri = tresorerie > 0 ? depenseNette / tresorerie : null;
     const regle70 = loyersAnnuels > 0 ? remboursementAnnuel / loyersAnnuels : null;
-    return { ebe: loyersAnnuels - totalFraisAnnuels, impot: impot, tresorerie: tresorerie, rendBrut: rendBrut, rendNet: rendNet, tri: tri, regle70: regle70 };
+    // TRI : apport négatif en t=0, puis cash-flows annuels sur la durée du prêt
+    const cfIRR = [-pf(i.apport)];
+    for (var y = 0; y < dur; y++) {
+      const loyAn = loyersAnnuels * Math.pow(1.01, y);
+      const gAn = (loyAn * pf(i.gestionLocativePct)) / 100;
+      const frAn = pf(i.chargesImmeubleAn) + pf(i.taxeFonciereAn) + (depenseNette * 0.0012) + gAn + pf(i.provisionTravauxAn) + pf(i.fraisBancairesAn) + pf(i.expertComptableAn);
+      const cfAn = loyAn - frAn - remboursementAnnuel - impot;
+      cfIRR.push(cfAn);
+    }
+    const triVal = calculerIRR(cfIRR);
+    return { ebe: loyersAnnuels - totalFraisAnnuels, impot: impot, tresorerie: tresorerie, rendBrut: rendBrut, rendNet: rendNet, tri: triVal, regle70: regle70 };
   };
-  const bIS = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels - amortissement);
-  const bFR = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels);
-  return {
     depenseNette: depenseNette, sommeEmpruntee: sommeEmpruntee, mensualite: mensualite,
     coutPretTotal: coutPretTotal, remboursementAnnuel: remboursementAnnuel,
     loyersAnnuels: loyersAnnuels, totalFraisAnnuels: totalFraisAnnuels, amortissement: amortissement,
