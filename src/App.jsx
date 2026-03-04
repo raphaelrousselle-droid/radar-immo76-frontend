@@ -133,13 +133,13 @@ function calculerSimulation(i) {
     const rendNet = depenseNette > 0 ? (tresorerie / depenseNette) * 100 : 0;
     const regle70 = loyersAnnuels > 0 ? remboursementAnnuel / loyersAnnuels : null;
     // TRI : apport négatif en t=0, puis cash-flows annuels sur la durée du prêt
-    const cfIRR = [-pf(i.apport)];
-    for (var y = 0; y < dur; y++) {
+       const apport = pf(i.apport);
+    const cfIRR = apport > 0 ? [-apport] : [-depenseNette * 0.05];
+    for (var y = 0; y < Math.max(1, dur); y++) {
       const loyAn = loyersAnnuels * Math.pow(1.01, y);
       const gAn = (loyAn * pf(i.gestionLocativePct)) / 100;
       const frAn = pf(i.chargesImmeubleAn) + pf(i.taxeFonciereAn) + (depenseNette * 0.0012) + gAn + pf(i.provisionTravauxAn) + pf(i.fraisBancairesAn) + pf(i.expertComptableAn);
-      const cfAn = loyAn - frAn - remboursementAnnuel - impot;
-      cfIRR.push(cfAn);
+      cfIRR.push(loyAn - frAn - remboursementAnnuel - impot);
     }
     const triVal = calculerIRR(cfIRR);
     return { ebe: loyersAnnuels - totalFraisAnnuels, impot: impot, tresorerie: tresorerie, rendBrut: rendBrut, rendNet: rendNet, tri: triVal, regle70: regle70 };
