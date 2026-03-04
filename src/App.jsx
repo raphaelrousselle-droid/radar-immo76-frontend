@@ -5,10 +5,10 @@ const CACHE_KEY = "radar-immo-communes-v2";
 
 // ─── Helpers généraux ─────────────────────────────────────────────────────────
 const nc = (v) => {
-  if (v == null) return "#9ca3af";
-  if (v >= 7) return "#16a34a";
-  if (v >= 5) return "#f59e0b";
-  return "#dc2626";
+  if (v == null) return "#a1a1aa";
+  if (v >= 7) return "#22c55e";
+  if (v >= 5) return "#f97316";
+  return "#ef4444";
 };
 const nLabel = (v) => {
   if (v == null) return "—";
@@ -29,19 +29,21 @@ function ProgressBar({ value, onClick, clickable }) {
     <div
       onClick={onClick}
       style={{
-        background: "#e5e7eb",
+        background: "rgba(255,255,255,0.35)",
         borderRadius: 999,
-        height: 6,
+        height: 7,
         width: "100%",
         overflow: "hidden",
         cursor: clickable ? "pointer" : "default",
+        boxShadow: "inset 0 0 0 1px rgba(148,163,184,0.3)",
       }}
     >
       <div
         style={{
           width: `${pct}%`,
-          background: `linear-gradient(90deg, #3b82f6, ${nc(n)})`,
-          height: 6,
+          background:
+            "linear-gradient(90deg, rgba(56,189,248,0.9), rgba(129,140,248,0.9))",
+          height: 7,
           borderRadius: 999,
           transition: "width 0.3s",
         }}
@@ -69,7 +71,7 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
   const configs = {
     rendement: {
       title: "Détail — Rendement",
-      color: "#3b82f6",
+      color: "#38bdf8",
       items: [
         {
           label: "Prix appartement/m²",
@@ -85,8 +87,8 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
         },
         {
           label: "Loyer médian/m²",
-          value: detail?.loyer?.appartement_m2
-            ? `${detail.loyer.appartement_m2} €/m²/mois`
+          value: detail?.loyer?.appartement_m2 != null
+            ? `${Number(detail.loyer.appartement_m2).toFixed(1)} €/m²/mois`
             : "—",
         },
         {
@@ -109,7 +111,7 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
     },
     demographie: {
       title: "Détail — Démographie",
-      color: "#6366f1",
+      color: "#a855f7",
       items: [
         {
           label: "Population",
@@ -183,7 +185,7 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
           value: se.gini != null ? se.gini : "—",
         },
       ],
-      note: "Médian 76 : revenu ~21 000 €, chômage ~12 %. Plus le revenu est élevé et le chômage faible, meilleur est le score.",
+      note: "Plus le revenu est élevé et le chômage faible, meilleur est le score.",
     },
   };
 
@@ -193,18 +195,20 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
   return (
     <div
       style={{
-        background: "#f9fafb",
-        border: `1px solid ${cfg.color}33`,
-        borderRadius: 12,
+        background: "rgba(255,255,255,0.75)",
+        borderRadius: 14,
         padding: 12,
         marginTop: 8,
+        border: `1px solid ${cfg.color}33`,
+        boxShadow: "0 18px 45px rgba(15,23,42,0.10)",
       }}
     >
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          marginBottom: 8,
+          marginBottom: 6,
+          alignItems: "center",
         }}
       >
         <div
@@ -232,7 +236,7 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
             display: "flex",
             justifyContent: "space-between",
             padding: "4px 0",
-            borderBottom: "1px solid #e5e7eb",
+            borderBottom: "1px solid rgba(148,163,184,0.25)",
             fontSize: 12,
           }}
         >
@@ -251,7 +255,7 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
         style={{
           fontSize: 11,
           color: "#9ca3af",
-          marginTop: 6,
+          marginTop: 5,
           fontStyle: "italic",
         }}
       >
@@ -380,7 +384,7 @@ function InputField({
         style={{
           display: "block",
           fontSize: 12,
-          color: "#4b5563",
+          color: "#f9fafb",
           marginBottom: 4,
         }}
       >
@@ -398,19 +402,20 @@ function InputField({
           onChange={onChange}
           style={{
             width: "100%",
-            background: "#ffffff",
-            border: "1px solid #d1d5db",
-            borderRadius: 8,
-            padding: "7px 10px",
-            color: "#111827",
+            background: "rgba(15,23,42,0.4)",
+            border: "1px solid rgba(148,163,184,0.45)",
+            borderRadius: 999,
+            padding: "7px 12px",
+            color: "#e5e7eb",
             fontSize: 13,
+            backdropFilter: "blur(14px)",
           }}
         />
         {unit && (
           <span
             style={{
-              color: "#6b7280",
-              fontSize: 12,
+              color: "#e5e7eb",
+              fontSize: 11,
               minWidth: 28,
               textAlign: "right",
             }}
@@ -431,7 +436,7 @@ function SectionTitle({ children }) {
         fontWeight: 600,
         textTransform: "uppercase",
         letterSpacing: 0.5,
-        color: "#6b7280",
+        color: "#c7d2fe",
         margin: "10px 0 4px",
       }}
     >
@@ -476,11 +481,11 @@ function SimulationProjet() {
   );
   const regime = result.regimes[regimeActif];
   const couleurTreso =
-    pf(regime.tresorerie) >= 0 ? "#16a34a" : "#dc2626";
+    pf(regime.tresorerie) >= 0 ? "#22c55e" : "#f97316";
   const couleur70 =
     regime.regle70 != null && regime.regle70 < 0.7
-      ? "#16a34a"
-      : "#dc2626";
+      ? "#22c55e"
+      : "#ef4444";
 
   return (
     <div
@@ -490,14 +495,16 @@ function SimulationProjet() {
         gap: 16,
       }}
     >
-      {/* Formulaire en haut */}
+      {/* Formulaire glassmorphism en haut */}
       <div
         style={{
-          background: "#ffffff",
-          borderRadius: 16,
-          padding: 16,
+          borderRadius: 20,
+          padding: 18,
+          background:
+            "linear-gradient(135deg, rgba(15,23,42,0.75), rgba(30,64,175,0.85))",
           boxShadow:
-            "0 4px 12px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06)",
+            "0 22px 55px rgba(15,23,42,0.45), 0 0 0 1px rgba(148,163,184,0.4)",
+          backdropFilter: "blur(24px)",
         }}
       >
         <div
@@ -505,7 +512,7 @@ function SimulationProjet() {
             fontSize: 14,
             fontWeight: 600,
             marginBottom: 10,
-            color: "#111827",
+            color: "#e5e7eb",
           }}
         >
           Paramètres du projet
@@ -514,8 +521,8 @@ function SimulationProjet() {
           style={{
             display: "grid",
             gridTemplateColumns:
-              "repeat(auto-fit, minmax(220px, 1fr))",
-            columnGap: 16,
+              "repeat(auto-fit, minmax(230px, 1fr))",
+            columnGap: 18,
             rowGap: 6,
           }}
         >
@@ -562,7 +569,7 @@ function SimulationProjet() {
           </div>
 
           <div>
-            <SectionTitle>Prêt</SectionTitle>
+            <SectionTitle>Prêt & Fiscalité</SectionTitle>
             <InputField
               label="Taux crédit (%)"
               name="tauxCredit"
@@ -579,7 +586,6 @@ function SimulationProjet() {
               unit="ans"
               step="1"
             />
-            <SectionTitle>Fiscalité</SectionTitle>
             <InputField
               label="Coef amortissement (%)"
               name="coefAmortissement"
@@ -721,17 +727,18 @@ function SimulationProjet() {
             <div
               key={c.label}
               style={{
-                background: "#ffffff",
-                borderRadius: 12,
+                background: "rgba(255,255,255,0.85)",
+                borderRadius: 18,
                 padding: "10px 12px",
                 boxShadow:
-                  "0 4px 10px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.06)",
+                  "0 16px 40px rgba(15,23,42,0.18), 0 0 0 1px rgba(148,163,184,0.3)",
+                backdropFilter: "blur(20px)",
               }}
             >
               <div
                 style={{
                   fontSize: 11,
-                  color: "#6b7280",
+                  color: "#4b5563",
                   marginBottom: 4,
                 }}
               >
@@ -767,15 +774,18 @@ function SimulationProjet() {
                 borderRadius: 999,
                 border:
                   regimeActif === r
-                    ? "1px solid #3b82f6"
-                    : "1px solid #e5e7eb",
+                    ? "1px solid rgba(59,130,246,0.8)"
+                    : "1px solid rgba(148,163,184,0.4)",
                 background:
-                  regimeActif === r ? "#eff6ff" : "#ffffff",
+                  regimeActif === r
+                    ? "rgba(59,130,246,0.15)"
+                    : "rgba(15,23,42,0.35)",
                 color:
-                  regimeActif === r ? "#1d4ed8" : "#4b5563",
+                  regimeActif === r ? "#e5e7eb" : "#cbd5f5",
                 fontSize: 12,
                 fontWeight: 500,
                 cursor: "pointer",
+                backdropFilter: "blur(18px)",
               }}
             >
               {r}
@@ -786,11 +796,12 @@ function SimulationProjet() {
         {/* Bilan régime actif */}
         <div
           style={{
-            background: "#ffffff",
-            borderRadius: 16,
+            background: "rgba(15,23,42,0.75)",
+            borderRadius: 20,
             padding: 16,
             boxShadow:
-              "0 8px 20px rgba(15,23,42,0.05), 0 1px 3px rgba(15,23,42,0.08)",
+              "0 20px 50px rgba(15,23,42,0.4), 0 0 0 1px rgba(148,163,184,0.4)",
+            backdropFilter: "blur(24px)",
           }}
         >
           <div
@@ -798,7 +809,7 @@ function SimulationProjet() {
               fontSize: 14,
               fontWeight: 600,
               marginBottom: 12,
-              color: "#111827",
+              color: "#e5e7eb",
             }}
           >
             Bilan — {regimeActif}
@@ -814,12 +825,12 @@ function SimulationProjet() {
               {
                 label: "EBE",
                 value: fmtEur(regime.ebe),
-                color: "#2563eb",
+                color: "#38bdf8",
               },
               {
                 label: "Fiscalité annuelle",
                 value: fmtEur(regime.impot),
-                color: "#f59e0b",
+                color: "#facc15",
               },
               {
                 label: "Trésorerie/an",
@@ -829,31 +840,32 @@ function SimulationProjet() {
               {
                 label: "Rendement brut",
                 value: fmtPct(regime.rendBrut),
-                color: "#6b7280",
+                color: "#e5e7eb",
               },
               {
                 label: "Rendement net",
                 value: fmtPct(regime.rendNet),
-                color: "#16a34a",
+                color: "#22c55e",
               },
               {
                 label: "TRI",
                 value: regime.tri ? fmt(regime.tri, 1) + " ans" : "—",
-                color: "#6b7280",
+                color: "#e5e7eb",
               },
             ].map((c) => (
               <div
                 key={c.label}
                 style={{
-                  background: "#f9fafb",
-                  borderRadius: 12,
+                  background: "rgba(15,23,42,0.6)",
+                  borderRadius: 16,
                   padding: "10px 12px",
+                  border: "1px solid rgba(148,163,184,0.5)",
                 }}
               >
                 <div
                   style={{
                     fontSize: 11,
-                    color: "#6b7280",
+                    color: "#cbd5f5",
                     marginBottom: 4,
                   }}
                 >
@@ -877,15 +889,16 @@ function SimulationProjet() {
             style={{
               marginTop: 14,
               padding: "10px 12px",
-              borderRadius: 12,
-              background: "#f9fafb",
+              borderRadius: 16,
+              background: "rgba(15,23,42,0.7)",
               display: "flex",
               alignItems: "center",
               gap: 12,
+              border: "1px solid rgba(148,163,184,0.5)",
             }}
           >
             <div
-              style={{ fontSize: 12, color: "#4b5563", minWidth: 110 }}
+              style={{ fontSize: 12, color: "#e5e7eb", minWidth: 110 }}
             >
               Règle des 70 %
             </div>
@@ -916,9 +929,9 @@ function SimulationProjet() {
             <div
               style={{
                 flex: 1,
-                background: "#e5e7eb",
+                background: "rgba(15,23,42,0.85)",
                 borderRadius: 999,
-                height: 6,
+                height: 7,
                 overflow: "hidden",
               }}
             >
@@ -929,7 +942,7 @@ function SimulationProjet() {
                     (regime.regle70 || 0) * 100
                   )}%`,
                   background: couleur70,
-                  height: 6,
+                  height: 7,
                   borderRadius: 999,
                   transition: "width 0.3s",
                 }}
@@ -941,11 +954,12 @@ function SimulationProjet() {
         {/* Tableau comparatif */}
         <div
           style={{
-            background: "#ffffff",
-            borderRadius: 16,
+            background: "rgba(15,23,42,0.75)",
+            borderRadius: 20,
             padding: 16,
             boxShadow:
-              "0 4px 12px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06)",
+              "0 18px 45px rgba(15,23,42,0.5), 0 0 0 1px rgba(148,163,184,0.5)",
+            backdropFilter: "blur(24px)",
           }}
         >
           <div
@@ -953,7 +967,7 @@ function SimulationProjet() {
               fontSize: 13,
               fontWeight: 600,
               marginBottom: 8,
-              color: "#111827",
+              color: "#e5e7eb",
             }}
           >
             Comparatif des régimes fiscaux
@@ -968,8 +982,8 @@ function SimulationProjet() {
             <thead>
               <tr
                 style={{
-                  color: "#6b7280",
-                  borderBottom: "1px solid #e5e7eb",
+                  color: "#9ca3af",
+                  borderBottom: "1px solid rgba(148,163,184,0.6)",
                 }}
               >
                 {[
@@ -999,9 +1013,11 @@ function SimulationProjet() {
                   key={nom}
                   onClick={() => setRegimeActif(nom)}
                   style={{
-                    borderBottom: "1px solid #f3f4f6",
-                    backgroundColor:
-                      regimeActif === nom ? "#eff6ff" : "transparent",
+                    borderBottom: "1px solid rgba(30,64,175,0.5)",
+                    background:
+                      regimeActif === nom
+                        ? "rgba(59,130,246,0.18)"
+                        : "transparent",
                     cursor: "pointer",
                   }}
                 >
@@ -1009,7 +1025,7 @@ function SimulationProjet() {
                     style={{
                       padding: "8px 8px",
                       fontWeight: 500,
-                      color: "#111827",
+                      color: "#e5e7eb",
                     }}
                   >
                     {nom}
@@ -1020,8 +1036,8 @@ function SimulationProjet() {
                       textAlign: "right",
                       color:
                         r.tresorerie >= 0
-                          ? "#16a34a"
-                          : "#dc2626",
+                          ? "#4ade80"
+                          : "#fb923c",
                       fontWeight: 600,
                     }}
                   >
@@ -1031,7 +1047,7 @@ function SimulationProjet() {
                     style={{
                       padding: "8px 8px",
                       textAlign: "right",
-                      color: "#f59e0b",
+                      color: "#facc15",
                     }}
                   >
                     {fmtEur(r.impot)}
@@ -1040,6 +1056,7 @@ function SimulationProjet() {
                     style={{
                       padding: "8px 8px",
                       textAlign: "right",
+                      color: "#e5e7eb",
                     }}
                   >
                     {fmtPct(r.rendNet)}
@@ -1048,6 +1065,7 @@ function SimulationProjet() {
                     style={{
                       padding: "8px 8px",
                       textAlign: "right",
+                      color: "#e5e7eb",
                     }}
                   >
                     {r.tri ? fmt(r.tri, 1) + " ans" : "—"}
@@ -1058,8 +1076,8 @@ function SimulationProjet() {
                       textAlign: "right",
                       color:
                         r.regle70 != null && r.regle70 < 0.7
-                          ? "#16a34a"
-                          : "#dc2626",
+                          ? "#4ade80"
+                          : "#f97316",
                       fontWeight: 600,
                     }}
                   >
@@ -1158,7 +1176,6 @@ function AnalyseCommunes() {
       });
   }, [communes, search, sortKey, filterMin]);
 
-  // TOP 10 seulement
   const top10 = useMemo(() => filtered.slice(0, 10), [filtered]);
 
   const toggleCompare = (c) => {
@@ -1179,30 +1196,56 @@ function AnalyseCommunes() {
   ];
 
   return (
-    <div style={{ display: "flex", gap: 20 }}>
-      {/* Liste communes */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {/* Barre de recherche centrée, large, glassmorphism */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <div
           style={{
+            maxWidth: 800,
+            flex: 1,
             display: "flex",
-            gap: 10,
-            marginBottom: 14,
-            flexWrap: "wrap",
             alignItems: "center",
+            gap: 10,
+            padding: 10,
+            borderRadius: 999,
+            background:
+              "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(219,234,254,0.9))",
+            boxShadow:
+              "0 18px 45px rgba(15,23,42,0.18), 0 0 0 1px rgba(148,163,184,0.3)",
+            backdropFilter: "blur(18px)",
           }}
         >
+          <div
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: "999px",
+              background:
+                "radial-gradient(circle at 30% 0%, #38bdf8, #6366f1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#f9fafb",
+              fontSize: 16,
+            }}
+          >
+            🔍
+          </div>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher une commune…"
+            placeholder="Rechercher une commune ou taper un nom (TOP 10)…"
             style={{
               flex: 1,
-              minWidth: 180,
-              background: "#ffffff",
-              border: "1px solid #d1d5db",
-              borderRadius: 999,
-              padding: "8px 14px",
-              fontSize: 13,
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              fontSize: 14,
               color: "#111827",
             }}
           />
@@ -1210,11 +1253,11 @@ function AnalyseCommunes() {
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value)}
             style={{
-              background: "#ffffff",
-              border: "1px solid #d1d5db",
+              background: "rgba(15,23,42,0.08)",
+              border: "1px solid rgba(148,163,184,0.6)",
               borderRadius: 999,
-              padding: "8px 12px",
-              fontSize: 13,
+              padding: "7px 10px",
+              fontSize: 12,
               color: "#111827",
             }}
           >
@@ -1228,11 +1271,11 @@ function AnalyseCommunes() {
             value={filterMin}
             onChange={(e) => setFilterMin(Number(e.target.value))}
             style={{
-              background: "#ffffff",
-              border: "1px solid #d1d5db",
+              background: "rgba(15,23,42,0.08)",
+              border: "1px solid rgba(148,163,184,0.6)",
               borderRadius: 999,
-              padding: "8px 12px",
-              fontSize: 13,
+              padding: "7px 10px",
+              fontSize: 12,
               color: "#111827",
             }}
           >
@@ -1241,19 +1284,42 @@ function AnalyseCommunes() {
             <option value={6}>Score ≥ 6</option>
             <option value={7}>Score ≥ 7</option>
           </select>
+        </div>
+      </div>
+
+      {/* Ligne boutons action */}
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          alignItems: "center",
+          justifyContent: "space-between",
+          maxWidth: 800,
+          margin: "0 auto",
+        }}
+      >
+        <div
+          style={{ fontSize: 11, color: "#e5e7eb" }}
+        >
+          {filtered.length} communes matchent tes critères · Top 10
+          affiché
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
           <button
             onClick={() => loadCommunes(true)}
             style={{
-              background: "#2563eb",
+              background:
+                "linear-gradient(135deg,#38bdf8,#6366f1)",
               border: "none",
               borderRadius: 999,
-              padding: "8px 14px",
-              color: "#ffffff",
+              padding: "7px 12px",
+              color: "#f9fafb",
               cursor: "pointer",
-              fontSize: 13,
+              fontSize: 12,
               display: "flex",
               alignItems: "center",
               gap: 6,
+              boxShadow: "0 12px 30px rgba(59,130,246,0.55)",
             }}
           >
             <span>↻</span>
@@ -1263,49 +1329,44 @@ function AnalyseCommunes() {
             <button
               onClick={() => setShowCompare(true)}
               style={{
-                background: "#6366f1",
+                background:
+                  "linear-gradient(135deg,#a855f7,#ec4899)",
                 border: "none",
                 borderRadius: 999,
-                padding: "8px 14px",
-                color: "#ffffff",
+                padding: "7px 12px",
+                color: "#fdf2ff",
                 cursor: "pointer",
-                fontSize: 13,
+                fontSize: 12,
+                boxShadow: "0 12px 30px rgba(168,85,247,0.55)",
               }}
             >
               Comparer ({compareList.length})
             </button>
           )}
         </div>
+      </div>
 
-        {loading && (
-          <div
-            style={{
-              color: "#6b7280",
-              padding: 40,
-              textAlign: "center",
-            }}
-          >
-            Chargement des communes…
-          </div>
-        )}
-        {error && (
-          <div style={{ color: "#dc2626", padding: 20 }}>
-            Erreur : {error}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <>
+      <div style={{ display: "flex", gap: 18 }}>
+        {/* Liste communes TOP 10 */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {loading && (
             <div
               style={{
-                fontSize: 11,
-                color: "#6b7280",
-                marginBottom: 8,
+                color: "#e5e7eb",
+                padding: 40,
+                textAlign: "center",
               }}
             >
-              {filtered.length} communes correspondantes · affichage du
-              top 10 · Clic = détail · clic droit = comparer
+              Chargement des communes…
             </div>
+          )}
+          {error && (
+            <div style={{ color: "#fecaca", padding: 20 }}>
+              Erreur : {error}
+            </div>
+          )}
+
+          {!loading && !error && (
             <div
               style={{
                 display: "grid",
@@ -1331,19 +1392,20 @@ function AnalyseCommunes() {
                       toggleCompare(c);
                     }}
                     style={{
-                      background: "#ffffff",
-                      borderRadius: 16,
+                      background: "rgba(15,23,42,0.75)",
+                      borderRadius: 18,
                       padding: "12px 14px",
                       boxShadow: isSelected
-                        ? "0 8px 20px rgba(37,99,235,0.18)"
-                        : "0 4px 12px rgba(15,23,42,0.05)",
+                        ? "0 20px 45px rgba(59,130,246,0.55)"
+                        : "0 14px 35px rgba(15,23,42,0.6)",
                       border: isSelected
-                        ? "1px solid #2563eb"
+                        ? "1px solid rgba(59,130,246,0.8)"
                         : isCompared
-                        ? "1px solid #a855f7"
-                        : "1px solid #e5e7eb",
+                        ? "1px solid rgba(244,114,182,0.9)"
+                        : "1px solid rgba(148,163,184,0.55)",
                       cursor: "pointer",
-                      transition: "all 0.15s",
+                      transition: "all 0.18s",
+                      backdropFilter: "blur(16px)",
                     }}
                   >
                     <div
@@ -1358,7 +1420,7 @@ function AnalyseCommunes() {
                         style={{
                           fontWeight: 600,
                           fontSize: 13,
-                          color: "#111827",
+                          color: "#f9fafb",
                         }}
                       >
                         {c.nom}
@@ -1377,7 +1439,7 @@ function AnalyseCommunes() {
                       <div
                         style={{
                           fontSize: 11,
-                          color: "#6b7280",
+                          color: "#cbd5f5",
                           marginBottom: 6,
                         }}
                       >
@@ -1406,7 +1468,7 @@ function AnalyseCommunes() {
                               <div
                                 style={{
                                   fontSize: 11,
-                                  color: "#6b7280",
+                                  color: "#cbd5f5",
                                   width: 80,
                                 }}
                               >
@@ -1436,74 +1498,574 @@ function AnalyseCommunes() {
                 );
               })}
             </div>
-          </>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Panneau détail */}
-      {selected && (
-        <div
-          style={{
-            width: 360,
-            minWidth: 320,
-            background: "#ffffff",
-            borderRadius: 16,
-            padding: 16,
-            boxShadow:
-              "0 10px 25px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.12)",
-          }}
-        >
-          {loadingDetail && (
+        {/* Panneau détail */}
+        {selected && (
+          <div
+            style={{
+              width: 360,
+              minWidth: 320,
+              background: "rgba(15,23,42,0.85)",
+              borderRadius: 20,
+              padding: 16,
+              boxShadow:
+                "0 20px 50px rgba(15,23,42,0.7), 0 0 0 1px rgba(148,163,184,0.7)",
+              backdropFilter: "blur(26px)",
+            }}
+          >
+            {loadingDetail && (
+              <div
+                style={{
+                  color: "#e5e7eb",
+                  textAlign: "center",
+                  marginTop: 40,
+                }}
+              >
+                Chargement…
+              </div>
+            )}
+            {detail?.error && (
+              <div style={{ color: "#fecaca" }}>
+                Erreur : {detail.error}
+              </div>
+            )}
+            {detail && !detail.error && (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: 12,
+                    alignItems: "center",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 17,
+                        fontWeight: 700,
+                        color: "#f9fafb",
+                      }}
+                    >
+                      {detail.commune}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "#cbd5f5",
+                      }}
+                    >
+                      {detail.code_insee} · Zone {detail.zonage_abc}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelected(null);
+                      setDetail(null);
+                      setOpenScore(null);
+                    }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "#9ca3af",
+                      cursor: "pointer",
+                      fontSize: 18,
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Scores cliquables */}
+                <div style={{ marginBottom: 14 }}>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "#cbd5f5",
+                      fontWeight: 500,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Scores (clic sur une jauge pour le détail)
+                  </div>
+                  {[
+                    {
+                      key: "global",
+                      label: "Global",
+                      v: sn(detail.scores?.global),
+                    },
+                    {
+                      key: "rendement",
+                      label: "Rendement",
+                      v: sn(detail.scores?.rendement),
+                    },
+                    {
+                      key: "demographie",
+                      label: "Démographie",
+                      v: sn(detail.scores?.demographie),
+                    },
+                    {
+                      key: "socio_eco",
+                      label: "Socio-éco",
+                      v: sn(detail.scores?.socio_eco),
+                    },
+                  ].map(({ key, label, v }) => {
+                    const clickable = key !== "global";
+                    const isOpen = openScore === key;
+                    return (
+                      <div key={key} style={{ marginBottom: isOpen ? 4 : 6 }}>
+                        <div
+                          onClick={() =>
+                            clickable &&
+                            setOpenScore(isOpen ? null : key)
+                          }
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            cursor: clickable ? "pointer" : "default",
+                            padding: "3px 0",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 12,
+                              width: 80,
+                              color: "#e5e7eb",
+                            }}
+                          >
+                            {label}
+                          </div>
+                          <ProgressBar
+                            value={v}
+                            clickable={clickable}
+                          />
+                          <div
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 600,
+                              color: nc(v),
+                              minWidth: 32,
+                              textAlign: "right",
+                            }}
+                          >
+                            {v != null ? v.toFixed(1) : "—"}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: nc(v),
+                              minWidth: 42,
+                            }}
+                          >
+                            {nLabel(v)}
+                          </div>
+                          {clickable && (
+                            <div
+                              style={{
+                                fontSize: 11,
+                                color: "#9ca3af",
+                              }}
+                            >
+                              {isOpen ? "▲" : "▼"}
+                            </div>
+                          )}
+                        </div>
+                        {isOpen && clickable && (
+                          <ScoreDetail
+                            scoreKey={key}
+                            detail={detail}
+                            onClose={() => setOpenScore(null)}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Prix au m² */}
+                <div style={{ marginBottom: 12 }}>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "#cbd5f5",
+                      fontWeight: 500,
+                      marginBottom: 6,
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    Prix au m²
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 8,
+                    }}
+                  >
+                    {[
+                      {
+                        label: "Appartement",
+                        value: detail.prix?.appartement_m2
+                          ? `${detail.prix.appartement_m2.toLocaleString(
+                              "fr-FR"
+                            )} €/m²`
+                          : "—",
+                        sub: detail.prix?.nb_ventes_apt
+                          ? `${detail.prix.nb_ventes_apt} ventes`
+                          : "",
+                      },
+                      {
+                        label: "Maison",
+                        value: detail.prix?.maison_m2
+                          ? `${detail.prix.maison_m2.toLocaleString(
+                              "fr-FR"
+                            )} €/m²`
+                          : "—",
+                        sub: detail.prix?.nb_ventes_mai
+                          ? `${detail.prix.nb_ventes_mai} ventes`
+                          : "",
+                      },
+                    ].map((x) => (
+                      <div
+                        key={x.label}
+                        style={{
+                          background: "rgba(15,23,42,0.7)",
+                          borderRadius: 14,
+                          padding: "9px 10px",
+                          border:
+                            "1px solid rgba(148,163,184,0.6)",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "#cbd5f5",
+                            marginBottom: 2,
+                          }}
+                        >
+                          {x.label}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 600,
+                            color: "#f9fafb",
+                          }}
+                        >
+                          {x.value}
+                        </div>
+                        {x.sub && (
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: "#9ca3af",
+                            }}
+                          >
+                            {x.sub}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Loyer avec 1 décimale */}
+                {detail.loyer?.appartement_m2 != null && (
+                  <div
+                    style={{
+                      marginBottom: 12,
+                      background:
+                        "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(129,140,248,0.35))",
+                      borderRadius: 14,
+                      padding: "8px 10px",
+                      border: "1px solid rgba(129,140,248,0.7)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "#e0e7ff",
+                        marginBottom: 2,
+                      }}
+                    >
+                      Loyer médian
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 15,
+                        fontWeight: 600,
+                        color: "#f9fafb",
+                      }}
+                    >
+                      {Number(
+                        detail.loyer.appartement_m2
+                      ).toFixed(1)}{" "}
+                      €/m²/mois
+                    </div>
+                  </div>
+                )}
+
+                {/* Rentabilité brute */}
+                {detail.rentabilite_brute_pct && (
+                  <div
+                    style={{
+                      marginBottom: 12,
+                      background:
+                        "linear-gradient(135deg, rgba(34,197,94,0.25), rgba(52,211,153,0.35))",
+                      borderRadius: 14,
+                      padding: "8px 10px",
+                      border: "1px solid rgba(34,197,94,0.7)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "#bbf7d0",
+                        marginBottom: 2,
+                      }}
+                    >
+                      Rentabilité brute estimée
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: "#f9fafb",
+                      }}
+                    >
+                      {detail.rentabilite_brute_pct} %
+                    </div>
+                  </div>
+                )}
+
+                {/* Socio-éco */}
+                <div style={{ marginBottom: 12 }}>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "#cbd5f5",
+                      fontWeight: 500,
+                      marginBottom: 6,
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    Données socio-éco
+                  </div>
+                  {[
+                    {
+                      label: "Revenu médian",
+                      value: detail.socio_eco?.revenu_median
+                        ? `${detail.socio_eco.revenu_median.toLocaleString(
+                            "fr-FR"
+                          )} €`
+                        : "—",
+                    },
+                    {
+                      label: "Chômage",
+                      value:
+                        detail.socio_eco?.chomage_pct != null
+                          ? `${detail.socio_eco.chomage_pct} %`
+                          : "—",
+                    },
+                    {
+                      label: "Taux pauvreté",
+                      value:
+                        detail.socio_eco?.taux_pauvrete_pct != null
+                          ? `${detail.socio_eco.taux_pauvrete_pct} %`
+                          : "—",
+                    },
+                    {
+                      label: "Part cadres",
+                      value:
+                        detail.socio_eco?.part_cadres_pct != null
+                          ? `${detail.socio_eco.part_cadres_pct} %`
+                          : "—",
+                    },
+                  ].map((x) => (
+                    <div
+                      key={x.label}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "4px 0",
+                        borderBottom:
+                          "1px solid rgba(148,163,184,0.6)",
+                        fontSize: 13,
+                      }}
+                    >
+                      <span style={{ color: "#cbd5f5" }}>
+                        {x.label}
+                      </span>
+                      <span
+                        style={{
+                          fontWeight: 500,
+                          color: "#f9fafb",
+                        }}
+                      >
+                        {x.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Démographie */}
+                <div style={{ marginBottom: 12 }}>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "#cbd5f5",
+                      fontWeight: 500,
+                      marginBottom: 6,
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    Démographie
+                  </div>
+                  {[
+                    {
+                      label: "Population",
+                      value: detail.population
+                        ? detail.population.toLocaleString(
+                            "fr-FR"
+                          ) + " hab."
+                        : "—",
+                    },
+                    {
+                      label: "Évolution/an",
+                      value:
+                        detail.demographie
+                          ?.evolution_pop_pct_an != null
+                          ? `${detail.demographie.evolution_pop_pct_an} %`
+                          : "—",
+                    },
+                    {
+                      label: "Vacance logements",
+                      value:
+                        detail.demographie?.vacance_pct != null
+                          ? `${detail.demographie.vacance_pct} %`
+                          : "—",
+                    },
+                    {
+                      label: "Tension locative",
+                      value:
+                        detail.demographie
+                          ?.tension_locative_pct != null
+                          ? `${detail.demographie.tension_locative_pct} %`
+                          : "—",
+                    },
+                  ].map((x) => (
+                    <div
+                      key={x.label}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "4px 0",
+                        borderBottom:
+                          "1px solid rgba(148,163,184,0.6)",
+                        fontSize: 13,
+                      }}
+                    >
+                      <span style={{ color: "#cbd5f5" }}>
+                        {x.label}
+                      </span>
+                      <span
+                        style={{
+                          fontWeight: 500,
+                          color: "#f9fafb",
+                        }}
+                      >
+                        {x.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {detail.prix?.avertissement_apt && (
+                  <div
+                    style={{
+                      background: "rgba(251,191,36,0.15)",
+                      borderRadius: 12,
+                      padding: "8px 10px",
+                      fontSize: 12,
+                      color: "#fef3c7",
+                      marginBottom: 10,
+                      border:
+                        "1px solid rgba(251,191,36,0.7)",
+                    }}
+                  >
+                    ⚠ {detail.prix.avertissement_apt}
+                  </div>
+                )}
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#9ca3af",
+                    marginTop: 4,
+                  }}
+                >
+                  Sources : {detail.prix?.source} ·{" "}
+                  {detail.loyer?.source}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Modal comparaison (inchangé sauf couleurs déjà futuristes) */}
+        {showCompare && compareList.length > 0 && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15,23,42,0.65)",
+              zIndex: 50,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onClick={() => setShowCompare(false)}
+          >
             <div
               style={{
-                color: "#6b7280",
-                textAlign: "center",
-                marginTop: 40,
+                background:
+                  "linear-gradient(135deg, rgba(15,23,42,0.92), rgba(30,64,175,0.95))",
+                borderRadius: 20,
+                padding: 20,
+                minWidth: 520,
+                maxWidth: 840,
+                maxHeight: "80vh",
+                overflowY: "auto",
+                boxShadow:
+                  "0 22px 55px rgba(15,23,42,0.8), 0 0 0 1px rgba(148,163,184,0.7)",
+                backdropFilter: "blur(28px)",
               }}
+              onClick={(e) => e.stopPropagation()}
             >
-              Chargement…
-            </div>
-          )}
-          {detail?.error && (
-            <div style={{ color: "#dc2626" }}>
-              Erreur : {detail.error}
-            </div>
-          )}
-          {detail && !detail.error && (
-            <>
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  marginBottom: 12,
+                  marginBottom: 14,
                   alignItems: "center",
                 }}
               >
-                <div>
-                  <div
-                    style={{
-                      fontSize: 17,
-                      fontWeight: 700,
-                      color: "#111827",
-                    }}
-                  >
-                    {detail.commune}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "#6b7280",
-                    }}
-                  >
-                    {detail.code_insee} · Zone {detail.zonage_abc}
-                  </div>
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: "#f9fafb",
+                  }}
+                >
+                  Comparaison de communes
                 </div>
                 <button
-                  onClick={() => {
-                    setSelected(null);
-                    setDetail(null);
-                    setOpenScore(null);
-                  }}
+                  onClick={() => setShowCompare(false)}
                   style={{
                     background: "transparent",
                     border: "none",
@@ -1515,568 +2077,111 @@ function AnalyseCommunes() {
                   ✕
                 </button>
               </div>
-
-              {/* Scores cliquables */}
-              <div style={{ marginBottom: 14 }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "#6b7280",
-                    fontWeight: 500,
-                    marginBottom: 6,
-                  }}
-                >
-                  Scores (clic sur une jauge pour le détail)
-                </div>
-                {[
-                  { key: "global", label: "Global", v: sn(detail.scores?.global) },
-                  {
-                    key: "rendement",
-                    label: "Rendement",
-                    v: sn(detail.scores?.rendement),
-                  },
-                  {
-                    key: "demographie",
-                    label: "Démographie",
-                    v: sn(detail.scores?.demographie),
-                  },
-                  {
-                    key: "socio_eco",
-                    label: "Socio-éco",
-                    v: sn(detail.scores?.socio_eco),
-                  },
-                ].map(({ key, label, v }) => {
-                  const clickable = key !== "global";
-                  const isOpen = openScore === key;
-                  return (
-                    <div key={key} style={{ marginBottom: isOpen ? 4 : 6 }}>
-                      <div
-                        onClick={() =>
-                          clickable &&
-                          setOpenScore(isOpen ? null : key)
-                        }
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          cursor: clickable ? "pointer" : "default",
-                          padding: "3px 0",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 12,
-                            width: 80,
-                            color: "#4b5563",
-                          }}
-                        >
-                          {label}
-                        </div>
-                        <ProgressBar value={v} clickable={clickable} />
-                        <div
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: nc(v),
-                            minWidth: 32,
-                            textAlign: "right",
-                          }}
-                        >
-                          {v != null ? v.toFixed(1) : "—"}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 11,
-                            color: nc(v),
-                            minWidth: 42,
-                          }}
-                        >
-                          {nLabel(v)}
-                        </div>
-                        {clickable && (
-                          <div
-                            style={{
-                              fontSize: 11,
-                              color: "#9ca3af",
-                            }}
-                          >
-                            {isOpen ? "▲" : "▼"}
-                          </div>
-                        )}
-                      </div>
-                      {isOpen && clickable && (
-                        <ScoreDetail
-                          scoreKey={key}
-                          detail={detail}
-                          onClose={() => setOpenScore(null)}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Prix au m² */}
-              <div style={{ marginBottom: 12 }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "#6b7280",
-                    fontWeight: 500,
-                    marginBottom: 6,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Prix au m²
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 8,
-                  }}
-                >
-                  {[
-                    {
-                      label: "Appartement",
-                      value: detail.prix?.appartement_m2
-                        ? `${detail.prix.appartement_m2.toLocaleString(
-                            "fr-FR"
-                          )} €/m²`
-                        : "—",
-                      sub: detail.prix?.nb_ventes_apt
-                        ? `${detail.prix.nb_ventes_apt} ventes`
-                        : "",
-                    },
-                    {
-                      label: "Maison",
-                      value: detail.prix?.maison_m2
-                        ? `${detail.prix.maison_m2.toLocaleString(
-                            "fr-FR"
-                          )} €/m²`
-                        : "—",
-                      sub: detail.prix?.nb_ventes_mai
-                        ? `${detail.prix.nb_ventes_mai} ventes`
-                        : "",
-                    },
-                  ].map((x) => (
-                    <div
-                      key={x.label}
-                      style={{
-                        background: "#f9fafb",
-                        borderRadius: 12,
-                        padding: "9px 10px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: 11,
-                          color: "#6b7280",
-                          marginBottom: 2,
-                        }}
-                      >
-                        {x.label}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 15,
-                          fontWeight: 600,
-                          color: "#111827",
-                        }}
-                      >
-                        {x.value}
-                      </div>
-                      {x.sub && (
-                        <div
-                          style={{
-                            fontSize: 11,
-                            color: "#9ca3af",
-                          }}
-                        >
-                          {x.sub}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Loyer */}
-              {detail.loyer?.appartement_m2 && (
-                <div
-                  style={{
-                    marginBottom: 12,
-                    background: "#eef2ff",
-                    borderRadius: 12,
-                    padding: "8px 10px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "#4f46e5",
-                      marginBottom: 2,
-                    }}
-                  >
-                    Loyer médian
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: "#111827",
-                    }}
-                  >
-                    {detail.loyer.appartement_m2} €/m²/mois
-                  </div>
-                </div>
-              )}
-
-              {/* Rentabilité brute */}
-              {detail.rentabilite_brute_pct && (
-                <div
-                  style={{
-                    marginBottom: 12,
-                    background: "#ecfdf5",
-                    borderRadius: 12,
-                    padding: "8px 10px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "#15803d",
-                      marginBottom: 2,
-                    }}
-                  >
-                    Rentabilité brute estimée
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 700,
-                      color: "#15803d",
-                    }}
-                  >
-                    {detail.rentabilite_brute_pct} %
-                  </div>
-                </div>
-              )}
-
-              {/* Socio-éco */}
-              <div style={{ marginBottom: 12 }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "#6b7280",
-                    fontWeight: 500,
-                    marginBottom: 6,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Données socio-éco
-                </div>
-                {[
-                  {
-                    label: "Revenu médian",
-                    value: detail.socio_eco?.revenu_median
-                      ? `${detail.socio_eco.revenu_median.toLocaleString(
-                          "fr-FR"
-                        )} €`
-                      : "—",
-                  },
-                  {
-                    label: "Chômage",
-                    value:
-                      detail.socio_eco?.chomage_pct != null
-                        ? `${detail.socio_eco.chomage_pct} %`
-                        : "—",
-                  },
-                  {
-                    label: "Taux pauvreté",
-                    value:
-                      detail.socio_eco?.taux_pauvrete_pct != null
-                        ? `${detail.socio_eco.taux_pauvrete_pct} %`
-                        : "—",
-                  },
-                  {
-                    label: "Part cadres",
-                    value:
-                      detail.socio_eco?.part_cadres_pct != null
-                        ? `${detail.socio_eco.part_cadres_pct} %`
-                        : "—",
-                  },
-                ].map((x) => (
-                  <div
-                    key={x.label}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "4px 0",
-                      borderBottom: "1px solid #f3f4f6",
-                      fontSize: 13,
-                    }}
-                  >
-                    <span style={{ color: "#6b7280" }}>
-                      {x.label}
-                    </span>
-                    <span style={{ fontWeight: 500 }}>{x.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Démographie */}
-              <div style={{ marginBottom: 12 }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: "#6b7280",
-                    fontWeight: 500,
-                    marginBottom: 6,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Démographie
-                </div>
-                {[
-                  {
-                    label: "Population",
-                    value: detail.population
-                      ? detail.population.toLocaleString("fr-FR") +
-                        " hab."
-                      : "—",
-                  },
-                  {
-                    label: "Évolution/an",
-                    value:
-                      detail.demographie?.evolution_pop_pct_an != null
-                        ? `${detail.demographie.evolution_pop_pct_an} %`
-                        : "—",
-                  },
-                  {
-                    label: "Vacance logements",
-                    value:
-                      detail.demographie?.vacance_pct != null
-                        ? `${detail.demographie.vacance_pct} %`
-                        : "—",
-                  },
-                  {
-                    label: "Tension locative",
-                    value:
-                      detail.demographie?.tension_locative_pct != null
-                        ? `${detail.demographie.tension_locative_pct} %`
-                        : "—",
-                  },
-                ].map((x) => (
-                  <div
-                    key={x.label}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "4px 0",
-                      borderBottom: "1px solid #f3f4f6",
-                      fontSize: 13,
-                    }}
-                  >
-                    <span style={{ color: "#6b7280" }}>
-                      {x.label}
-                    </span>
-                    <span style={{ fontWeight: 500 }}>{x.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              {detail.prix?.avertissement_apt && (
-                <div
-                  style={{
-                    background: "#fef3c7",
-                    borderRadius: 12,
-                    padding: "8px 10px",
-                    fontSize: 12,
-                    color: "#92400e",
-                    marginBottom: 10,
-                  }}
-                >
-                  ⚠ {detail.prix.avertissement_apt}
-                </div>
-              )}
-              <div
+              <table
                 style={{
-                  fontSize: 11,
-                  color: "#9ca3af",
-                  marginTop: 4,
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: 12,
                 }}
               >
-                Sources : {detail.prix?.source} · {detail.loyer?.source}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Modal comparaison */}
-      {showCompare && compareList.length > 0 && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15,23,42,0.35)",
-            zIndex: 50,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={() => setShowCompare(false)}
-        >
-          <div
-            style={{
-              background: "#ffffff",
-              borderRadius: 18,
-              padding: 20,
-              minWidth: 520,
-              maxWidth: 840,
-              maxHeight: "80vh",
-              overflowY: "auto",
-              boxShadow:
-                "0 18px 45px rgba(15,23,42,0.25), 0 4px 8px rgba(15,23,42,0.18)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 14,
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: "#111827",
-                }}
-              >
-                Comparaison de communes
-              </div>
-              <button
-                onClick={() => setShowCompare(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#9ca3af",
-                  cursor: "pointer",
-                  fontSize: 18,
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: 12,
-              }}
-            >
-              <thead>
-                <tr style={{ color: "#6b7280" }}>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "6px 8px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    Critère
-                  </th>
-                  {compareList.map((c) => (
+                <thead>
+                  <tr style={{ color: "#cbd5f5" }}>
                     <th
-                      key={c.nom}
                       style={{
-                        textAlign: "right",
+                        textAlign: "left",
                         padding: "6px 8px",
                         fontWeight: 500,
-                        color: "#111827",
                       }}
                     >
-                      {c.nom}
+                      Critère
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {
-                    label: "Score global",
-                    fn: (c) =>
-                      sn(c.scores?.global)?.toFixed(1) ?? "—",
-                  },
-                  {
-                    label: "Rendement",
-                    fn: (c) =>
-                      sn(c.scores?.rendement)?.toFixed(1) ?? "—",
-                  },
-                  {
-                    label: "Démographie",
-                    fn: (c) =>
-                      sn(c.scores?.demographie)?.toFixed(1) ?? "—",
-                  },
-                  {
-                    label: "Socio-éco",
-                    fn: (c) =>
-                      sn(c.scores?.socio_eco)?.toFixed(1) ?? "—",
-                  },
-                  {
-                    label: "Population",
-                    fn: (c) =>
-                      c.population?.toLocaleString("fr-FR") ?? "—",
-                  },
-                ].map(({ label, fn }) => (
-                  <tr
-                    key={label}
-                    style={{ borderBottom: "1px solid #e5e7eb" }}
-                  >
-                    <td
-                      style={{
-                        padding: "7px 8px",
-                        color: "#6b7280",
-                      }}
-                    >
-                      {label}
-                    </td>
                     {compareList.map((c) => (
-                      <td
+                      <th
                         key={c.nom}
                         style={{
-                          padding: "7px 8px",
                           textAlign: "right",
+                          padding: "6px 8px",
                           fontWeight: 500,
+                          color: "#f9fafb",
                         }}
                       >
-                        {fn(c)}
-                      </td>
+                        {c.nom}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 11,
-                color: "#9ca3af",
-              }}
-            >
-              Clic droit sur une commune dans la liste pour
-              l’ajouter/retirer.
+                </thead>
+                <tbody>
+                  {[
+                    {
+                      label: "Score global",
+                      fn: (c) =>
+                        sn(c.scores?.global)?.toFixed(1) ?? "—",
+                    },
+                    {
+                      label: "Rendement",
+                      fn: (c) =>
+                        sn(c.scores?.rendement)?.toFixed(1) ?? "—",
+                    },
+                    {
+                      label: "Démographie",
+                      fn: (c) =>
+                        sn(c.scores?.demographie)?.toFixed(1) ?? "—",
+                    },
+                    {
+                      label: "Socio-éco",
+                      fn: (c) =>
+                        sn(c.scores?.socio_eco)?.toFixed(1) ?? "—",
+                    },
+                    {
+                      label: "Population",
+                      fn: (c) =>
+                        c.population?.toLocaleString("fr-FR") ??
+                        "—",
+                    },
+                  ].map(({ label, fn }) => (
+                    <tr
+                      key={label}
+                      style={{ borderBottom: "1px solid rgba(148,163,184,0.6)" }}
+                    >
+                      <td
+                        style={{
+                          padding: "7px 8px",
+                          color: "#e5e7eb",
+                        }}
+                      >
+                        {label}
+                      </td>
+                      {compareList.map((c) => (
+                        <td
+                          key={c.nom}
+                          style={{
+                            padding: "7px 8px",
+                            textAlign: "right",
+                            fontWeight: 500,
+                            color: "#f9fafb",
+                          }}
+                        >
+                          {fn(c)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 11,
+                  color: "#9ca3af",
+                }}
+              >
+                Clic droit sur une commune dans le TOP 10 pour
+                l’ajouter/retirer.
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
@@ -2094,7 +2199,8 @@ export default function App() {
       style={{
         display: "flex",
         minHeight: "100vh",
-        background: "#f3f4f6",
+        background:
+          "radial-gradient(circle at top left, #bae6fd 0, transparent 55%), radial-gradient(circle at top right,#fce7f3 0, transparent 55%), radial-gradient(circle at bottom,#d1fae5 0, #0b1120 55%)",
         fontFamily:
           "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
       }}
@@ -2103,14 +2209,15 @@ export default function App() {
         style={{
           width: 220,
           minWidth: 220,
-          background: "#ffffff",
-          borderRight: "1px solid #e5e7eb",
+          background: "rgba(15,23,42,0.85)",
+          borderRight: "1px solid rgba(148,163,184,0.6)",
           padding: "18px 14px",
           display: "flex",
           flexDirection: "column",
           gap: 6,
           boxShadow:
-            "0 4px 12px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.06)",
+            "0 18px 45px rgba(15,23,42,0.85), 0 0 0 1px rgba(15,23,42,0.9)",
+          backdropFilter: "blur(24px)",
           position: "relative",
           zIndex: 10,
         }}
@@ -2119,8 +2226,10 @@ export default function App() {
           style={{
             fontSize: 16,
             fontWeight: 700,
-            color: "#111827",
+            color: "#f9fafb",
             marginBottom: 18,
+            display: "flex",
+            alignItems: "center",
           }}
         >
           <span
@@ -2128,13 +2237,15 @@ export default function App() {
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              width: 26,
-              height: 26,
+              width: 28,
+              height: 28,
               borderRadius: 999,
-              background: "#2563eb",
-              color: "#ffffff",
+              background:
+                "conic-gradient(from 140deg, #38bdf8, #6366f1, #f97316, #22c55e, #38bdf8)",
+              color: "#0b1120",
               fontSize: 15,
               marginRight: 8,
+              boxShadow: "0 0 16px rgba(96,165,250,0.9)",
             }}
           >
             R
@@ -2158,9 +2269,15 @@ export default function App() {
               textAlign: "left",
               width: "100%",
               background:
-                onglet === n.id ? "#eff6ff" : "transparent",
+                onglet === n.id
+                  ? "linear-gradient(135deg, rgba(59,130,246,0.85), rgba(129,140,248,0.9))"
+                  : "transparent",
               color:
-                onglet === n.id ? "#1d4ed8" : "#4b5563",
+                onglet === n.id ? "#f9fafb" : "#e5e7eb",
+              boxShadow:
+                onglet === n.id
+                  ? "0 14px 35px rgba(59,130,246,0.7)"
+                  : "none",
             }}
           >
             <span>{n.icon}</span>
@@ -2192,8 +2309,9 @@ export default function App() {
             style={{
               fontSize: 18,
               fontWeight: 700,
-              color: "#111827",
+              color: "#f9fafb",
               margin: 0,
+              textShadow: "0 8px 24px rgba(15,23,42,0.9)",
             }}
           >
             {onglet === "analyse"
@@ -2203,13 +2321,13 @@ export default function App() {
           <p
             style={{
               fontSize: 12,
-              color: "#6b7280",
+              color: "#e5e7eb",
               margin: "4px 0 0",
             }}
           >
             {onglet === "analyse"
-              ? "Top 10 des communes selon tes filtres · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer"
-              : "Renseigne les paramètres de ton projet pour visualiser trésorerie, rendements et règle des 70 %."}
+              ? "TOP 10 des communes selon tes filtres · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer"
+              : "Renseigne les paramètres du projet et visualise trésorerie, rendements et règle des 70 % en temps réel."}
           </p>
         </div>
         {onglet === "analyse" && <AnalyseCommunes />}
