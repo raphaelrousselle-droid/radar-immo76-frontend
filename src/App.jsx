@@ -134,37 +134,18 @@ function calculerSimulation(i) {
   const tmi = pf(i.tmi);
   const bIS = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels - amortissement);
   const bFR = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels);
-    const mkR = function(impot) {
+     const mkR = function(impot) {
     const tresorerie = loyersAnnuels - totalFraisAnnuels - remboursementAnnuel - impot;
     const rendBrut = depenseNette > 0 ? (loyersAnnuels / depenseNette) * 100 : 0;
     const rendNet = depenseNette > 0 ? (tresorerie / depenseNette) * 100 : 0;
     const regle70 = loyersAnnuels > 0 ? remboursementAnnuel / loyersAnnuels : null;
-
-    // Construction des flux pour le TRI
-    // t=0 : sortie = apport (mise de fond initiale)
-    var apportInit = pf(i.apport) > 0 ? pf(i.apport) : depenseNette * 0.05;
-    var cfIRR = [-apportInit];
-
-    // t=1 à N : cash-flow net annuel (loyers indexés - frais - crédit - impôts)
-    var soldeIRR = sommeEmpruntee;
-    var tMensuelIRR = pf(i.tauxCredit) / 100 / 12;
-    for (var y = 1; y <= dur; y++) {
-      var loyAn = loyersAnnuels * Math.pow(1.01, y - 1);
-      var gAn   = (loyAn * pf(i.gestionLocativePct)) / 100;
-      var assur = pf(i.assurancePNOAn) > 0 ? pf(i.assurancePNOAn) : depenseNette * 0.0012;
-      var frAn  = pf(i.chargesImmeubleAn) + pf(i.taxeFonciereAn) + assur + gAn
-                + pf(i.provisionTravauxAn) + pf(i.fraisBancairesAn) + pf(i.expertComptableAn);
-
-      // Calcul des intérêts réels de l'année pour l'impôt
-      var interetsY = 0;
-      var soldeDebut = soldeIRR;
-      if (tMensuelIRR > 0) {
-        for (var m = 0; m < 12; m++) {
-          var intM = soldeIRR * tMensuelIRR;
-          interetsY += intM;
-          soldeIRR = Math.max(0, soldeIRR - (mensualite - intM));
-        }
-      }
+    const ebe = loyersAnnuels - totalFraisAnnuels;
+    const tri = ebe > 0 ? depenseNette / ebe : null;
+    return {
+      ebe: ebe, impot: impot, tresorerie: tresorerie,
+      rendBrut: rendBrut, rendNet: rendNet, tri: tri, regle70: regle70
+    };
+  };
 
       // Impôt recalculé avec les vrais intérêts de l'année
       var baseIS  = Math.max(0, loyAn - frAn - interetsY - amortissement);
