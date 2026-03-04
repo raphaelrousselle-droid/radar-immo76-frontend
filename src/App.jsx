@@ -85,34 +85,7 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
     </div>
   );
 }
-function calculerIRR(cashFlows) {
-  if (!cashFlows || cashFlows.length < 2) return null;
-  // Vérifie qu'il y a au moins un flux négatif et un positif
-  var hasNeg = false; var hasPos = false;
-  for (var k = 0; k < cashFlows.length; k++) {
-    if (cashFlows[k] < 0) hasNeg = true;
-    if (cashFlows[k] > 0) hasPos = true;
-  }
-  if (!hasNeg || !hasPos) return null;
-  // Méthode de Newton-Raphson
-  var r = 0.1;
-  for (var iter = 0; iter < 2000; iter++) {
-    var npv = 0; var dnpv = 0;
-    for (var t = 0; t < cashFlows.length; t++) {
-      var denom = Math.pow(1 + r, t);
-      if (!isFinite(denom) || denom === 0) return null;
-      npv  += cashFlows[t] / denom;
-      if (t > 0) dnpv -= t * cashFlows[t] / (denom * (1 + r));
-    }
-    if (!isFinite(npv) || !isFinite(dnpv) || Math.abs(dnpv) < 1e-12) break;
-    var step = npv / dnpv;
-    r -= step;
-    if (r <= -0.999) r = 0.001;
-    if (Math.abs(step) < 1e-9) break;
-  }
-  if (!isFinite(r) || r <= -1 || r > 10) return null;
-  return r;
-}
+
 function calculerSimulation(i) {
   const pv = pf(i.prixVente);
   const depenseNette = pv + pf(i.fraisNotaire) + pf(i.travaux) + pf(i.amenagements) + (pv * pf(i.fraisAgencePct) / 100);
@@ -134,43 +107,14 @@ function calculerSimulation(i) {
   const tmi = pf(i.tmi);
   const bIS = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels - amortissement);
   const bFR = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels);
-       const mkR = function(impot) {
+  const mkR = function(impot) {
     const tresorerie = loyersAnnuels - totalFraisAnnuels - remboursementAnnuel - impot;
     const rendBrut = depenseNette > 0 ? (loyersAnnuels / depenseNette) * 100 : 0;
     const rendNet = depenseNette > 0 ? (tresorerie / depenseNette) * 100 : 0;
     const regle70 = loyersAnnuels > 0 ? remboursementAnnuel / loyersAnnuels : null;
     const ebe = loyersAnnuels - totalFraisAnnuels;
     const tri = ebe > 0 ? depenseNette / ebe : null;
-    return {
-      ebe: ebe, impot: impot, tresorerie: tresorerie,
-      rendBrut: rendBrut, rendNet: rendNet, tri: tri, regle70: regle70
-    };
-  };
-
-      // Impôt recalculé avec les vrais intérêts de l'année
-      var baseIS  = Math.max(0, loyAn - frAn - interetsY - amortissement);
-      var baseFR  = Math.max(0, loyAn - frAn - interetsY);
-      var impotY  = 0;
-      if (impot > 0) {
-        var tauxImpot = impot / Math.max(1, bIS > 0 ? bIS : 1);
-        impotY = impot * (loyAn / Math.max(1, loyersAnnuels));
-      }
-
-      var cf = loyAn - frAn - remboursementAnnuel - impotY;
-      // Dernière année : on ajoute la valeur de revente estimée - capital restant dû
-      if (y === dur) {
-        var prixRevente = depenseNette * Math.pow(1.01, dur); // +1%/an
-        var capitalRestant = Math.max(0, soldeIRR);
-        cf += prixRevente - capitalRestant;
-      }
-      cfIRR.push(cf);
-    }
-
-    var triVal = calculerIRR(cfIRR);
-    return {
-      ebe: loyersAnnuels - totalFraisAnnuels, impot: impot, tresorerie: tresorerie,
-      rendBrut: rendBrut, rendNet: rendNet, tri: triVal, regle70: regle70
-    };
+    return { ebe: ebe, impot: impot, tresorerie: tresorerie, rendBrut: rendBrut, rendNet: rendNet, tri: tri, regle70: regle70 };
   };
   return {
     depenseNette: depenseNette, sommeEmpruntee: sommeEmpruntee, mensualite: mensualite,
@@ -203,7 +147,7 @@ function calculerNote(result, regimeActif) {
     else if (rg <= 0.80) score += 8;
   }
   score += Math.min(15, Math.max(0, (r.rendNet / 4) * 15));
-    if (r.tri != null && isFinite(r.tri)) {
+  if (r.tri != null && isFinite(r.tri)) {
     if (r.tri <= 12) score += 10;
     else if (r.tri <= 20) score += 5;
     else score += 2;
@@ -268,7 +212,6 @@ function projeterCashFlow(inputs, regimeNom) {
   }
   return data;
 }
-
 function CashFlowChart({ data }) {
   const [hovered, setHovered] = useState(null);
   if (!data || data.length === 0) return null;
@@ -405,6 +348,7 @@ function InputField({ label, name, value, onChange, unit, step, min }) {
 function SectionTitle({ children }) {
   return <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "#64748b", margin: "10px 0 4px" }}>{children}</div>;
 }
+
 function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
   const totalSurface = lots.reduce(function(s, l) { return s + pf(l.surface); }, 0);
   const totalLoyer = lots.reduce(function(s, l) { return s + pf(l.loyer); }, 0);
@@ -412,7 +356,6 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
   const totalCharges = lots.reduce(function(s, l) { return s + pf(l.charges); }, 0);
   const surfOk = surfaceGlobale > 0 ? Math.abs(totalSurface - surfaceGlobale) < 1 : true;
   const loyerOk = loyerGlobal > 0 ? Math.abs(totalLoyer - loyerGlobal) < 1 : true;
-
   const addLot = function() {
     const newId = lots.length > 0 ? Math.max.apply(null, lots.map(function(l) { return l.id; })) + 1 : 1;
     onChange(lots.concat([{ id: newId, nom: "Lot " + newId, surface: "", loyer: "", travaux: "", charges: "" }]));
@@ -424,24 +367,18 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
   const updateLot = function(id, field, value) {
     onChange(lots.map(function(l) { return l.id === id ? Object.assign({}, l, { [field]: value }) : l; }));
   };
-
   return (
     <div style={{ marginTop: 4 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <div style={{ fontSize: 12, fontWeight: 600, color: "#334155" }}>🏘️ Lots / Biens du projet</div>
         <button onClick={addLot} style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 999, padding: "5px 12px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>+ Ajouter un lot</button>
       </div>
-
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {lots.map(function(lot) {
           return (
             <div key={lot.id} style={{ background: "rgba(241,245,249,0.9)", borderRadius: 14, padding: "10px 12px", border: "1px solid rgba(148,163,184,0.3)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <input
-                  value={lot.nom}
-                  onChange={function(e) { updateLot(lot.id, "nom", e.target.value); }}
-                  style={{ fontWeight: 600, fontSize: 13, color: "#0f172a", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed #94a3b8", minWidth: 80 }}
-                />
+                <input value={lot.nom} onChange={function(e) { updateLot(lot.id, "nom", e.target.value); }} style={{ fontWeight: 600, fontSize: 13, color: "#0f172a", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed #94a3b8", minWidth: 80 }} />
                 <button onClick={function() { removeLot(lot.id); }} style={{ background: "rgba(239,68,68,0.1)", border: "none", borderRadius: 999, padding: "3px 9px", color: "#dc2626", cursor: lots.length > 1 ? "pointer" : "not-allowed", fontSize: 12, opacity: lots.length > 1 ? 1 : 0.3 }}>✕</button>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8 }}>
@@ -455,11 +392,7 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
                     <div key={col.field}>
                       <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>{col.label}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        <input
-                          type="number" value={lot[col.field]} step={col.step} min="0"
-                          onChange={function(e) { updateLot(lot.id, col.field, e.target.value); }}
-                          style={{ width: "100%", background: "rgba(255,255,255,0.85)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "5px 8px", fontSize: 12, color: "#0f172a", outline: "none" }}
-                        />
+                        <input type="number" value={lot[col.field]} step={col.step} min="0" onChange={function(e) { updateLot(lot.id, col.field, e.target.value); }} style={{ width: "100%", background: "rgba(255,255,255,0.85)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "5px 8px", fontSize: 12, color: "#0f172a", outline: "none" }} />
                         <span style={{ fontSize: 10, color: "#94a3b8", minWidth: 20 }}>{col.unit}</span>
                       </div>
                     </div>
@@ -470,19 +403,14 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
           );
         })}
       </div>
-
       <div style={{ marginTop: 10, background: "rgba(255,255,255,0.7)", borderRadius: 12, padding: "8px 12px", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
         <div>
           <div style={{ fontSize: 10, color: "#64748b" }}>Total surface lots</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: surfOk ? "#16a34a" : "#dc2626" }}>{fmt(totalSurface, 0)} m²
-            {surfaceGlobale > 0 && <span style={{ fontSize: 10, fontWeight: 400, color: surfOk ? "#16a34a" : "#dc2626", marginLeft: 4 }}>{surfOk ? "✓" : "≠ " + fmt(surfaceGlobale, 0) + " m²"}</span>}
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: surfOk ? "#16a34a" : "#dc2626" }}>{fmt(totalSurface, 0)} m² {surfaceGlobale > 0 && <span style={{ fontSize: 10, fontWeight: 400 }}>{surfOk ? "✓" : "≠ " + fmt(surfaceGlobale, 0) + " m²"}</span>}</div>
         </div>
         <div>
           <div style={{ fontSize: 10, color: "#64748b" }}>Total loyers lots</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: loyerOk ? "#16a34a" : "#dc2626" }}>{fmtEur(totalLoyer)}
-            {loyerGlobal > 0 && <span style={{ fontSize: 10, fontWeight: 400, color: loyerOk ? "#16a34a" : "#dc2626", marginLeft: 4 }}>{loyerOk ? "✓" : "≠ " + fmtEur(loyerGlobal)}</span>}
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: loyerOk ? "#16a34a" : "#dc2626" }}>{fmtEur(totalLoyer)} {loyerGlobal > 0 && <span style={{ fontSize: 10, fontWeight: 400 }}>{loyerOk ? "✓" : "≠ " + fmtEur(loyerGlobal)}</span>}</div>
         </div>
         <div>
           <div style={{ fontSize: 10, color: "#64748b" }}>Total travaux lots</div>
@@ -493,21 +421,19 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
           <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>{fmtEur(totalCharges)}</div>
         </div>
       </div>
-
       {(!surfOk && surfaceGlobale > 0) && (
         <div style={{ marginTop: 6, background: "rgba(254,243,199,0.9)", borderRadius: 10, padding: "6px 10px", fontSize: 11, color: "#92400e", border: "1px solid rgba(251,191,36,0.4)" }}>
-          ⚠ La somme des surfaces des lots ({fmt(totalSurface, 0)} m²) ne correspond pas à la surface globale renseignée ({fmt(surfaceGlobale, 0)} m²).
+          ⚠ Somme des surfaces ({fmt(totalSurface, 0)} m²) ≠ surface globale ({fmt(surfaceGlobale, 0)} m²).
         </div>
       )}
       {(!loyerOk && loyerGlobal > 0) && (
         <div style={{ marginTop: 6, background: "rgba(254,243,199,0.9)", borderRadius: 10, padding: "6px 10px", fontSize: 11, color: "#92400e", border: "1px solid rgba(251,191,36,0.4)" }}>
-          ⚠ La somme des loyers des lots ({fmtEur(totalLoyer)}) ne correspond pas au loyer mensuel global renseigné ({fmtEur(loyerGlobal)}).
+          ⚠ Somme des loyers ({fmtEur(totalLoyer)}) ≠ loyer global ({fmtEur(loyerGlobal)}).
         </div>
       )}
     </div>
   );
 }
-
 const DEFAULT_INPUTS = {
   prixVente: "175000", fraisNotaire: "13300", travaux: "0", amenagements: "0",
   fraisAgencePct: "5", apport: "14000", tauxCredit: "4.2", dureeAnnees: "25",
@@ -526,7 +452,6 @@ function SimulationProjet() {
   const [projets, setProjets] = useState(function() {
     try { return JSON.parse(localStorage.getItem(PROJETS_KEY)) || []; } catch(e) { return []; }
   });
-
   const handleChange = function(e) {
     const name = e.target.name; const value = e.target.value;
     setInputs(function(prev) { return Object.assign({}, prev, { [name]: value }); });
@@ -535,16 +460,13 @@ function SimulationProjet() {
     if (!nomProjet.trim()) return;
     const nouveau = { id: Date.now(), nom: nomProjet.trim(), inputs: Object.assign({}, inputs), lots: lots, regimeActif: regimeActif, savedAt: new Date().toLocaleDateString("fr-FR") };
     const liste = [nouveau].concat(projets.filter(function(p) { return p.nom !== nomProjet.trim(); }));
-    setProjets(liste);
-    localStorage.setItem(PROJETS_KEY, JSON.stringify(liste));
-    setNomProjet("");
+    setProjets(liste); localStorage.setItem(PROJETS_KEY, JSON.stringify(liste)); setNomProjet("");
   };
   const charger = function(p) { setInputs(p.inputs); setRegimeActif(p.regimeActif); if (p.lots) setLots(p.lots); };
   const supprimer = function(id) {
     const liste = projets.filter(function(p) { return p.id !== id; });
     setProjets(liste); localStorage.setItem(PROJETS_KEY, JSON.stringify(liste));
   };
-
   const result = useMemo(function() { return calculerSimulation(inputs); }, [inputs]);
   const regime = result.regimes[regimeActif];
   const cashFlowData = useMemo(function() { return projeterCashFlow(inputs, regimeActif); }, [inputs, regimeActif]);
@@ -557,7 +479,6 @@ function SimulationProjet() {
   const dash = (Math.min(100, Math.max(0, note)) / 100) * circumference;
   const glassCard = { background: "rgba(255,255,255,0.55)", borderRadius: 20, padding: 16, boxShadow: "0 8px 32px rgba(99,102,241,0.08), 0 0 0 1px rgba(148,163,184,0.25)", backdropFilter: "blur(18px)" };
   const glassCardAlt = { background: "rgba(241,245,249,0.75)", borderRadius: 18, padding: 16, boxShadow: "0 8px 24px rgba(99,102,241,0.10), 0 0 0 1px rgba(148,163,184,0.3)", backdropFilter: "blur(18px)" };
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {projets.length > 0 && (
@@ -576,7 +497,6 @@ function SimulationProjet() {
           </div>
         </div>
       )}
-
       <div style={glassCard}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: "#1e293b" }}>Paramètres du projet</div>
@@ -617,17 +537,10 @@ function SimulationProjet() {
             <InputField label="Expert-comptable + CFE/an" name="expertComptableAn" value={inputs.expertComptableAn} onChange={handleChange} step="50" />
           </div>
         </div>
-
         <div style={{ marginTop: 14, borderTop: "1px solid rgba(148,163,184,0.25)", paddingTop: 14 }}>
-          <GestionLots
-            lots={lots}
-            onChange={setLots}
-            surfaceGlobale={pf(inputs.surfaceGlobale)}
-            loyerGlobal={pf(inputs.loyerMensuelHC)}
-          />
+          <GestionLots lots={lots} onChange={setLots} surfaceGlobale={pf(inputs.surfaceGlobale)} loyerGlobal={pf(inputs.loyerMensuelHC)} />
         </div>
       </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 10 }}>
         {[
           { label: "Dépense nette", value: fmtEur(result.depenseNette) },
@@ -647,7 +560,6 @@ function SimulationProjet() {
           );
         })}
       </div>
-
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {Object.keys(result.regimes).map(function(r) {
           return (
@@ -655,7 +567,6 @@ function SimulationProjet() {
           );
         })}
       </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "start" }}>
         <div style={glassCardAlt}>
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#1e293b" }}>Bilan — {regimeActif}</div>
@@ -665,7 +576,8 @@ function SimulationProjet() {
               { label: "Fiscalité annuelle", value: fmtEur(regime.impot), color: "#d97706" },
               { label: "Trésorerie/an", value: fmtEur(regime.tresorerie), color: couleurTreso },
               { label: "Rendement brut", value: fmtPct(regime.rendBrut), color: "#64748b" },
-            { label: "TRI", value: regime.tri != null ? fmt(regime.tri, 1) + " ans" : "—"
+              { label: "Rendement net", value: fmtPct(regime.rendNet), color: "#16a34a" },
+              { label: "Remboursement crédit", value: regime.tri != null ? fmt(regime.tri, 1) + " ans" : "—", color: "#64748b" },
             ].map(function(c) {
               return (
                 <div key={c.label} style={{ background: "rgba(255,255,255,0.7)", borderRadius: 14, padding: "10px 12px" }}>
@@ -692,10 +604,9 @@ function SimulationProjet() {
             <text x="36" y="40" textAnchor="middle" fontSize="18" fontWeight="700" fill={noteColor}>{note}</text>
           </svg>
           <div style={{ fontSize: 13, fontWeight: 600, color: noteColor }}>{noteLabel}</div>
-          <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", lineHeight: 1.4 }}>Rendement · Tréso<br />Règle 70% · TRI</div>
+          <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", lineHeight: 1.4 }}>Rendement · Tréso<br />Règle 70% · Payback</div>
         </div>
       </div>
-
       <div style={glassCard}>
         <div style={{ fontSize: 14, fontWeight: 600, color: "#1e293b", marginBottom: 4 }}>
           Évolution du Cash-Flow — <span style={{ color: "#6366f1" }}>{regimeActif}</span>
@@ -703,13 +614,12 @@ function SimulationProjet() {
         <div style={{ fontSize: 11, color: "#64748b", marginBottom: 10 }}>Survole une colonne pour le détail · Loyers indexés +1%/an</div>
         <CashFlowChart data={cashFlowData} />
       </div>
-
       <div style={glassCard}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: "#1e293b" }}>Comparatif des régimes fiscaux</div>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
             <tr style={{ color: "#64748b", borderBottom: "1px solid rgba(148,163,184,0.35)" }}>
-              {["Régime", "Tréso/an", "Impôt/an", "Rdt net", "TRI", "Règle 70%", "Note"].map(function(h) {
+              {["Régime", "Tréso/an", "Impôt/an", "Rdt net", "Payback", "Règle 70%", "Note"].map(function(h) {
                 return <th key={h} style={{ textAlign: h === "Régime" ? "left" : "right", padding: "6px 8px", fontWeight: 500 }}>{h}</th>;
               })}
             </tr>
@@ -724,7 +634,7 @@ function SimulationProjet() {
                   <td style={{ padding: "8px 8px", textAlign: "right", color: r.tresorerie >= 0 ? "#16a34a" : "#dc2626", fontWeight: 600 }}>{fmtEur(r.tresorerie)}</td>
                   <td style={{ padding: "8px 8px", textAlign: "right", color: "#d97706" }}>{fmtEur(r.impot)}</td>
                   <td style={{ padding: "8px 8px", textAlign: "right", color: "#334155" }}>{fmtPct(r.rendNet)}</td>
-                  <td style={{ padding: "8px 8px", textAlign: "right", color: "#334155" }}>{r.tri ? fmt(r.tri, 1) + " ans" : "—"}</td>
+                  <td style={{ padding: "8px 8px", textAlign: "right", color: "#334155" }}>{r.tri != null ? fmt(r.tri, 1) + " ans" : "—"}</td>
                   <td style={{ padding: "8px 8px", textAlign: "right", color: r.regle70 != null && r.regle70 < 0.7 ? "#16a34a" : "#dc2626", fontWeight: 600 }}>{r.regle70 != null ? fmt(r.regle70, 2) : "—"}</td>
                   <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: getNoteColor(n) }}>{n}/100</td>
                 </tr>
