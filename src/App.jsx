@@ -134,7 +134,7 @@ function calculerSimulation(i) {
   const tmi = pf(i.tmi);
   const bIS = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels - amortissement);
   const bFR = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels);
-     const mkR = function(impot) {
+       const mkR = function(impot) {
     const tresorerie = loyersAnnuels - totalFraisAnnuels - remboursementAnnuel - impot;
     const rendBrut = depenseNette > 0 ? (loyersAnnuels / depenseNette) * 100 : 0;
     const rendNet = depenseNette > 0 ? (tresorerie / depenseNette) * 100 : 0;
