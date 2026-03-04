@@ -127,13 +127,14 @@ function calculerSimulation(i) {
   const amortissement = (depenseNette * pf(i.coefAmortissement)) / 100;
   const tis = pf(i.tauxIS);
   const tmi = pf(i.tmi);
-    const mkR = function(impot) {
+  const bIS = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels - amortissement);
+  const bFR = Math.max(0, loyersAnnuels - totalFraisAnnuels - interetsAnnuels);
+  const mkR = function(impot) {
     const tresorerie = loyersAnnuels - totalFraisAnnuels - remboursementAnnuel - impot;
     const rendBrut = depenseNette > 0 ? (loyersAnnuels / depenseNette) * 100 : 0;
     const rendNet = depenseNette > 0 ? (tresorerie / depenseNette) * 100 : 0;
     const regle70 = loyersAnnuels > 0 ? remboursementAnnuel / loyersAnnuels : null;
-    // TRI : apport négatif en t=0, puis cash-flows annuels sur la durée du prêt
-       const apport = pf(i.apport);
+    const apport = pf(i.apport);
     const cfIRR = apport > 0 ? [-apport] : [-depenseNette * 0.05];
     for (var y = 0; y < Math.max(1, dur); y++) {
       const loyAn = loyersAnnuels * Math.pow(1.01, y);
@@ -144,7 +145,7 @@ function calculerSimulation(i) {
     const triVal = calculerIRR(cfIRR);
     return { ebe: loyersAnnuels - totalFraisAnnuels, impot: impot, tresorerie: tresorerie, rendBrut: rendBrut, rendNet: rendNet, tri: triVal, regle70: regle70 };
   };
-   return {
+  return {
     depenseNette: depenseNette, sommeEmpruntee: sommeEmpruntee, mensualite: mensualite,
     coutPretTotal: coutPretTotal, remboursementAnnuel: remboursementAnnuel,
     loyersAnnuels: loyersAnnuels, totalFraisAnnuels: totalFraisAnnuels, amortissement: amortissement,
