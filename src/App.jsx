@@ -423,7 +423,17 @@ function SimulationProjet() {
               <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
                 {pf(inputs.prixVente) > 0 && <span>{fmt(pf(inputs.prixVente))} € · </span>}
                 {pf(inputs.surfaceGlobale) > 0 && <span>{fmt(pf(inputs.surfaceGlobale), 0)} m² · </span>}
-                <Tag color="purple">{regimeActif}</Tag>
+                                <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 2 }}>
+                  <Tag color="purple">{regimeActif}</Tag>
+                  {inputs.noteDPE && (
+                    <span style={{ fontWeight: 800, fontSize: 13, padding: "1px 8px", borderRadius: 6,
+                      background: { A:"#16a34a",B:"#4ade80",C:"#a3e635",D:"#facc15",E:"#fb923c",F:"#f97316",G:"#dc2626" }[inputs.noteDPE] + "22",
+                      color: { A:"#15803d",B:"#166534",C:"#3f6212",D:"#854d0e",E:"#9a3412",F:"#7c2d12",G:"#991b1b" }[inputs.noteDPE],
+                      border: "1px solid " + { A:"#16a34a",B:"#4ade80",C:"#a3e635",D:"#facc15",E:"#fb923c",F:"#f97316",G:"#dc2626" }[inputs.noteDPE] + "44" }}>
+                      DPE {inputs.noteDPE}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
