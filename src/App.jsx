@@ -852,61 +852,84 @@ function AnalyseCommunes() {
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
+
+  const navItems = [
+    { id: "analyse",    label: "Analyse communes",               icon: "📊" },
+    { id: "simulation", label: "Simulation projet",              icon: "💼" },
+    { id: "credit",     label: "Simulation de crédit",           icon: "🏦" },
+    { id: "offres",     label: "Comparateur offres financement", icon: "📑" },
+    { id: "travaux",    label: "Simulateur coût travaux",        icon: "🛠️" },
+  ];
+
+  const titres = {
+    analyse:    { h: "Analyse investissement — Seine-Maritime",  sub: "TOP 10 · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer" },
+    simulation: { h: "Simulation de rentabilité",                sub: "Paramètre ton projet, sauvegarde-le et visualise l'évolution du cash-flow par régime fiscal." },
+    credit:     { h: "Simulation de crédit",                     sub: "Calcule mensualités, coût total et tableau d'amortissement de ton prêt." },
+    offres:     { h: "Comparateur d'offres de financement",      sub: "Compare plusieurs propositions de banques sur une base homogène." },
+    travaux:    { h: "Simulateur de coût des travaux",           sub: "Estime le budget travaux poste par poste et son impact sur la rentabilité." },
+  };
+
+  const Placeholder = function({ texte }) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 320, gap: 16 }}>
+        <div style={{ fontSize: 48 }}>🚧</div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: "#334155" }}>En cours de développement</div>
+        <div style={{ fontSize: 13, color: "#94a3b8", textAlign: "center", maxWidth: 400 }}>{texte}</div>
+      </div>
+    );
+  };
+
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "radial-gradient(ellipse at top left,#bfdbfe 0%,transparent 50%),radial-gradient(ellipse at top right,#fce7f3 0%,transparent 50%),radial-gradient(ellipse at bottom center,#d1fae5 0%,#f1f5f9 60%)", fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif" }}>
-      <aside style={{ width: 210, minWidth: 210, background: "rgba(255,255,255,0.65)", borderRight: "1px solid rgba(148,163,184,0.25)", padding: "18px 12px", display: "flex", flexDirection: "column", gap: 4, backdropFilter: "blur(20px)" }}>
+
+      {/* Sidebar */}
+      <aside style={{ width: 220, minWidth: 220, background: "rgba(255,255,255,0.65)", borderRight: "1px solid rgba(148,163,184,0.25)", padding: "18px 12px", display: "flex", flexDirection: "column", gap: 4, backdropFilter: "blur(20px)", position: "relative", zIndex: 10 }}>
         <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 26, height: 26, borderRadius: 8, background: "linear-gradient(135deg,#38bdf8,#6366f1)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 13, fontWeight: 700, boxShadow: "0 4px 10px rgba(99,102,241,0.35)" }}>R</span>
+          <span style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#38bdf8,#6366f1)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700, boxShadow: "0 4px 10px rgba(99,102,241,0.35)" }}>R</span>
           Radar Immo 76
         </div>
-        {[{ id: "analyse", label: "Analyse communes", icon: "📊" }, { id: "simulation", label: "Simulation projet", icon: "💼" }].map(function(n) {
-          return (<button key={n.id} onClick={function() { setOnglet(n.id); }}
-            style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, width: "100%", textAlign: "left", background: onglet === n.id ? "linear-gradient(135deg,rgba(99,102,241,0.12),rgba(56,189,248,0.12))" : "transparent", color: onglet === n.id ? "#4338ca" : "#64748b", borderLeft: onglet === n.id ? "3px solid #6366f1" : "3px solid transparent" }}><span>{n.icon}</span><span>{n.label}</span></button>
+
+        {navItems.map(function(n) {
+          const isActive = onglet === n.id;
+          return (
+            <button
+              key={n.id}
+              onClick={function() { setOnglet(n.id); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "8px 10px", borderRadius: 10, border: "none",
+                cursor: "pointer", fontSize: 13, fontWeight: 500,
+                width: "100%", textAlign: "left",
+                background: isActive ? "linear-gradient(135deg,rgba(99,102,241,0.12),rgba(56,189,248,0.12))" : "transparent",
+                color: isActive ? "#4338ca" : "#64748b",
+                borderLeft: isActive ? "3px solid #6366f1" : "3px solid transparent",
+                transition: "all 0.15s",
+              }}
+            >
+              <span style={{ fontSize: 15 }}>{n.icon}</span>
+              <span>{n.label}</span>
+            </button>
           );
         })}
-        <div style={{ flex: 1 }} />
-        <div style={{ fontSize: 11, color: "#94a3b8" }}>Sources : DVF · ANIL · INSEE</div>
-      </aside>
-      <main style={{ flex: 1, padding: 20, overflowY: "auto", minWidth: 0 }}>
-        <div style={{ marginBottom: 14 }}>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: "#0f172a", margin: 0 }}>
-            {onglet === "analyse" ? "Analyse investissement — Seine-Maritime" : "Simulation de rentabilité"}
-          </h1>
-          <p style={{ fontSize: 12, color: "#64748b", margin: "4px 0 0" }}>
-            {onglet === "analyse" ? "TOP 10 · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer" : "Paramètre ton projet, sauvegarde-le et visualise l'évolution du cash-flow par régime fiscal."}
-          </p>
-        </div>
-              {[ 
-        { id: "analyse",   label: "Analyse communes",              icon: "📊" },
-        { id: "simulation",label: "Simulation projet",             icon: "💼" },
-        { id: "credit",    label: "Simulation de crédit",          icon: "🏦" },
-        { id: "offres",    label: "Comparateur offres financement",icon: "📑" },
-        { id: "travaux",   label: "Simulateur coût travaux",       icon: "🛠️" },
-      ].map(function(n) {
-        return (
-          <button
-            key={n.id}
-            onClick={function() { setOnglet(n.id); }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 10px",
-              borderRadius: 10,
-              border: "none",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 500,
-              width: "100%",
-              textAlign: "left",
-              background: onglet === n.id ? "linear-gradient(135deg,rgba(99,102,241,0.12),rgba(56,189,248,0.12))" : "transparent",
-              color: onglet === n.id ? "#4338ca" : "#64748b",
-              borderLeft: onglet === n.id ? "3px solid #6366f1" : "3px solid transparent"
-            }}
-          >
-            <span>{n.icon}</span>
-            <span>{n.label}</span>
-          </button>
-        );
-      })}
 
+        <div style={{ flex: 1 }} />
+        <div style={{ fontSize: 11, color: "#94a3b8", paddingTop: 8, borderTop: "1px solid rgba(148,163,184,0.2)" }}>Sources : DVF · ANIL · INSEE</div>
+      </aside>
+
+      {/* Main */}
+      <main style={{ flex: 1, padding: 20, overflowY: "auto", minWidth: 0 }}>
+        <div style={{ marginBottom: 16 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: "#0f172a", margin: 0 }}>{titres[onglet].h}</h1>
+          <p style={{ fontSize: 12, color: "#64748b", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
+        </div>
+
+        {onglet === "analyse"    && <AnalyseCommunes />}
+        {onglet === "simulation" && <SimulationProjet />}
+        {onglet === "credit"     && <Placeholder texte="On codera ici le calcul des mensualités, coût total et tableau d'amortissement complet." />}
+        {onglet === "offres"     && <Placeholder texte="On y saisira plusieurs propositions de banques (taux, durée, assurance, frais) pour les comparer côte à côte." />}
+        {onglet === "travaux"    && <Placeholder texte="On détaillera les postes travaux (gros œuvre, second œuvre, déco…) avec totaux et impact sur le projet." />}
+      </main>
+
+    </div>
+  );
+}
