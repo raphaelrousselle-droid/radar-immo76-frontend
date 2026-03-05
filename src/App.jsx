@@ -1103,7 +1103,7 @@ export default function App() {
 
         {onglet === "analyse"    && <AnalyseCommunes />}
         {onglet === "simulation" && <SimulationProjet />}
-        {onglet === "credit"     && <Placeholder texte="On codera ici le calcul des mensualités, coût total et tableau d'amortissement complet." />}
+        {onglet === "credit" && <SimulateurCredit />}
         {onglet === "offres"     && <Placeholder texte="On y saisira plusieurs propositions de banques (taux, durée, assurance, frais) pour les comparer côte à côte." />}
         {onglet === "travaux"    && <Placeholder texte="On détaillera les postes travaux (gros œuvre, second œuvre, déco…) avec totaux et impact sur le projet." />}
       </main>
