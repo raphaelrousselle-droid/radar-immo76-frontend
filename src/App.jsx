@@ -1484,7 +1484,6 @@ function ComparateurOffres() {
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <input type="number" value={o.dureeDiffere} step="1" min="0" max="24" onChange={function(e) { updateOffre(o.id, "dureeDiffere", e.target.value); }} style={inputSmall} />
                         <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 28 }}>mois</span>
-                      </div>
                     </div>
                   )}
                 </div>
