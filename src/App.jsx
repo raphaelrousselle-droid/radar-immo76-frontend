@@ -1340,6 +1340,229 @@ function SimulateurTravaux() {
     </div>
   );
 }
+const OFFRES_KEY = "radar-immo-offres-v1";
+
+const OFFRE_DEFAULT = function(id) {
+  return { id: id, banque: "Banque " + id, montant: "200000", duree: "25", taux: "4.20", assurance: "0.30", fraisDossier: "1000", fraisGarantie: "2000", fraisCourtier: "0", modulation: false, remboursementAnticipe: false, domiciliation: false };
+};
+
+function ComparateurOffres() {
+  const [offres, setOffres] = useState(function() {
+    try { return JSON.parse(localStorage.getItem(OFFRES_KEY)) || [OFFRE_DEFAULT(1), OFFRE_DEFAULT(2)]; }
+    catch(e) { return [OFFRE_DEFAULT(1), OFFRE_DEFAULT(2)]; }
+  });
+
+  const sauver = function(liste) { setOffres(liste); localStorage.setItem(OFFRES_KEY, JSON.stringify(liste)); };
+
+  const ajouterOffre = function() {
+    const newId = Math.max.apply(null, offres.map(function(o) { return o.id; })) + 1;
+    sauver(offres.concat([OFFRE_DEFAULT(newId)]));
+  };
+
+  const supprimerOffre = function(id) {
+    if (offres.length <= 1) return;
+    sauver(offres.filter(function(o) { return o.id !== id; }));
+  };
+
+  const updateOffre = function(id, field, value) {
+    sauver(offres.map(function(o) { return o.id === id ? Object.assign({}, o, { [field]: value }) : o; }));
+  };
+
+  const calcOffre = function(o) {
+    const M = pf(o.montant);
+    const D = Math.max(1, pf(o.duree));
+    const nMois = D * 12;
+    const tMensuel = pf(o.taux) / 100 / 12;
+    const tAssurMensuel = pf(o.assurance) / 100 / 12;
+    const mensualiteCredit = tMensuel === 0 ? M / nMois : (M * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
+    const mensualiteAssur = M * tAssurMensuel;
+    const mensualiteTotale = mensualiteCredit + mensualiteAssur;
+    const coutInterets = mensualiteCredit * nMois - M;
+    const coutAssurance = mensualiteAssur * nMois;
+    const fraisTotaux = pf(o.fraisDossier) + pf(o.fraisGarantie) + pf(o.fraisCourtier);
+    const coutTotal = coutInterets + coutAssurance + fraisTotaux;
+    const taeg = M > 0 ? ((coutTotal / M) / D) * 100 : 0;
+    return { mensualiteCredit, mensualiteAssur, mensualiteTotale, coutInterets, coutAssurance, fraisTotaux, coutTotal, taeg };
+  };
+
+  const resultats = offres.map(function(o) { return { id: o.id, offre: o, calc: calcOffre(o) }; });
+
+  // Trouver le meilleur sur chaque critère
+  const meilleurMensualite = Math.min.apply(null, resultats.map(function(r) { return r.calc.mensualiteTotale; }));
+  const meilleurCoutTotal  = Math.min.apply(null, resultats.map(function(r) { return r.calc.coutTotal; }));
+  const meilleurTaeg       = Math.min.apply(null, resultats.map(function(r) { return r.calc.taeg; }));
+
+  const isBest = function(val, best) { return Math.abs(val - best) < 0.01; };
+
+  const couleurs = ["#6366f1", "#0ea5e9", "#16a34a", "#f97316", "#a855f7"];
+
+  const inputSmall = { background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 8, padding: "5px 8px", fontSize: 13, color: "#0f172a", outline: "none", width: "100%" };
+
+  const BestBadge = function() {
+    return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 999, background: "rgba(22,163,74,0.15)", color: "#15803d", border: "1px solid rgba(22,163,74,0.3)", marginLeft: 5 }}>✓ Meilleur</span>;
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+      {/* Bouton ajouter */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ fontSize: 12, color: "#94a3b8" }}>{offres.length} offre{offres.length > 1 ? "s" : ""} comparée{offres.length > 1 ? "s" : ""} · Les données sont sauvegardées automatiquement</div>
+        <button onClick={ajouterOffre} style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600, boxShadow: "0 4px 12px rgba(99,102,241,0.3)" }}>
+          + Ajouter une offre
+        </button>
+      </div>
+
+      {/* Cartes de saisie */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14 }}>
+        {offres.map(function(o, idx) {
+          const couleur = couleurs[idx % couleurs.length];
+          const r = resultats.find(function(r) { return r.id === o.id; }).calc;
+          return (
+            <div key={o.id} style={{ background: "rgba(255,255,255,0.75)", borderRadius: 18, padding: 16, border: "2px solid " + couleur + "44", boxShadow: "0 4px 20px " + couleur + "18", backdropFilter: "blur(16px)" }}>
+              {/* Header carte */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: couleur }} />
+                  <input value={o.banque} onChange={function(e) { updateOffre(o.id, "banque", e.target.value); }}
+                    style={{ fontWeight: 700, fontSize: 14, color: "#0f172a", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed " + couleur + "66", width: 140 }} />
+                </div>
+                <button onClick={function() { supprimerOffre(o.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 8, padding: "3px 9px", color: "#dc2626", cursor: offres.length > 1 ? "pointer" : "not-allowed", fontSize: 12, opacity: offres.length > 1 ? 1 : 0.3 }}>✕</button>
+              </div>
+
+              {/* Inputs */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { label: "Montant emprunté", field: "montant", unit: "€", step: "5000" },
+                  { label: "Durée", field: "duree", unit: "ans", step: "1" },
+                  { label: "Taux hors assurance", field: "taux", unit: "%", step: "0.05" },
+                  { label: "Taux assurance", field: "assurance", unit: "%", step: "0.01" },
+                  { label: "Frais de dossier", field: "fraisDossier", unit: "€", step: "100" },
+                  { label: "Frais de garantie", field: "fraisGarantie", unit: "€", step: "100" },
+                  { label: "Frais de courtier", field: "fraisCourtier", unit: "€", step: "100" },
+                ].map(function(f) {
+                  return (
+                    <div key={f.field}>
+                      <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2, fontWeight: 600 }}>{f.label}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <input type="number" value={o[f.field]} step={f.step} min="0" onChange={function(e) { updateOffre(o.id, f.field, e.target.value); }} style={inputSmall} />
+                        <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 20 }}>{f.unit}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Options booléennes */}
+                <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 5 }}>
+                  <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Options</div>
+                  {[
+                    { field: "modulation", label: "Modulation des mensualités" },
+                    { field: "remboursementAnticipe", label: "Remboursement anticipé sans pénalité" },
+                    { field: "domiciliation", label: "Domiciliation bancaire obligatoire" },
+                  ].map(function(opt) {
+                    return (
+                      <div key={opt.field} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 11, color: "#475569" }}>{opt.label}</span>
+                        <button onClick={function() { updateOffre(o.id, opt.field, !o[opt.field]); }}
+                          style={{ padding: "2px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, background: o[opt.field] ? "rgba(99,102,241,0.9)" : "rgba(220,38,38,0.1)", color: o[opt.field] ? "#fff" : "#dc2626", boxShadow: o[opt.field] ? "0 2px 6px rgba(99,102,241,0.3)" : "inset 0 0 0 1px rgba(220,38,38,0.3)" }}>
+                          {o[opt.field] ? "✓ Oui" : "✗ Non"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Mini résultat dans la carte */}
+              <div style={{ marginTop: 12, background: couleur + "10", borderRadius: 12, padding: "10px 12px", border: "1px solid " + couleur + "33" }}>
+                <div style={{ fontSize: 11, color: "#64748b" }}>Mensualité totale</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: couleur }}>{fmt(r.mensualiteTotale, 0)} €<span style={{ fontSize: 13, fontWeight: 400 }}>/mois</span></div>
+                <div style={{ fontSize: 11, color: "#94a3b8" }}>dont {fmt(r.mensualiteAssur, 0)} € assurance</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tableau comparatif */}
+      <div style={SECTION}>
+        <SectionHeader icon="⚖️" title="Tableau comparatif" />
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
+                <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase" }}>Critère</th>
+                {offres.map(function(o, idx) {
+                  return (
+                    <th key={o.id} style={{ padding: "10px 12px", textAlign: "right", fontSize: 13, fontWeight: 700, color: couleurs[idx % couleurs.length] }}>{o.banque}</th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { label: "Montant", fn: function(r) { return fmtEur(pf(r.offre.montant)); }, best: null },
+                { label: "Durée", fn: function(r) { return fmt(pf(r.offre.duree), 0) + " ans"; }, best: null },
+                { label: "Taux crédit", fn: function(r) { return pf(r.offre.taux).toFixed(2) + " %"; }, best: null },
+                { label: "Taux assurance", fn: function(r) { return pf(r.offre.assurance).toFixed(2) + " %"; }, best: null },
+                { label: "Mensualité crédit", fn: function(r) { return fmt(r.calc.mensualiteCredit, 0) + " €"; }, best: null },
+                { label: "Mensualité assurance", fn: function(r) { return fmt(r.calc.mensualiteAssur, 0) + " €"; }, best: null },
+                { label: "Mensualité totale", fn: function(r) { return fmt(r.calc.mensualiteTotale, 0) + " €"; }, bestVal: meilleurMensualite, bestFn: function(r) { return r.calc.mensualiteTotale; }, highlight: true },
+                { label: "Coût des intérêts", fn: function(r) { return fmtEur(r.calc.coutInterets); }, best: null },
+                { label: "Coût assurance totale", fn: function(r) { return fmtEur(r.calc.coutAssurance); }, best: null },
+                { label: "Frais (dossier+garantie+courtier)", fn: function(r) { return fmtEur(r.calc.fraisTotaux); }, best: null },
+                { label: "Coût total (intérêts+assur.+frais)", fn: function(r) { return fmtEur(r.calc.coutTotal); }, bestVal: meilleurCoutTotal, bestFn: function(r) { return r.calc.coutTotal; }, highlight: true },
+                { label: "TAEG estimé", fn: function(r) { return r.calc.taeg.toFixed(2) + " %"; }, bestVal: meilleurTaeg, bestFn: function(r) { return r.calc.taeg; }, highlight: true },
+                { label: "Modulation mensualités", fn: function(r) { return r.offre.modulation ? "✓ Oui" : "✗ Non"; }, best: null },
+                { label: "Remb. anticipé sans pénalité", fn: function(r) { return r.offre.remboursementAnticipe ? "✓ Oui" : "✗ Non"; }, best: null },
+                { label: "Domiciliation obligatoire", fn: function(r) { return r.offre.domiciliation ? "⚠ Oui" : "✓ Non"; }, best: null },
+              ].map(function(row, idx) {
+                return (
+                  <tr key={row.label} style={{ borderBottom: "1px solid rgba(148,163,184,0.1)", background: row.highlight ? "rgba(99,102,241,0.03)" : (idx % 2 === 0 ? "rgba(248,250,252,0.5)" : "transparent") }}>
+                    <td style={{ padding: "9px 12px", fontSize: 12, fontWeight: row.highlight ? 700 : 400, color: row.highlight ? "#334155" : "#64748b" }}>{row.label}</td>
+                    {resultats.map(function(r, ridx) {
+                      const isB = row.bestFn && isBest(row.bestFn(r), row.bestVal);
+                      return (
+                        <td key={r.id} style={{ padding: "9px 12px", textAlign: "right", fontWeight: row.highlight ? 700 : 500, color: isB ? "#15803d" : (row.highlight ? couleurs[ridx % couleurs.length] : "#334155"), background: isB ? "rgba(22,163,74,0.06)" : "transparent" }}>
+                          {row.fn(r)}
+                          {isB && <BestBadge />}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Verdict */}
+      <div style={Object.assign({}, SECTION, { background: "linear-gradient(135deg,rgba(99,102,241,0.07),rgba(56,189,248,0.07))", border: "1.5px solid rgba(99,102,241,0.2)" })}>
+        <SectionHeader icon="🏆" title="Verdict" />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+          {[
+            { label: "Mensualité la plus basse", best: meilleurMensualite, fn: function(r) { return r.calc.mensualiteTotale; }, format: function(v) { return fmt(v, 0) + " €/mois"; } },
+            { label: "Coût total le plus bas", best: meilleurCoutTotal, fn: function(r) { return r.calc.coutTotal; }, format: function(v) { return fmtEur(v); } },
+            { label: "TAEG le plus bas", best: meilleurTaeg, fn: function(r) { return r.calc.taeg; }, format: function(v) { return v.toFixed(2) + " %"; } },
+          ].map(function(critere) {
+            const winner = resultats.find(function(r) { return isBest(critere.fn(r), critere.best); });
+            const idx = offres.findIndex(function(o) { return o.id === winner.id; });
+            const couleur = couleurs[idx % couleurs.length];
+            return (
+              <div key={critere.label} style={{ background: "rgba(255,255,255,0.85)", borderRadius: 14, padding: "12px 16px", border: "1.5px solid " + couleur + "44", textAlign: "center" }}>
+                <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>{critere.label}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: couleur }}>{winner.offre.banque}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#334155", marginTop: 2 }}>{critere.format(critere.best)}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+    </div>
+  );
+}
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
