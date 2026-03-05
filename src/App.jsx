@@ -1468,6 +1468,47 @@ function ComparateurOffres() {
                           {o[opt.field] ? "✓ Oui" : "✗ Non"}
                         </button>
                       </div>
+                                      {/* Différé */}
+                <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(148,163,184,0.15)" }}>
+                  <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Différé</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                    <span style={{ fontSize: 11, color: "#475569" }}>Différé de remboursement</span>
+                    <button onClick={function() { updateOffre(o.id, "differe", !o.differe); }}
+                      style={{ padding: "2px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, background: o.differe ? "rgba(99,102,241,0.9)" : "rgba(220,38,38,0.1)", color: o.differe ? "#fff" : "#dc2626", boxShadow: o.differe ? "0 2px 6px rgba(99,102,241,0.3)" : "inset 0 0 0 1px rgba(220,38,38,0.3)" }}>
+                      {o.differe ? "✓ Oui" : "✗ Non"}
+                    </button>
+                  </div>
+                  {o.differe && (
+                    <div>
+                      <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2 }}>Durée du différé</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <input type="number" value={o.dureeDiffere} step="1" min="0" max="24" onChange={function(e) { updateOffre(o.id, "dureeDiffere", e.target.value); }} style={inputSmall} />
+                        <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 28 }}>mois</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Garantie */}
+                <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(148,163,184,0.15)" }}>
+                  <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Type de garantie</div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[{ val: "caution", label: "🤝 Cautionnement" }, { val: "hypotheque", label: "🏠 Hypothèque" }].map(function(g) {
+                      const isActive = o.typeGarantie === g.val;
+                      return (
+                        <button key={g.val} onClick={function() { updateOffre(o.id, "typeGarantie", g.val); }}
+                          style={{ flex: 1, padding: "5px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isActive ? "rgba(99,102,241,0.9)" : "rgba(148,163,184,0.12)", color: isActive ? "#fff" : "#64748b", boxShadow: isActive ? "0 2px 6px rgba(99,102,241,0.25)" : "none" }}>
+                          {g.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {o.typeGarantie === "hypotheque" && (
+                    <div style={{ marginTop: 5, background: "rgba(254,243,199,0.8)", borderRadius: 8, padding: "5px 8px", fontSize: 10, color: "#92400e" }}>
+                      ⚠ Hypothèque : frais de mainlevée à prévoir en cas de revente anticipée
+                    </div>
+                  )}
+                </div>
                     );
                   })}
                 </div>
