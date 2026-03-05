@@ -1507,12 +1507,11 @@ function ComparateurOffres() {
                     })}
                   </div>
                   {o.typeGarantie === "hypotheque" && (
-                    <div style={{ marginTop: 5, background: "rgba(254,243,199,0.8)", borderRadius: 8, padding: "5px 8px", fontSize: 10, color: "#92400e" }}>
+                                   <div style={{ marginTop: 5, background: "rgba(254,243,199,0.8)", borderRadius: 8, padding: "5px 8px", fontSize: 10, color: "#92400e" }}>
                       ⚠ Hypothèque : frais de mainlevée à prévoir en cas de revente anticipée
                     </div>
                   )}
-                               </div>
-              </div>
+                </div>
 
               {/* Mini résultat dans la carte */}
               <div style={{ marginTop: 12, background: couleur + "10", borderRadius: 12, padding: "10px 12px", border: "1px solid " + couleur + "33" }}>
@@ -1526,6 +1525,7 @@ function ComparateurOffres() {
       </div>
 
       {/* Tableau comparatif */}
+
       <div style={SECTION}>
         <SectionHeader icon="⚖️" title="Tableau comparatif" />
         <div style={{ overflowX: "auto" }}>
