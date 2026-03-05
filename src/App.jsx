@@ -1341,6 +1341,7 @@ function SimulateurTravaux() {
   );
 }
 const OFFRES_KEY = "radar-immo-offres-v1";
+const OFFRES_KEY = "radar-immo-offres-v1";
 
 const OFFRE_DEFAULT = function(id) {
   return { id: id, banque: "Banque " + id, montant: "200000", duree: "25", taux: "4.20", assurance: "0.30", fraisDossier: "1000", fraisGarantie: "2000", fraisCourtier: "0", modulation: false, remboursementAnticipe: false, domiciliation: false, differe: false, dureeDiffere: "0", typeGarantie: "caution" };
@@ -1375,8 +1376,14 @@ function ComparateurOffres() {
   const meilleurMensualite = Math.min.apply(null, resultats.map(function(r) { return r.calc.mensualiteTotale; }));
   const meilleurCoutTotal  = Math.min.apply(null, resultats.map(function(r) { return r.calc.coutTotal; }));
   const meilleurTaeg       = Math.min.apply(null, resultats.map(function(r) { return r.calc.taeg; }));
-  const meilleurDiffere = Math.max.apply(null, resultats.map(function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }));
-  const isBest = function(val, best) { return Math.abs(val - best) < 0.01; };
+  const meilleurDiffere    = Math.max.apply(null, resultats.map(function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }));
+
+  const isBest = function(val, best) {
+    if (best === null || best === undefined) return false;
+    if (typeof best === "string") return val === best;
+    return Math.abs(val - best) < 0.01;
+  };
+
   const couleurs = ["#6366f1", "#0ea5e9", "#16a34a", "#f97316", "#a855f7"];
   const inputSmall = { background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 8, padding: "5px 8px", fontSize: 13, color: "#0f172a", outline: "none", width: "100%" };
 
@@ -1517,29 +1524,29 @@ function ComparateurOffres() {
             </thead>
             <tbody>
               {[
-                { label: "Montant",                          fn: function(r) { return fmtEur(pf(r.offre.montant)); } },
-                { label: "Durée",                            fn: function(r) { return fmt(pf(r.offre.duree), 0) + " ans"; } },
-                { label: "Taux crédit",                      fn: function(r) { return pf(r.offre.taux).toFixed(2) + " %"; } },
-                { label: "Taux assurance",                   fn: function(r) { return pf(r.offre.assurance).toFixed(2) + " %"; } },
-                { label: "Mensualité crédit",                fn: function(r) { return fmt(r.calc.mensualiteCredit, 0) + " €"; } },
-                { label: "Mensualité assurance",             fn: function(r) { return fmt(r.calc.mensualiteAssur, 0) + " €"; } },
-                { label: "Mensualité totale",                fn: function(r) { return fmt(r.calc.mensualiteTotale, 0) + " €"; }, bestVal: meilleurMensualite, bestFn: function(r) { return r.calc.mensualiteTotale; }, highlight: true },
-                { label: "Coût des intérêts",                fn: function(r) { return fmtEur(r.calc.coutInterets); } },
-                { label: "Coût assurance totale",            fn: function(r) { return fmtEur(r.calc.coutAssurance); } },
-                { label: "Frais (dossier+garantie+courtier)",fn: function(r) { return fmtEur(r.calc.fraisTotaux); } },
-                { label: "Coût total",                       fn: function(r) { return fmtEur(r.calc.coutTotal); }, bestVal: meilleurCoutTotal, bestFn: function(r) { return r.calc.coutTotal; }, highlight: true },
-                { label: "TAEG estimé",                      fn: function(r) { return r.calc.taeg.toFixed(2) + " %"; }, bestVal: meilleurTaeg, bestFn: function(r) { return r.calc.taeg; }, highlight: true },
-                { label: "Différé",                          fn: function(r) { return r.offre.differe ? "✓ " + pf(r.offre.dureeDiffere) + " mois" : "✗ Non"; } },
-                { label: "Type de garantie",                 fn: function(r) { return r.offre.typeGarantie === "hypotheque" ? "🏠 Hypothèque" : "🤝 Cautionnement"; } },
-                { label: "Modulation mensualités",           fn: function(r) { return r.offre.modulation ? "✓ Oui" : "✗ Non"; } },
-                { label: "Remb. anticipé sans pénalité",     fn: function(r) { return r.offre.remboursementAnticipe ? "✓ Oui" : "✗ Non"; } },
-                { label: "Domiciliation obligatoire",        fn: function(r) { return r.offre.domiciliation ? "⚠ Oui" : "✓ Non"; } },
+                { label: "Montant",                           fn: function(r) { return fmtEur(pf(r.offre.montant)); } },
+                { label: "Durée",                             fn: function(r) { return fmt(pf(r.offre.duree), 0) + " ans"; } },
+                { label: "Taux crédit",                       fn: function(r) { return pf(r.offre.taux).toFixed(2) + " %"; } },
+                { label: "Taux assurance",                    fn: function(r) { return pf(r.offre.assurance).toFixed(2) + " %"; } },
+                { label: "Mensualité crédit",                 fn: function(r) { return fmt(r.calc.mensualiteCredit, 0) + " €"; } },
+                { label: "Mensualité assurance",              fn: function(r) { return fmt(r.calc.mensualiteAssur, 0) + " €"; } },
+                { label: "Mensualité totale",                 fn: function(r) { return fmt(r.calc.mensualiteTotale, 0) + " €"; }, bestVal: meilleurMensualite, bestFn: function(r) { return r.calc.mensualiteTotale; }, highlight: true },
+                { label: "Coût des intérêts",                 fn: function(r) { return fmtEur(r.calc.coutInterets); } },
+                { label: "Coût assurance totale",             fn: function(r) { return fmtEur(r.calc.coutAssurance); } },
+                { label: "Frais (dossier+garantie+courtier)", fn: function(r) { return fmtEur(r.calc.fraisTotaux); } },
+                { label: "Coût total",                        fn: function(r) { return fmtEur(r.calc.coutTotal); }, bestVal: meilleurCoutTotal, bestFn: function(r) { return r.calc.coutTotal; }, highlight: true },
+                { label: "TAEG estimé",                       fn: function(r) { return r.calc.taeg.toFixed(2) + " %"; }, bestVal: meilleurTaeg, bestFn: function(r) { return r.calc.taeg; }, highlight: true },
+                { label: "Différé",                           fn: function(r) { return r.offre.differe ? "✓ " + pf(r.offre.dureeDiffere) + " mois" : "✗ Non"; }, bestVal: meilleurDiffere > 0 ? meilleurDiffere : null, bestFn: function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }, highlight: meilleurDiffere > 0 },
+                { label: "Type de garantie",                  fn: function(r) { return r.offre.typeGarantie === "hypotheque" ? "🏠 Hypothèque" : "🤝 Cautionnement"; }, bestVal: "caution", bestFn: function(r) { return r.offre.typeGarantie; }, highlight: true },
+                { label: "Modulation mensualités",            fn: function(r) { return r.offre.modulation ? "✓ Oui" : "✗ Non"; } },
+                { label: "Remb. anticipé sans pénalité",      fn: function(r) { return r.offre.remboursementAnticipe ? "✓ Oui" : "✗ Non"; } },
+                { label: "Domiciliation obligatoire",         fn: function(r) { return r.offre.domiciliation ? "⚠ Oui" : "✓ Non"; } },
               ].map(function(row, idx) {
                 return (
                   <tr key={row.label} style={{ borderBottom: "1px solid rgba(148,163,184,0.1)", background: row.highlight ? "rgba(99,102,241,0.03)" : (idx % 2 === 0 ? "rgba(248,250,252,0.5)" : "transparent") }}>
                     <td style={{ padding: "9px 12px", fontSize: 12, fontWeight: row.highlight ? 700 : 400, color: row.highlight ? "#334155" : "#64748b" }}>{row.label}</td>
                     {resultats.map(function(r, ridx) {
-                      const isB = row.bestFn && isBest(row.bestFn(r), row.bestVal);
+                      const isB = row.bestFn && row.bestVal !== null && isBest(row.bestFn(r), row.bestVal);
                       return (
                         <td key={r.id} style={{ padding: "9px 12px", textAlign: "right", fontWeight: row.highlight ? 700 : 500, color: isB ? "#15803d" : (row.highlight ? couleurs[ridx % couleurs.length] : "#334155"), background: isB ? "rgba(22,163,74,0.06)" : "transparent" }}>
                           {row.fn(r)}
@@ -1560,11 +1567,14 @@ function ComparateurOffres() {
         <SectionHeader icon="🏆" title="Verdict" />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
           {[
-            { label: "Mensualité la plus basse", best: meilleurMensualite, fn: function(r) { return r.calc.mensualiteTotale; }, format: function(v) { return fmt(v, 0) + " €/mois"; } },
-            { label: "Coût total le plus bas",   best: meilleurCoutTotal,  fn: function(r) { return r.calc.coutTotal; },        format: function(v) { return fmtEur(v); } },
-            { label: "TAEG le plus bas",         best: meilleurTaeg,       fn: function(r) { return r.calc.taeg; },             format: function(v) { return v.toFixed(2) + " %"; } },
-          ].map(function(critere) {
+            { label: "Mensualité la plus basse", best: meilleurMensualite,                    fn: function(r) { return r.calc.mensualiteTotale; },                    format: function(v) { return fmt(v, 0) + " €/mois"; } },
+            { label: "Coût total le plus bas",   best: meilleurCoutTotal,                     fn: function(r) { return r.calc.coutTotal; },                           format: function(v) { return fmtEur(v); } },
+            { label: "TAEG le plus bas",         best: meilleurTaeg,                          fn: function(r) { return r.calc.taeg; },                                format: function(v) { return v.toFixed(2) + " %"; } },
+            { label: "Différé le plus long",     best: meilleurDiffere > 0 ? meilleurDiffere : null, fn: function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }, format: function(v) { return v + " mois"; } },
+            { label: "Meilleure garantie",       best: "caution",                             fn: function(r) { return r.offre.typeGarantie; },                       format: function() { return "🤝 Cautionnement"; } },
+          ].filter(function(c) { return c.best !== null; }).map(function(critere) {
             const winner = resultats.find(function(r) { return isBest(critere.fn(r), critere.best); });
+            if (!winner) return null;
             const idx = offres.findIndex(function(o) { return o.id === winner.id; });
             const couleur = couleurs[idx % couleurs.length];
             return (
@@ -1581,6 +1591,45 @@ function ComparateurOffres() {
     </div>
   );
 }
+
+const OFFRE_DEFAULT = function(id) {
+  return { id: id, banque: "Banque " + id, montant: "200000", duree: "25", taux: "4.20", assurance: "0.30", fraisDossier: "1000", fraisGarantie: "2000", fraisCourtier: "0", modulation: false, remboursementAnticipe: false, domiciliation: false, differe: false, dureeDiffere: "0", typeGarantie: "caution" };
+};
+
+function ComparateurOffres() {
+  const [offres, setOffres] = useState(function() {
+    try { return JSON.parse(localStorage.getItem(OFFRES_KEY)) || [OFFRE_DEFAULT(1), OFFRE_DEFAULT(2)]; }
+    catch(e) { return [OFFRE_DEFAULT(1), OFFRE_DEFAULT(2)]; }
+  });
+
+  const sauver = function(liste) { setOffres(liste); localStorage.setItem(OFFRES_KEY, JSON.stringify(liste)); };
+  const ajouterOffre = function() { const newId = Math.max.apply(null, offres.map(function(o) { return o.id; })) + 1; sauver(offres.concat([OFFRE_DEFAULT(newId)])); };
+  const supprimerOffre = function(id) { if (offres.length <= 1) return; sauver(offres.filter(function(o) { return o.id !== id; })); };
+  const updateOffre = function(id, field, value) { sauver(offres.map(function(o) { return o.id === id ? Object.assign({}, o, { [field]: value }) : o; })); };
+
+  const calcOffre = function(o) {
+    const M = pf(o.montant); const D = Math.max(1, pf(o.duree)); const nMois = D * 12;
+    const tMensuel = pf(o.taux) / 100 / 12; const tAssurMensuel = pf(o.assurance) / 100 / 12;
+    const mensualiteCredit = tMensuel === 0 ? M / nMois : (M * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
+    const mensualiteAssur = M * tAssurMensuel;
+    const mensualiteTotale = mensualiteCredit + mensualiteAssur;
+    const coutInterets = mensualiteCredit * nMois - M;
+    const coutAssurance = mensualiteAssur * nMois;
+    const fraisTotaux = pf(o.fraisDossier) + pf(o.fraisGarantie) + pf(o.fraisCourtier);
+    const coutTotal = coutInterets + coutAssurance + fraisTotaux;
+    const taeg = M > 0 ? ((coutTotal / M) / D) * 100 : 0;
+    return { mensualiteCredit, mensualiteAssur, mensualiteTotale, coutInterets, coutAssurance, fraisTotaux, coutTotal, taeg };
+  };
+
+  const resultats = offres.map(function(o) { return { id: o.id, offre: o, calc: calcOffre(o) }; });
+  const meilleurMensualite = Math.min.apply(null, resultats.map(function(r) { return r.calc.mensualiteTotale; }));
+  const meilleurCoutTotal  = Math.min.apply(null, resultats.map(function(r) { return r.calc.coutTotal; }));
+  const meilleurTaeg       = Math.min.apply(null, resultats.map(function(r) { return r.calc.taeg; }));
+  const meilleurDiffere = Math.max.apply(null, resultats.map(function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }));
+  const isBest = function(val, best) { return Math.abs(val - best) < 0.01; };
+  const couleurs = ["#6366f1", "#0ea5e9", "#16a34a", "#f97316", "#a855f7"];
+  const inputSmall = { background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 8, padding: "5px 8px", fontSize: 13, color: "#0f172a", outline: "none", width: "100%" };
+
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
