@@ -2414,6 +2414,7 @@ export default function App() {
     { id: "offres",     label: "Comparateur offres",      icon: "⚖️" },
     { id: "travaux",    label: "Simulateur travaux",      icon: "🔨" },
     { id: "plusvalue",  label: "Plus-value immo",         icon: "📈" },
+    { id: "sci",       label: "Simulateur SCI IS",          icon: "🏢" },
   ];
 
   const titres = {
@@ -2423,6 +2424,7 @@ export default function App() {
     offres:     { h: "Comparateur d'offres de financement", sub: "Compare plusieurs propositions de banques sur une base homogène avec score pondéré." },
     travaux:    { h: "Simulateur de coût des travaux", sub: "Estime le budget travaux poste par poste et son impact sur la rentabilité." },
     plusvalue:  { h: "Calculateur de plus-value immobilière", sub: "Estime l'impôt sur la plus-value selon la durée de détention et les abattements légaux." },
+    sci:        { h: "Simulateur SCI à l'IS", sub: "Analyse rentabilité, fiscalité IS, amortissements et dividendes de ta SCI." },  // ← ajouter
   };
 
   const handleNav = function(id) { setOnglet(id); setSidebarOpen(false); };
@@ -2490,6 +2492,7 @@ export default function App() {
         {onglet === "offres"     && <ComparateurOffres />}
         {onglet === "travaux"    && <SimulateurTravaux />}
         {onglet === "plusvalue"  && <CalculateurPlusValue />}
+        {onglet === "sci" && <SimulateurSCI />}
       </main>
     </div>
   );
