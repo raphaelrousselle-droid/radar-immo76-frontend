@@ -849,6 +849,184 @@ function AnalyseCommunes() {
     </div>
   );
 }
+function SimulateurCredit() {
+  const [montant, setMontant] = useState("200000");
+  const [duree, setDuree] = useState("25");
+  const [tauxHorsAssurance, setTauxHorsAssurance] = useState("4.20");
+  const [tauxAssurance, setTauxAssurance] = useState("0.30");
+
+  const calc = useMemo(function() {
+    const M = pf(montant);
+    const D = Math.max(1, pf(duree));
+    const nMois = D * 12;
+    const tMensuel = pf(tauxHorsAssurance) / 100 / 12;
+    const tAssurMensuel = pf(tauxAssurance) / 100 / 12;
+    const mensualiteHorsAssur = tMensuel === 0
+      ? M / nMois
+      : (M * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
+    const mensualiteAssur = M * tAssurMensuel;
+    const mensualiteTotale = mensualiteHorsAssur + mensualiteAssur;
+    const coutTotalHorsAssur = mensualiteHorsAssur * nMois - M;
+    const coutTotalAssur = mensualiteAssur * nMois;
+    const coutTotal = coutTotalHorsAssur + coutTotalAssur;
+
+    // Tableau d'amortissement annuel
+    const tableau = [];
+    var solde = M;
+    for (var y = 1; y <= D; y++) {
+      var capitalAn = 0; var interetsAn = 0; var assurAn = mensualiteAssur * 12;
+      for (var m = 0; m < 12; m++) {
+        var intM = solde * tMensuel;
+        var capM = mensualiteHorsAssur - intM;
+        interetsAn += intM;
+        capitalAn += capM;
+        solde = Math.max(0, solde - capM);
+      }
+      tableau.push({ annee: y, capital: capitalAn, interets: interetsAn, assurance: assurAn, solde: Math.max(0, solde) });
+    }
+
+    return { mensualiteHorsAssur, mensualiteAssur, mensualiteTotale, coutTotalHorsAssur, coutTotalAssur, coutTotal, tableau };
+  }, [montant, duree, tauxHorsAssurance, tauxAssurance]);
+
+  const M = pf(montant);
+  const tresoPMois = calc.mensualiteTotale;
+  const inputStyle = { width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "8px 12px", color: "#0f172a", fontSize: 14, outline: "none" };
+  const labelStyle = { display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+      {/* Formulaire + résultat principal */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+
+        {/* Inputs */}
+        <div style={SECTION}>
+          <SectionHeader icon="🏦" title="Paramètres du prêt" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Montant emprunté</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input type="number" value={montant} step="5000" min="0" onChange={function(e) { setMontant(e.target.value); }} style={inputStyle} />
+                <span style={{ color: "#94a3b8", fontSize: 13, minWidth: 16 }}>€</span>
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Durée du prêt</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input type="number" value={duree} step="1" min="1" max="30" onChange={function(e) { setDuree(e.target.value); }} style={inputStyle} />
+                <span style={{ color: "#94a3b8", fontSize: 13, minWidth: 28 }}>ans</span>
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Taux hors assurance</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input type="number" value={tauxHorsAssurance} step="0.05" min="0" onChange={function(e) { setTauxHorsAssurance(e.target.value); }} style={inputStyle} />
+                <span style={{ color: "#94a3b8", fontSize: 13, minWidth: 16 }}>%</span>
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Taux assurance (sur capital initial)</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input type="number" value={tauxAssurance} step="0.01" min="0" onChange={function(e) { setTauxAssurance(e.target.value); }} style={inputStyle} />
+                <span style={{ color: "#94a3b8", fontSize: 13, minWidth: 16 }}>%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Barre durée visuelle */}
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>
+              <span>1 an</span><span>{duree} ans</span><span>30 ans</span>
+            </div>
+            <input type="range" min="1" max="30" value={duree} onChange={function(e) { setDuree(e.target.value); }}
+              style={{ width: "100%", accentColor: "#6366f1" }} />
+          </div>
+        </div>
+
+        {/* Résultat principal */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+          {/* Mensualité hero */}
+          <div style={Object.assign({}, SECTION, { textAlign: "center", padding: "24px 20px" })}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 8 }}>Votre mensualité sera de</div>
+            <div style={{ fontSize: 48, fontWeight: 800, color: "#6366f1", lineHeight: 1 }}>
+              {fmt(calc.mensualiteTotale, 0)} <span style={{ fontSize: 32 }}>€</span>
+            </div>
+            <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 6 }}>
+              dont {fmt(calc.mensualiteAssur, 0)} € d'assurance / mois
+            </div>
+            <div style={{ marginTop: 14, height: 8, borderRadius: 999, background: "rgba(148,163,184,0.2)", overflow: "hidden", display: "flex" }}>
+              <div style={{ flex: calc.mensualiteHorsAssur, background: "linear-gradient(90deg,#6366f1,#38bdf8)", borderRadius: "999px 0 0 999px" }} />
+              <div style={{ flex: calc.mensualiteAssur, background: "#f97316", borderRadius: "0 999px 999px 0" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 6, fontSize: 11, color: "#94a3b8" }}>
+              <span>🟣 Crédit : {fmt(calc.mensualiteHorsAssur, 0)} €</span>
+              <span>🟠 Assurance : {fmt(calc.mensualiteAssur, 0)} €</span>
+            </div>
+          </div>
+
+          {/* Détail chiffres */}
+          <div style={SECTION}>
+            <SectionHeader icon="📋" title="Récapitulatif" />
+            <StatRow label="Montant de votre prêt" value={fmtEur(M)} bold />
+            <StatRow label="Mensualité hors assurance" value={fmt(calc.mensualiteHorsAssur, 2) + " €/mois"} />
+            <StatRow label="dont assurance" value={fmt(calc.mensualiteAssur, 2) + " €/mois"} color="#f97316" />
+            <StatRow label="Mensualité totale" value={fmt(calc.mensualiteTotale, 2) + " €/mois"} bold color="#6366f1" />
+            <div style={{ margin: "8px 0", background: "rgba(241,245,249,0.8)", borderRadius: 10, height: 1 }} />
+            <StatRow label="Coût total du crédit (intérêts)" value={fmtEur(calc.coutTotalHorsAssur)} color="#dc2626" />
+            <StatRow label="Coût total assurance" value={fmtEur(calc.coutTotalAssur)} color="#f97316" />
+            <StatRow label="Coût total (intérêts + assurance)" value={fmtEur(calc.coutTotal)} bold color="#dc2626" border={false} />
+            <div style={{ marginTop: 10, background: "rgba(254,226,226,0.5)", borderRadius: 10, padding: "8px 12px", border: "1px solid rgba(220,38,38,0.15)" }}>
+              <div style={{ fontSize: 11, color: "#94a3b8" }}>Coût total remboursé (capital + intérêts + assurance)</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#dc2626" }}>{fmtEur(M + calc.coutTotal)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tableau d'amortissement */}
+      <div style={SECTION}>
+        <SectionHeader icon="📅" title="Tableau d'amortissement" badge={duree + " ans"} />
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
+                {["Année", "Capital remboursé", "Intérêts", "Assurance", "Mensualité totale", "Capital restant dû"].map(function(h) {
+                  return <th key={h} style={{ padding: "8px 12px", textAlign: h === "Année" ? "left" : "right", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 }}>{h}</th>;
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {calc.tableau.map(function(row, idx) {
+                const isEven = idx % 2 === 0;
+                return (
+                  <tr key={row.annee} style={{ background: isEven ? "rgba(248,250,252,0.6)" : "transparent", borderBottom: "1px solid rgba(148,163,184,0.1)" }}>
+                    <td style={{ padding: "8px 12px", fontWeight: 600, color: "#334155" }}>Année {row.annee}</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#16a34a", fontWeight: 500 }}>{fmt(row.capital, 0)} €</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#dc2626" }}>{fmt(row.interets, 0)} €</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#f97316" }}>{fmt(row.assurance, 0)} €</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: "#4338ca" }}>{fmt(row.capital + row.interets + row.assurance, 0)} €</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#64748b" }}>{fmt(row.solde, 0)} €</td>
+                  </tr>
+                );
+              })}
+              {/* Ligne totaux */}
+              <tr style={{ borderTop: "2px solid rgba(148,163,184,0.3)", background: "rgba(99,102,241,0.05)" }}>
+                <td style={{ padding: "10px 12px", fontWeight: 700, color: "#0f172a" }}>Total</td>
+                <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#16a34a" }}>{fmtEur(M)}</td>
+                <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#dc2626" }}>{fmtEur(calc.coutTotalHorsAssur)}</td>
+                <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#f97316" }}>{fmtEur(calc.coutTotalAssur)}</td>
+                <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#4338ca" }}>{fmtEur(M + calc.coutTotal)}</td>
+                <td style={{ padding: "10px 12px", textAlign: "right", color: "#16a34a", fontWeight: 700 }}>0 €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  );
+}
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
