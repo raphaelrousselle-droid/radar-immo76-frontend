@@ -702,13 +702,20 @@ function AnalyseCommunes() {
   }, [communes, search, sortKey, filterMin]);
   const top10 = useMemo(function() { return filtered.slice(0, 10); }, [filtered]);
 
-  const toggleCompare = function(c) {
-    setCompareList(function(prev) {
-      if (prev.find(function(x) { return x.nom === c.nom; })) return prev.filter(function(x) { return x.nom !== c.nom; });
-      if (prev.length < 4) return prev.concat([c]);
-      return prev;
-    });
-  };
+  function Toggle({ value, onChange, labelOn, labelOff, colorOn, colorOff }) {
+  return (
+    <button onClick={function() { onChange(!value); }} style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "4px 12px", borderRadius: 999, border: "none", cursor: "pointer",
+      fontSize: 12, fontWeight: 700, transition: "all 0.15s",
+      background: value ? "rgba(99,102,241,0.9)" : "rgba(220,38,38,0.12)",
+      color: value ? "#fff" : "#dc2626",
+      boxShadow: value ? "0 2px 8px rgba(99,102,241,0.3)" : "inset 0 0 0 1.5px rgba(220,38,38,0.4)",
+    }}>
+      {value ? "✓ Oui" : "✗ Non"}
+    </button>
+  );
+}
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
