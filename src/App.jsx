@@ -1343,7 +1343,7 @@ function SimulateurTravaux() {
 const OFFRES_KEY = "radar-immo-offres-v1";
 
 const OFFRE_DEFAULT = function(id) {
-  return { id: id, banque: "Banque " + id, montant: "200000", duree: "25", taux: "4.20", assurance: "0.30", fraisDossier: "1000", fraisGarantie: "2000", fraisCourtier: "0", modulation: false, remboursementAnticipe: false, domiciliation: false };
+  return { id: id, banque: "Banque " + id, montant: "200000", duree: "25", taux: "4.20", assurance: "0.30", fraisDossier: "1000", fraisGarantie: "2000", fraisCourtier: "0", modulation: false, remboursementAnticipe: false, domiciliation: false, differe: false, dureeDiffere: "0", typeGarantie: "caution" };
 };
 
 function ComparateurOffres() {
