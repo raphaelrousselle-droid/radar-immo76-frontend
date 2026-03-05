@@ -1719,8 +1719,8 @@ function CalculateurPlusValue() {
     const nMois = Math.max(1, pf(vals.dureeCredit)) * 12;
     const mensualite = tMensuel === 0 ? M / nMois : (M * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
     var moisEcoules = 0;
-    if (vals.dateDebut) {
-      const debut = new Date(vals.dateDebut + "-01");
+       if (debutMois && debutAnnee) {
+      const debut = new Date(parseInt(debutAnnee), parseInt(debutMois) - 1, 1);
       const dateRevente = new Date(debut);
       dateRevente.setFullYear(dateRevente.getFullYear() + ans);
       moisEcoules = Math.max(0, Math.round((dateRevente - debut) / (1000 * 60 * 60 * 24 * 30.44)));
