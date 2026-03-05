@@ -480,6 +480,25 @@ function SimulationProjet() {
               <InputField label="Frais d'agence" name="fraisAgencePct" value={inputs.fraisAgencePct} onChange={handleChange} unit="%" step="0.5" />
               <InputField label="Apport personnel" name="apport" value={inputs.apport} onChange={handleChange} />
               <InputField label="Surface globale" name="surfaceGlobale" value={inputs.surfaceGlobale} onChange={handleChange} unit="m²" step="1" />
+                            <div style={{ gridColumn: "1 / -1" }}>
+                <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4, fontWeight: 500 }}>Note DPE</div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {["A", "B", "C", "D", "E", "F", "G", ""].map(function(note) {
+                    const colors = { A: "#16a34a", B: "#4ade80", C: "#a3e635", D: "#facc15", E: "#fb923c", F: "#f97316", G: "#dc2626", "": "#94a3b8" };
+                    const isActive = inputs.noteDPE === note;
+                    return (
+                      <button key={note === "" ? "nd" : note}
+                        onClick={function() { setInputs(function(prev) { return Object.assign({}, prev, { noteDPE: note }); }); }}
+                        style={{ flex: 1, padding: "5px 0", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 13,
+                          background: isActive ? colors[note] : "rgba(148,163,184,0.12)",
+                          color: isActive ? (["A","B","C","D"].includes(note) ? "#fff" : "#0f172a") : "#64748b",
+                          boxShadow: isActive ? "0 2px 8px " + colors[note] + "66" : "none" }}>
+                        {note === "" ? "N/D" : note}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
             <div style={{ marginTop: 8, background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 12px" }}>
               <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 6, fontWeight: 600, textTransform: "uppercase" }}>Crédit</div>
