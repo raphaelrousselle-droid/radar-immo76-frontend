@@ -1375,6 +1375,7 @@ function ComparateurOffres() {
   const meilleurMensualite = Math.min.apply(null, resultats.map(function(r) { return r.calc.mensualiteTotale; }));
   const meilleurCoutTotal  = Math.min.apply(null, resultats.map(function(r) { return r.calc.coutTotal; }));
   const meilleurTaeg       = Math.min.apply(null, resultats.map(function(r) { return r.calc.taeg; }));
+  const meilleurDiffere = Math.max.apply(null, resultats.map(function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }));
   const isBest = function(val, best) { return Math.abs(val - best) < 0.01; };
   const couleurs = ["#6366f1", "#0ea5e9", "#16a34a", "#f97316", "#a855f7"];
   const inputSmall = { background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 8, padding: "5px 8px", fontSize: 13, color: "#0f172a", outline: "none", width: "100%" };
