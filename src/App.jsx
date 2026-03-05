@@ -1027,6 +1027,327 @@ function SimulateurCredit() {
     </div>
   );
 }
+const TRAVAUX_DATA = {
+  quantite: [
+    { id: "fenetres",   label: "Fenêtres",              icon: "🪟", delegue: 1200, moi: null,  unite: "fenêtre(s)" },
+    { id: "radiateur",  label: "Radiateur électrique",  icon: "🔥", delegue: 350,  moi: 250,   unite: "radiateur(s)" },
+    { id: "chaudiere",  label: "Chaudière électrique",  icon: "⚙️", delegue: 2250, moi: 1750,  unite: "chaudière(s)" },
+  ],
+  fixe: [
+    { id: "cuisine",    label: "Cuisine",               icon: "🍳", delegue_inf: 5000, delegue_sup: 6000, moi_inf: 3000, moi_sup: 4000 },
+    { id: "sdb",        label: "Salle de bains",        icon: "🚿", delegue_inf: 4000, delegue_sup: 5500, moi_inf: 2500, moi_sup: 3000 },
+    { id: "vmc",        label: "VMC",                   icon: "💨", delegue_inf: 800,  delegue_sup: 1200, moi_inf: 400,  moi_sup: 600  },
+    { id: "tableau",    label: "Tableau électrique",    icon: "⚡", delegue_inf: 1750, delegue_sup: 1750, moi_inf: 600,  moi_sup: 600  },
+  ],
+  m2: [
+    { id: "elec",       label: "Électricité (complet)", icon: "💡", delegue: 120, moi: 50  },
+    { id: "normes",     label: "Mise aux normes élec.", icon: "🔌", delegue: 75,  moi: 25  },
+    { id: "plomberie",  label: "Plomberie",             icon: "🚰", delegue: 100, moi: 45  },
+    { id: "cloisons",   label: "Cloisons intérieures",  icon: "🧱", delegue: 60,  moi: 20  },
+    { id: "isolation",  label: "Isolation",             icon: "🏠", delegue: 40,  moi: 20  },
+    { id: "peinture",   label: "Peinture murs/plafond", icon: "🎨", delegue: 50,  moi: 20  },
+    { id: "sol",        label: "Sol",                   icon: "🏡", delegue: 80,  moi: 30  },
+  ],
+  batiment: [
+    { id: "toiture",    label: "Remplacement couverture toiture", icon: "🏗️", delegue: 230, moi: 50,   type: "toiture" },
+    { id: "tuiles",     label: "Révision tuiles/chevrons",        icon: "🔧", delegue: 38,  moi: 10,   type: "toiture" },
+    { id: "charpente",  label: "Remplacement charpente",          icon: "🪵", delegue: 200, moi: null, type: "toiture" },
+    { id: "ravalement", label: "Ravalement façade",               icon: "🏢", delegue: 70,  moi: 10,   type: "facade" },
+  ],
+};
+
+function Toggle({ value, onChange, labelOn, labelOff, colorOn, colorOff }) {
+  return (
+    <button onClick={function() { onChange(!value); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: value ? (colorOn || "rgba(22,163,74,0.12)") : "rgba(148,163,184,0.12)", color: value ? (colorOn ? "#fff" : "#15803d") : "#94a3b8", transition: "all 0.15s" }}>
+      {value ? (labelOn || "Oui") : (labelOff || "Non")}
+    </button>
+  );
+}
+
+function SimulateurTravaux() {
+  const [surface, setSurface] = useState("80");
+  const [surfaceToiture, setSurfaceToiture] = useState("60");
+  const [surfaceFacade, setSurfaceFacade] = useState("100");
+
+  // État pour chaque poste : { actif, delegue, quantite }
+  const initState = function(items, defQty) {
+    const s = {};
+    items.forEach(function(item) { s[item.id] = { actif: false, delegue: true, quantite: defQty || "1" }; });
+    return s;
+  };
+
+  const [stateQ, setStateQ] = useState(function() { return initState(TRAVAUX_DATA.quantite, "1"); });
+  const [stateF, setStateF] = useState(function() { return initState(TRAVAUX_DATA.fixe, "1"); });
+  const [stateM, setStateM] = useState(function() { return initState(TRAVAUX_DATA.m2, "1"); });
+  const [stateB, setStateB] = useState(function() { return initState(TRAVAUX_DATA.batiment, "1"); });
+
+  const updateState = function(setter, id, field, value) {
+    setter(function(prev) { return Object.assign({}, prev, { [id]: Object.assign({}, prev[id], { [field]: value }) }); });
+  };
+
+  const surf = pf(surface) || 1;
+  const surfT = pf(surfaceToiture) || 1;
+  const surfF = pf(surfaceFacade) || 1;
+  const grand = surf >= 50;
+
+  const calcQ = useMemo(function() {
+    var total = 0; var detail = [];
+    TRAVAUX_DATA.quantite.forEach(function(item) {
+      const s = stateQ[item.id];
+      if (!s.actif) return;
+      const prix = s.delegue ? item.delegue : item.moi;
+      if (prix == null) { detail.push({ label: item.label, montant: null }); return; }
+      const montant = prix * pf(s.quantite);
+      total += montant;
+      detail.push({ label: item.label, montant: montant });
+    });
+    return { total, detail };
+  }, [stateQ]);
+
+  const calcF = useMemo(function() {
+    var total = 0; var detail = [];
+    TRAVAUX_DATA.fixe.forEach(function(item) {
+      const s = stateF[item.id];
+      if (!s.actif) return;
+      const prix = s.delegue ? (grand ? item.delegue_sup : item.delegue_inf) : (grand ? item.moi_sup : item.moi_inf);
+      const montant = prix;
+      total += montant;
+      detail.push({ label: item.label, montant: montant });
+    });
+    return { total, detail };
+  }, [stateF, grand]);
+
+  const calcM = useMemo(function() {
+    var total = 0; var detail = [];
+    TRAVAUX_DATA.m2.forEach(function(item) {
+      const s = stateM[item.id];
+      if (!s.actif) return;
+      const prix = s.delegue ? item.delegue : item.moi;
+      const montant = prix * surf;
+      total += montant;
+      detail.push({ label: item.label, montant: montant });
+    });
+    return { total, detail };
+  }, [stateM, surf]);
+
+  const calcB = useMemo(function() {
+    var total = 0; var detail = [];
+    TRAVAUX_DATA.batiment.forEach(function(item) {
+      const s = stateB[item.id];
+      if (!s.actif) return;
+      const prix = s.delegue ? item.delegue : item.moi;
+      if (prix == null) { detail.push({ label: item.label, montant: null }); return; }
+      const surface2 = item.type === "toiture" ? surfT : surfF;
+      const montant = prix * surface2;
+      total += montant;
+      detail.push({ label: item.label, montant: montant });
+    });
+    return { total, detail };
+  }, [stateB, surfT, surfF]);
+
+  const totalGeneral = calcQ.total + calcF.total + calcM.total + calcB.total;
+  const prixM2 = surf > 0 ? totalGeneral / surf : 0;
+
+  const sectionStyle = Object.assign({}, SECTION, { marginBottom: 0 });
+
+  const renderRows = function(items, state, setter, showQty, qtyLabel) {
+    return items.map(function(item) {
+      const s = state[item.id];
+      const isActif = s.actif;
+      const prix = isActif ? (
+        item.delegue_inf !== undefined
+          ? (s.delegue ? (grand ? item.delegue_sup : item.delegue_inf) : (grand ? item.moi_sup : item.moi_inf))
+          : (s.delegue ? item.delegue : item.moi)
+      ) : null;
+      const montant = isActif && prix != null
+        ? (showQty === "quantite" ? prix * pf(s.quantite)
+          : showQty === "m2_logement" ? prix * surf
+          : showQty === "m2_toiture" ? prix * surfT
+          : showQty === "m2_facade" ? prix * surfF
+          : prix)
+        : null;
+
+      return (
+        <tr key={item.id} style={{ borderBottom: "1px solid rgba(148,163,184,0.1)", background: isActif ? "rgba(99,102,241,0.03)" : "transparent", opacity: isActif ? 1 : 0.55, transition: "all 0.15s" }}>
+          <td style={{ padding: "10px 12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "#0f172a" }}>{item.label}</span>
+              {item.moi === null && isActif && s.delegue === false && <Tag color="orange">Délégatoire uniquement</Tag>}
+            </div>
+          </td>
+          <td style={{ padding: "10px 12px", textAlign: "center" }}>
+            <Toggle value={isActif} onChange={function(v) { updateState(setter, item.id, "actif", v); }} labelOn="✓ Oui" labelOff="Non" colorOn="rgba(99,102,241,0.85)" />
+          </td>
+          <td style={{ padding: "10px 12px", textAlign: "center" }}>
+            {isActif ? (
+              <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
+                <button onClick={function() { updateState(setter, item.id, "delegue", true); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: s.delegue ? "rgba(99,102,241,0.9)" : "rgba(148,163,184,0.2)", color: s.delegue ? "#fff" : "#64748b" }}>Entreprise</button>
+                <button onClick={function() { if (item.moi !== null && item.moi_inf !== undefined || item.moi !== null) updateState(setter, item.id, "delegue", false); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: item.moi !== null ? "pointer" : "not-allowed", fontSize: 11, fontWeight: 600, background: !s.delegue ? "rgba(22,163,74,0.85)" : "rgba(148,163,184,0.2)", color: !s.delegue ? "#fff" : "#64748b", opacity: item.moi === null && item.moi_inf === undefined ? 0.4 : 1 }}>Moi-même</button>
+              </div>
+            ) : <span style={{ fontSize: 11, color: "#cbd5e1" }}>—</span>}
+          </td>
+          {showQty === "quantite" && (
+            <td style={{ padding: "10px 12px", textAlign: "center" }}>
+              {isActif ? (
+                <input type="number" value={s.quantite} min="1" step="1" onChange={function(e) { updateState(setter, item.id, "quantite", e.target.value); }}
+                  style={{ width: 60, background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "4px 8px", fontSize: 12, color: "#0f172a", outline: "none", textAlign: "center" }} />
+              ) : <span style={{ fontSize: 11, color: "#cbd5e1" }}>—</span>}
+            </td>
+          )}
+          <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12, color: "#94a3b8" }}>
+            {isActif && prix != null ? fmt(prix, 0) + " €" + (showQty !== "fixe" ? (showQty === "quantite" ? "/u" : "/m²") : "") : "—"}
+          </td>
+          <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: montant != null ? "#4338ca" : "#f97316", fontSize: 13 }}>
+            {montant != null ? fmtEur(montant) : isActif ? "⚠ N/A" : "—"}
+          </td>
+        </tr>
+      );
+    });
+  };
+
+  const theadStyle = { borderBottom: "2px solid rgba(148,163,184,0.2)" };
+  const thStyle = function(align) { return { padding: "8px 12px", textAlign: align || "left", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 }; };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+      {/* Avertissement */}
+      <div style={{ background: "rgba(254,243,199,0.9)", borderRadius: 14, padding: "10px 16px", border: "1px solid rgba(251,191,36,0.4)", fontSize: 12, color: "#92400e" }}>
+        ⚠️ <strong>Estimation indicative uniquement.</strong> Les prix peuvent varier selon la région et les artisans. Faites venir plusieurs devis pour une estimation précise.
+      </div>
+
+      {/* Surfaces */}
+      <div style={sectionStyle}>
+        <SectionHeader icon="📐" title="Surfaces de référence" />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+          {[
+            { label: "Surface habitable", value: surface, setter: setSurface, unit: "m²", sub: "Utilisée pour les postes au m²" },
+            { label: "Surface toiture", value: surfaceToiture, setter: setSurfaceToiture, unit: "m²", sub: "Utilisée pour les postes toiture" },
+            { label: "Surface façade", value: surfaceFacade, setter: setSurfaceFacade, unit: "m²", sub: "Utilisée pour le ravalement" },
+          ].map(function(f) {
+            return (
+              <div key={f.label} style={{ background: "rgba(248,250,252,0.9)", borderRadius: 12, padding: "12px 14px", border: "1px solid rgba(148,163,184,0.2)" }}>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>{f.label}</label>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <input type="number" value={f.value} min="1" step="1" onChange={function(e) { f.setter(e.target.value); }}
+                    style={{ width: "100%", background: "white", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "7px 10px", fontSize: 16, fontWeight: 700, color: "#0f172a", outline: "none" }} />
+                  <span style={{ color: "#94a3b8", fontSize: 13 }}>{f.unit}</span>
+                </div>
+                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 4 }}>{f.sub}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Section Prix à la quantité */}
+      <div style={sectionStyle}>
+        <SectionHeader icon="🔢" title="Prix à la quantité" badge={"Sous-total : " + fmtEur(calcQ.total)} />
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead><tr style={theadStyle}>
+              <th style={thStyle()}>Poste</th>
+              <th style={thStyle("center")}>À rénover ?</th>
+              <th style={thStyle("center")}>Qui rénove ?</th>
+              <th style={thStyle("center")}>Quantité</th>
+              <th style={thStyle("right")}>Prix unitaire</th>
+              <th style={thStyle("right")}>Montant</th>
+            </tr></thead>
+            <tbody>{renderRows(TRAVAUX_DATA.quantite, stateQ, setStateQ, "quantite")}</tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Section Prix fixe */}
+      <div style={sectionStyle}>
+        <SectionHeader icon="🏠" title={"Prix fixe (logement " + (grand ? "> 50 m²" : "< 50 m²") + ")"} badge={"Sous-total : " + fmtEur(calcF.total)} />
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead><tr style={theadStyle}>
+              <th style={thStyle()}>Poste</th>
+              <th style={thStyle("center")}>À rénover ?</th>
+              <th style={thStyle("center")}>Qui rénove ?</th>
+              <th style={thStyle("right")}>Prix</th>
+              <th style={thStyle("right")}>Montant</th>
+            </tr></thead>
+            <tbody>{renderRows(TRAVAUX_DATA.fixe, stateF, setStateF, "fixe")}</tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Section Prix au m² (habitable) */}
+      <div style={sectionStyle}>
+        <SectionHeader icon="📏" title={"Prix au m² habitable (" + fmt(surf, 0) + " m²)"} badge={"Sous-total : " + fmtEur(calcM.total)} />
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead><tr style={theadStyle}>
+              <th style={thStyle()}>Poste</th>
+              <th style={thStyle("center")}>À rénover ?</th>
+              <th style={thStyle("center")}>Qui rénove ?</th>
+              <th style={thStyle("right")}>Prix/m²</th>
+              <th style={thStyle("right")}>Montant</th>
+            </tr></thead>
+            <tbody>{renderRows(TRAVAUX_DATA.m2, stateM, setStateM, "m2_logement")}</tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Section Bâtiment */}
+      <div style={sectionStyle}>
+        <SectionHeader icon="🏗️" title="Bâtiment (toiture & façade)" badge={"Sous-total : " + fmtEur(calcB.total)} />
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead><tr style={theadStyle}>
+              <th style={thStyle()}>Poste</th>
+              <th style={thStyle("center")}>À rénover ?</th>
+              <th style={thStyle("center")}>Qui rénove ?</th>
+              <th style={thStyle("right")}>Prix/m²</th>
+              <th style={thStyle("right")}>Montant</th>
+            </tr></thead>
+            <tbody>
+              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 11, fontWeight: 600, color: "#94a3b8", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Toiture — {fmt(surfT, 0)} m²</td></tr>
+              {renderRows(TRAVAUX_DATA.batiment.filter(function(i) { return i.type === "toiture"; }), stateB, setStateB, "m2_toiture")}
+              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 11, fontWeight: 600, color: "#94a3b8", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Façade — {fmt(surfF, 0)} m²</td></tr>
+              {renderRows(TRAVAUX_DATA.batiment.filter(function(i) { return i.type === "facade"; }), stateB, setStateB, "m2_facade")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Récap total */}
+      <div style={Object.assign({}, sectionStyle, { background: "linear-gradient(135deg,rgba(99,102,241,0.08),rgba(56,189,248,0.08))", border: "1.5px solid rgba(99,102,241,0.25)" })}>
+        <SectionHeader icon="💰" title="Récapitulatif total" />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 16 }}>
+          {[
+            { label: "Quantité", value: fmtEur(calcQ.total), color: "#6366f1" },
+            { label: "Prix fixe", value: fmtEur(calcF.total), color: "#8b5cf6" },
+            { label: "Au m² habitable", value: fmtEur(calcM.total), color: "#0ea5e9" },
+            { label: "Bâtiment", value: fmtEur(calcB.total), color: "#d97706" },
+          ].map(function(c) {
+            return (
+              <div key={c.label} style={{ background: "rgba(255,255,255,0.75)", borderRadius: 12, padding: "10px 14px", border: "1px solid rgba(148,163,184,0.2)" }}>
+                <div style={{ fontSize: 11, color: "#94a3b8" }}>{c.label}</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: c.color }}>{c.value}</div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ background: "rgba(255,255,255,0.85)", borderRadius: 16, padding: "14px 20px", flex: 1, minWidth: 180, border: "1px solid rgba(99,102,241,0.25)" }}>
+            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>Coût total estimé</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: "#4338ca" }}>{fmtEur(totalGeneral)}</div>
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.85)", borderRadius: 16, padding: "14px 20px", flex: 1, minWidth: 180, border: "1px solid rgba(148,163,184,0.2)" }}>
+            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>Prix rénovation / m² habitable</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: "#0f172a" }}>{fmt(prixM2, 0)} <span style={{ fontSize: 16 }}>€/m²</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+}
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
@@ -1105,7 +1426,7 @@ export default function App() {
         {onglet === "simulation" && <SimulationProjet />}
         {onglet === "credit" && <SimulateurCredit />}
         {onglet === "offres"     && <Placeholder texte="On y saisira plusieurs propositions de banques (taux, durée, assurance, frais) pour les comparer côte à côte." />}
-        {onglet === "travaux"    && <Placeholder texte="On détaillera les postes travaux (gros œuvre, second œuvre, déco…) avec totaux et impact sur le projet." />}
+        {onglet === "travaux" && <SimulateurTravaux />}
       </main>
 
     </div>
