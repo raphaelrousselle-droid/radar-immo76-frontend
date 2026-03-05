@@ -1632,82 +1632,147 @@ function ComparateurOffres() {
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navItems = [
-    { id: "analyse",    label: "Analyse communes",               icon: "📊" },
-    { id: "simulation", label: "Simulation projet",              icon: "💼" },
-    { id: "credit",     label: "Simulation de crédit",           icon: "🏦" },
-    { id: "offres",     label: "Comparateur offres financement", icon: "📑" },
-    { id: "travaux",    label: "Simulateur coût travaux",        icon: "🛠️" },
+    { id: "analyse",    label: "Analyse communes",           icon: "🗺️" },
+    { id: "simulation", label: "Simulation projet",          icon: "📊" },
+    { id: "credit",     label: "Simulation de crédit",       icon: "🏦" },
+    { id: "offres",     label: "Comparateur offres",         icon: "⚖️" },
+    { id: "travaux",    label: "Simulateur travaux",         icon: "🔨" },
   ];
 
   const titres = {
-    analyse:    { h: "Analyse investissement — Seine-Maritime",  sub: "TOP 10 · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer" },
-    simulation: { h: "Simulation de rentabilité",                sub: "Paramètre ton projet, sauvegarde-le et visualise l'évolution du cash-flow par régime fiscal." },
-    credit:     { h: "Simulation de crédit",                     sub: "Calcule mensualités, coût total et tableau d'amortissement de ton prêt." },
-    offres:     { h: "Comparateur d'offres de financement",      sub: "Compare plusieurs propositions de banques sur une base homogène." },
-    travaux:    { h: "Simulateur de coût des travaux",           sub: "Estime le budget travaux poste par poste et son impact sur la rentabilité." },
+    analyse:    { h: "Analyse investissement — Seine-Maritime", sub: "TOP 10 des communes selon tes filtres · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer" },
+    simulation: { h: "Simulation de rentabilité", sub: "Paramètre ton projet, sauvegarde-le et visualise l'évolution du cash-flow par régime fiscal." },
+    credit:     { h: "Simulation de crédit", sub: "Calcule mensualités, coût total et tableau d'amortissement de ton prêt." },
+    offres:     { h: "Comparateur d'offres de financement", sub: "Compare plusieurs propositions de banques sur une base homogène." },
+    travaux:    { h: "Simulateur de coût des travaux", sub: "Estime le budget travaux poste par poste et son impact sur la rentabilité." },
   };
 
-  const Placeholder = function({ texte }) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 320, gap: 16 }}>
-        <div style={{ fontSize: 48 }}>🚧</div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#334155" }}>En cours de développement</div>
-        <div style={{ fontSize: 13, color: "#94a3b8", textAlign: "center", maxWidth: 400 }}>{texte}</div>
-      </div>
-    );
+  const handleNav = function(id) {
+    setOnglet(id);
+    setSidebarOpen(false);
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "radial-gradient(ellipse at top left,#bfdbfe 0%,transparent 50%),radial-gradient(ellipse at top right,#fce7f3 0%,transparent 50%),radial-gradient(ellipse at bottom center,#d1fae5 0%,#f1f5f9 60%)", fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "radial-gradient(ellipse at top left,#bfdbfe 0,transparent 50%),radial-gradient(ellipse at top right,#fce7f3 0,transparent 50%),radial-gradient(ellipse at bottom center,#d1fae5 0,#f1f5f9 60%)", fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif" }}>
+
+      {/* Overlay mobile */}
+      {sidebarOpen && (
+        <div onClick={function() { setSidebarOpen(false); }}
+          style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.4)", zIndex: 40, display: "none" }}
+          className="mobile-overlay" />
+      )}
 
       {/* Sidebar */}
-      <aside style={{ width: 220, minWidth: 220, background: "rgba(255,255,255,0.65)", borderRight: "1px solid rgba(148,163,184,0.25)", padding: "18px 12px", display: "flex", flexDirection: "column", gap: 4, backdropFilter: "blur(20px)", position: "relative", zIndex: 10 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#38bdf8,#6366f1)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700, boxShadow: "0 4px 10px rgba(99,102,241,0.35)" }}>R</span>
-          Radar Immo 76
+      <aside style={{
+        width: sidebarOpen ? 220 : 64,
+        minWidth: sidebarOpen ? 220 : 64,
+        background: "rgba(255,255,255,0.72)",
+        borderRight: "1px solid rgba(148,163,184,0.25)",
+        padding: sidebarOpen ? "18px 12px" : "18px 8px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 4,
+        backdropFilter: "blur(24px)",
+        position: "sticky",
+        top: 0,
+        height: "100vh",
+        overflowX: "hidden",
+        transition: "width 0.22s cubic-bezier(.4,0,.2,1), min-width 0.22s cubic-bezier(.4,0,.2,1), padding 0.22s",
+        zIndex: 30,
+        boxShadow: sidebarOpen ? "4px 0 24px rgba(99,102,241,0.08)" : "none",
+      }}>
+
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, overflow: "hidden", minHeight: 40 }}>
+          {/* Icône SVG maison + graphe */}
+          <div style={{ flexShrink: 0, width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg,#6366f1,#38bdf8)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px rgba(99,102,241,0.45)", cursor: "pointer" }}
+            onClick={function() { setSidebarOpen(!sidebarOpen); }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M3 12L12 4l9 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M5 10v8a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M9 21V14" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <circle cx="18" cy="8" r="1.5" fill="#fbbf24"/>
+            </svg>
+          </div>
+
+          {sidebarOpen && (
+            <div style={{ overflow: "hidden", whiteSpace: "nowrap" }}>
+              <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.5px", lineHeight: 1.1 }}>
+                <span style={{ background: "linear-gradient(90deg,#6366f1,#38bdf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>RADAR</span>
+                <span style={{ color: "#0f172a" }}> IMMO</span>
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", letterSpacing: "2px", marginTop: 1 }}>76</div>
+            </div>
+          )}
         </div>
 
-        {navItems.map(function(n) {
-          const isActive = onglet === n.id;
-          return (
-            <button
-              key={n.id}
-              onClick={function() { setOnglet(n.id); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "8px 10px", borderRadius: 10, border: "none",
-                cursor: "pointer", fontSize: 13, fontWeight: 500,
-                width: "100%", textAlign: "left",
-                background: isActive ? "linear-gradient(135deg,rgba(99,102,241,0.12),rgba(56,189,248,0.12))" : "transparent",
-                color: isActive ? "#4338ca" : "#64748b",
-                borderLeft: isActive ? "3px solid #6366f1" : "3px solid transparent",
-                transition: "all 0.15s",
-              }}
-            >
-              <span style={{ fontSize: 15 }}>{n.icon}</span>
-              <span>{n.label}</span>
-            </button>
-          );
-        })}
+        {/* Nav items */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
+          {navItems.map(function(n) {
+            const isActive = onglet === n.id;
+            return (
+              <button key={n.id} onClick={function() { handleNav(n.id); }}
+                title={!sidebarOpen ? n.label : undefined}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: sidebarOpen ? 10 : 0,
+                  justifyContent: sidebarOpen ? "flex-start" : "center",
+                  padding: sidebarOpen ? "9px 10px" : "9px 0",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  width: "100%",
+                  textAlign: "left",
+                  background: isActive ? "linear-gradient(135deg,rgba(99,102,241,0.15),rgba(56,189,248,0.15))" : "transparent",
+                  color: isActive ? "#4338ca" : "#64748b",
+                  borderLeft: isActive ? "3px solid #6366f1" : "3px solid transparent",
+                  transition: "all 0.15s",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  position: "relative",
+                }}>
+                <span style={{ fontSize: 17, flexShrink: 0, filter: isActive ? "none" : "grayscale(30%)" }}>{n.icon}</span>
+                {sidebarOpen && <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{n.label}</span>}
+                {isActive && !sidebarOpen && (
+                  <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", width: 3, height: 20, borderRadius: "3px 0 0 3px", background: "#6366f1" }} />
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-        <div style={{ flex: 1 }} />
-        <div style={{ fontSize: 11, color: "#94a3b8", paddingTop: 8, borderTop: "1px solid rgba(148,163,184,0.2)" }}>Sources : DVF · ANIL · INSEE</div>
+        {/* Toggle bouton bas */}
+        <button onClick={function() { setSidebarOpen(!sidebarOpen); }}
+          style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: sidebarOpen ? "flex-end" : "center", gap: 6, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", background: "rgba(148,163,184,0.1)", color: "#94a3b8", fontSize: 11, fontWeight: 500, width: "100%", transition: "all 0.15s" }}>
+          <span style={{ fontSize: 14, transition: "transform 0.22s", transform: sidebarOpen ? "rotate(180deg)" : "rotate(0deg)", display: "inline-block" }}>›</span>
+          {sidebarOpen && <span>Réduire</span>}
+        </button>
+
+        {!sidebarOpen && (
+          <div style={{ fontSize: 9, color: "#cbd5e1", textAlign: "center", marginTop: 4, letterSpacing: "1px", fontWeight: 700 }}>76</div>
+        )}
       </aside>
 
       {/* Main */}
       <main style={{ flex: 1, padding: 20, overflowY: "auto", minWidth: 0 }}>
-        <div style={{ marginBottom: 16 }}>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: "#0f172a", margin: 0 }}>{titres[onglet].h}</h1>
-          <p style={{ fontSize: 12, color: "#64748b", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
+        <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+          <div>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: "#0f172a", margin: 0 }}>{titres[onglet].h}</h1>
+            <p style={{ fontSize: 12, color: "#64748b", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
+          </div>
         </div>
 
         {onglet === "analyse"    && <AnalyseCommunes />}
         {onglet === "simulation" && <SimulationProjet />}
-        {onglet === "credit" && <SimulateurCredit />}
-        {onglet === "offres" && <ComparateurOffres />}
-        {onglet === "travaux" && <SimulateurTravaux />}
+        {onglet === "credit"     && <SimulateurCredit />}
+        {onglet === "offres"     && <ComparateurOffres />}
+        {onglet === "travaux"    && <SimulateurTravaux />}
       </main>
 
     </div>
