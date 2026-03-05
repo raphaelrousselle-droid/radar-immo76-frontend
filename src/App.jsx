@@ -370,11 +370,21 @@ function SimulationProjet() {
   const [activeTab, setActiveTab] = useState("params");
 
   const handleChange = function(e) { const name = e.target.name; const value = e.target.value; setInputs(function(prev) { return Object.assign({}, prev, { [name]: value }); }); };
-  const sauvegarder = function() {
+   const sauvegarder = function() {
     if (!nomProjet.trim()) return;
-    const nouveau = { id: Date.now(), nom: nomProjet.trim(), inputs: Object.assign({}, inputs), lots: lots, regimeActif: regimeActif, savedAt: new Date().toLocaleDateString("fr-FR") };
-    const liste = [nouveau].concat(projets.filter(function(p) { return p.nom !== nomProjet.trim(); }));
-    setProjets(liste); localStorage.setItem(PROJETS_KEY, JSON.stringify(liste)); setNomProjet("");
+    const existing = projets.find(function(p) { return p.nom === nomProjet.trim(); });
+    const entry = {
+      id: existing ? existing.id : Date.now(),
+      nom: nomProjet.trim(),
+      inputs: Object.assign({}, inputs),
+      lots: lots,
+      regimeActif: regimeActif,
+      savedAt: new Date().toLocaleDateString("fr-FR"),
+    };
+    const liste = [entry].concat(projets.filter(function(p) { return p.nom !== nomProjet.trim(); }));
+    setProjets(liste);
+    localStorage.setItem(PROJETSKEY, JSON.stringify(liste));
+    // Ne PAS vider nomProjet ici pour permettre de ré-enregistrer
   };
   const charger = function(p) { setInputs(p.inputs); setRegimeActif(p.regimeActif); if (p.lots) setLots(p.lots); };
   const supprimer = function(id) { const liste = projets.filter(function(p) { return p.id !== id; }); setProjets(liste); localStorage.setItem(PROJETS_KEY, JSON.stringify(liste)); };
