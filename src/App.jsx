@@ -1511,7 +1511,8 @@ function ComparateurOffres() {
                       ⚠ Hypothèque : frais de mainlevée à prévoir en cas de revente anticipée
                     </div>
                   )}
-                </div>
+                               </div>
+              </div>
 
               {/* Mini résultat dans la carte */}
               <div style={{ marginTop: 12, background: couleur + "10", borderRadius: 12, padding: "10px 12px", border: "1px solid " + couleur + "33" }}>
