@@ -1188,7 +1188,7 @@ function SimulateurTravaux() {
             </div>
           </td>
           <td style={{ padding: "10px 12px", textAlign: "center" }}>
-            <Toggle value={isActif} onChange={function(v) { updateState(setter, item.id, "actif", v); }} labelOn="✓ Oui" labelOff="Non" colorOn="rgba(99,102,241,0.85)" />
+           <Toggle value={isActif} onChange={function(v) { updateState(setter, item.id, "actif", v); }} />
           </td>
           <td style={{ padding: "10px 12px", textAlign: "center" }}>
             {isActif ? (
