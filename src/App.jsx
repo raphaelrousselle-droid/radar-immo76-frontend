@@ -2199,19 +2199,21 @@ function SimulateurSCI() {
   const couleurTreso = calc.tresoAn >= 0 ? "#16a34a" : "#dc2626";
   const couleurRendNet = calc.rendNet >= 5 ? "#16a34a" : calc.rendNet >= 3 ? "#d97706" : "#dc2626";
 
-  const Field = function(props) {
-    return (
-      <div>
-        <label style={labelS}>{props.label}</label>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <input type="number" value={sciVals[props.field]} step={props.step || "100"} min="0"
-            onChange={function(e) { handleSciChange(props.field, e.target.value); }} style={inputS} />
-          {props.unit && <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 28 }}>{props.unit}</span>}
-        </div>
-        {props.hint && <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>{props.hint}</div>}
+  function SCIField({ sciVals, onChange, field, label, unit, step, hint }) {
+  const inputS = { width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" };
+  const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 3 };
+  return (
+    <div>
+      <label style={labelS}>{label}</label>
+      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+        <input type="number" value={sciVals[field]} step={step || "100"} min="0"
+          onChange={function(e) { onChange(field, e.target.value); }} style={inputS} />
+        {unit && <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 28 }}>{unit}</span>}
       </div>
-    );
-  };
+      {hint && <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>{hint}</div>}
+    </div>
+  );
+}
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -2230,14 +2232,14 @@ function SimulateurSCI() {
             <SectionHeader icon="🏠" title="Acquisition" />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={sepS}>Prix & frais</div>
-              <Field field="prixAchat" label="Prix d'achat" unit="€" step="5000" />
-              <Field field="fraisAchat" label="Frais de notaire + agence" unit="€" step="500" />
-              <Field field="travaux" label="Travaux" unit="€" step="1000" />
+              <SCIField field="prixAchat" label="Prix d'achat" unit="€" step="5000" />
+              <SCIField field="fraisAchat" label="Frais de notaire + agence" unit="€" step="500" />
+              <SCIField field="travaux" label="Travaux" unit="€" step="1000" />
               <div style={sepS}>Financement</div>
-              <Field field="apport" label="Apport" unit="€" step="5000" />
-              <Field field="montantCredit" label="Montant emprunté" unit="€" step="5000" />
-              <Field field="tauxCredit" label="Taux hors assurance" unit="%" step="0.05" />
-              <Field field="dureeCredit" label="Durée du crédit" unit="ans" step="1" />
+              <SCIField field="apport" label="Apport" unit="€" step="5000" />
+              <SCIField field="montantCredit" label="Montant emprunté" unit="€" step="5000" />
+              <SCIField field="tauxCredit" label="Taux hors assurance" unit="%" step="0.05" />
+              <SCIField field="dureeCredit" label="Durée du crédit" unit="ans" step="1" />
             </div>
           </div>
 
@@ -2254,13 +2256,13 @@ function SimulateurSCI() {
                 </div>
               </div>
               <div style={sepS}>Charges annuelles</div>
-              <Field field="chargesAn" label="Charges immeuble" unit="€/an" />
-              <Field field="taxeFonciereAn" label="Taxe foncière" unit="€/an" />
-              <Field field="assurancePNOAn" label="Assurance PNO" unit="€/an" hint="0 = calculé auto (0.12% du prix)" />
-              <Field field="gestionPct" label="Gestion locative" unit="%/an" step="0.5" />
-              <Field field="provisionTravauxAn" label="Provision travaux" unit="€/an" />
-              <Field field="expertComptableAn" label="Expert-comptable" unit="€/an" hint="Obligatoire en SCI IS" />
-              <Field field="fraisBancairesAn" label="Frais bancaires" unit="€/an" step="50" />
+              <SCIField field="chargesAn" label="Charges immeuble" unit="€/an" />
+              <SCIField field="taxeFonciereAn" label="Taxe foncière" unit="€/an" />
+              <SCIField field="assurancePNOAn" label="Assurance PNO" unit="€/an" hint="0 = calculé auto (0.12% du prix)" />
+              <SCIField field="gestionPct" label="Gestion locative" unit="%/an" step="0.5" />
+              <SCIField field="provisionTravauxAn" label="Provision travaux" unit="€/an" />
+              <SCIField field="expertComptableAn" label="Expert-comptable" unit="€/an" hint="Obligatoire en SCI IS" />
+              <SCIField field="fraisBancairesAn" label="Frais bancaires" unit="€/an" step="50" />
             </div>
           </div>
 
@@ -2268,9 +2270,9 @@ function SimulateurSCI() {
             <SectionHeader icon="📊" title="Paramètres fiscaux SCI IS" />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={sepS}>Amortissements</div>
-              <Field field="coefAmortBatiment" label="Taux amort. bâtiment" unit="%/an" step="0.25" hint="Généralement 2.5% (hors terrain)" />
-              <Field field="coefAmortTravaux" label="Taux amort. travaux" unit="%/an" step="1" hint="Généralement 10% (10 ans)" />
-              <Field field="partTerrain" label="Part du terrain (non amortissable)" unit="%" step="1" hint="Généralement 15-20% du prix" />
+              <SCIField field="coefAmortBatiment" label="Taux amort. bâtiment" unit="%/an" step="0.25" hint="Généralement 2.5% (hors terrain)" />
+              <SCIField field="coefAmortTravaux" label="Taux amort. travaux" unit="%/an" step="1" hint="Généralement 10% (10 ans)" />
+              <SCIField field="partTerrain" label="Part du terrain (non amortissable)" unit="%" step="1" hint="Généralement 15-20% du prix" />
               <div style={sepS}>Taux IS</div>
               <div>
                 <label style={labelS}>Taux IS applicable</label>
@@ -2301,8 +2303,8 @@ function SimulateurSCI() {
                   })}
                 </div>
               </div>
-              <Field field="nbParts" label="Nombre de parts sociales" unit="parts" step="1" hint="Pour calcul dividende par associé" />
-              <Field field="capitalSocial" label="Capital social" unit="€" step="100" />
+              <SCIField field="nbParts" label="Nombre de parts sociales" unit="parts" step="1" hint="Pour calcul dividende par associé" />
+              <SCIField field="capitalSocial" label="Capital social" unit="€" step="100" />
             </div>
           </div>
         </div>
