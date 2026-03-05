@@ -1048,10 +1048,10 @@ const TRAVAUX_DATA = {
   ],
 };
 
-function Toggle({ value, onChange, labelOn, labelOff, colorOn, colorOff }) {
+function Toggle({ value, onChange }) {
   return (
-    <button onClick={function() { onChange(!value); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: value ? (colorOn || "rgba(22,163,74,0.12)") : "rgba(148,163,184,0.12)", color: value ? (colorOn ? "#fff" : "#15803d") : "#94a3b8", transition: "all 0.15s" }}>
-      {value ? (labelOn || "Oui") : (labelOff || "Non")}
+    <button onClick={function() { onChange(!value); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.15s", background: value ? "rgba(99,102,241,0.9)" : "rgba(220,38,38,0.12)", color: value ? "#fff" : "#dc2626", boxShadow: value ? "0 2px 8px rgba(99,102,241,0.3)" : "inset 0 0 0 1.5px rgba(220,38,38,0.4)" }}>
+      {value ? "✓ Oui" : "✗ Non"}
     </button>
   );
 }
