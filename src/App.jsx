@@ -386,8 +386,13 @@ function SimulationProjet() {
     localStorage.setItem(PROJETSKEY, JSON.stringify(liste));
     // Ne PAS vider nomProjet ici pour permettre de ré-enregistrer
   };
-  const charger = function(p) { setInputs(p.inputs); setRegimeActif(p.regimeActif); if (p.lots) setLots(p.lots); };
-  const supprimer = function(id) { const liste = projets.filter(function(p) { return p.id !== id; }); setProjets(liste); localStorage.setItem(PROJETS_KEY, JSON.stringify(liste)); };
+  const charger = function(p) {
+    setInputs(p.inputs);
+    setRegimeActif(p.regimeActif);
+    if (p.lots) setLots(p.lots);
+    setNomProjet(p.nom);
+  };
+  const supprimer = function(id) { const liste = projets.filter(function(p) { return p.id !== id; }); setProjets(liste); localStorage.setItem(PROJETSKEY, JSON.stringify(liste)); };
 
   const result = useMemo(function() { return calculerSimulation(inputs); }, [inputs]);
   const regime = result.regimes[regimeActif];
