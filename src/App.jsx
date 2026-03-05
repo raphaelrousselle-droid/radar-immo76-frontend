@@ -1933,8 +1933,23 @@ function CalculateurPlusValue() {
             <div>
               <label style={labelS}>Date de début du crédit</label>
               <input type="month" value={vals.dateDebut}
-                onChange={function(e) { handleChange("dateDebut", e.target.value); }}
-                style={Object.assign({}, inputS, { width: "100%" })} />
+                           <div>
+              <label style={labelS}>Date de début du crédit</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <select value={debutMois} onChange={function(e) { setDebutMois(e.target.value); }}
+                  style={{ flex: 1, background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" }}>
+                  {["01","02","03","04","05","06","07","08","09","10","11","12"].map(function(m, i) {
+                    const labels = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+                    return <option key={m} value={m}>{labels[i]}</option>;
+                  })}
+                </select>
+                <select value={debutAnnee} onChange={function(e) { setDebutAnnee(e.target.value); }}
+                  style={{ width: 90, background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" }}>
+                  {Array.from({ length: 20 }, function(_, i) { return String(2015 + i); }).map(function(y) {
+                    return <option key={y} value={y}>{y}</option>;
+                  })}
+                </select>
+              </div>
             </div>
 
             {/* Détention */}
