@@ -1344,40 +1344,6 @@ function SimulateurTravaux() {
 const OFFRE_DEFAULT = function(id) {
   return { id: id, banque: "Banque " + id, montant: "200000", duree: "25", taux: "4.20", assurance: "0.30", fraisDossier: "1000", fraisGarantie: "2000", fraisCourtier: "0", modulation: false, remboursementAnticipe: false, domiciliation: false, differe: false, dureeDiffere: "0", typeGarantie: "caution" };
 };
-function ComparateurOffres() {
-  const [offres, setOffres] = useState(function() {
-    try { return JSON.parse(localStorage.getItem(OFFRES_KEY)) || [OFFRE_DEFAULT(1), OFFRE_DEFAULT(2)]; }
-    catch(e) { return [OFFRE_DEFAULT(1), OFFRE_DEFAULT(2)]; }
-  });
-
-  const sauver = function(liste) { setOffres(liste); localStorage.setItem(OFFRES_KEY, JSON.stringify(liste)); };
-  const ajouterOffre = function() { const newId = Math.max.apply(null, offres.map(function(o) { return o.id; })) + 1; sauver(offres.concat([OFFRE_DEFAULT(newId)])); };
-  const supprimerOffre = function(id) { if (offres.length <= 1) return; sauver(offres.filter(function(o) { return o.id !== id; })); };
-  const updateOffre = function(id, field, value) { sauver(offres.map(function(o) { return o.id === id ? Object.assign({}, o, { [field]: value }) : o; })); };
-
-  const calcOffre = function(o) {
-    const M = pf(o.montant); const D = Math.max(1, pf(o.duree)); const nMois = D * 12;
-    const tMensuel = pf(o.taux) / 100 / 12; const tAssurMensuel = pf(o.assurance) / 100 / 12;
-    const mensualiteCredit = tMensuel === 0 ? M / nMois : (M * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
-    const mensualiteAssur = M * tAssurMensuel;
-    const mensualiteTotale = mensualiteCredit + mensualiteAssur;
-    const coutInterets = mensualiteCredit * nMois - M;
-    const coutAssurance = mensualiteAssur * nMois;
-    const fraisTotaux = pf(o.fraisDossier) + pf(o.fraisGarantie) + pf(o.fraisCourtier);
-    const coutTotal = coutInterets + coutAssurance + fraisTotaux;
-    const taeg = M > 0 ? ((coutTotal / M) / D) * 100 : 0;
-    return { mensualiteCredit, mensualiteAssur, mensualiteTotale, coutInterets, coutAssurance, fraisTotaux, coutTotal, taeg };
-  };
-
-  const resultats = offres.map(function(o) { return { id: o.id, offre: o, calc: calcOffre(o) }; });
-  const meilleurMensualite = Math.min.apply(null, resultats.map(function(r) { return r.calc.mensualiteTotale; }));
-  const meilleurCoutTotal  = Math.min.apply(null, resultats.map(function(r) { return r.calc.coutTotal; }));
-  const meilleurTaeg       = Math.min.apply(null, resultats.map(function(r) { return r.calc.taeg; }));
-  const meilleurDiffere = Math.max.apply(null, resultats.map(function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }));
-  const isBest = function(val, best) { return Math.abs(val - best) < 0.01; };
-  const couleurs = ["#6366f1", "#0ea5e9", "#16a34a", "#f97316", "#a855f7"];
-  const inputSmall = { background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 8, padding: "5px 8px", fontSize: 13, color: "#0f172a", outline: "none", width: "100%" };
-
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
