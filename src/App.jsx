@@ -1686,6 +1686,8 @@ function CalculateurPlusValue() {
   const [typeBien, setTypeBien] = useState("non-resid");
   const [regime, setRegime] = useState("particulier");
   const [duree, setDuree] = useState(10);
+  const [debutMois, setDebutMois] = useState(String(new Date().getMonth() + 1).padStart(2, "0"));
+  const [debutAnnee, setDebutAnnee] = useState(String(new Date().getFullYear()));
   const [vals, setVals] = useState({
     prixAchat: "175000",
     fraisAchat: "13300",
