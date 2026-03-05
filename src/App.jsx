@@ -1597,7 +1597,7 @@ function ComparateurOffres() {
                 <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>{critere.label}</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: couleur }}>{winner.offre.banque}</div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#334155", marginTop: 2 }}>{critere.format(critere.best)}</div>
-              </div>
+                </div>
             );
           })}
         </div>
@@ -1606,6 +1606,7 @@ function ComparateurOffres() {
     </div>
   );
 }
+
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
