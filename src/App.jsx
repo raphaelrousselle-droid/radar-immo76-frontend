@@ -1459,7 +1459,7 @@ function ComparateurOffres() {
                     { field: "modulation", label: "Modulation des mensualités" },
                     { field: "remboursementAnticipe", label: "Remboursement anticipé sans pénalité" },
                     { field: "domiciliation", label: "Domiciliation bancaire obligatoire" },
-                  ].map(function(opt) {
+                     ].map(function(opt) {
                     return (
                       <div key={opt.field} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 11, color: "#475569" }}>{opt.label}</span>
@@ -1468,7 +1468,10 @@ function ComparateurOffres() {
                           {o[opt.field] ? "✓ Oui" : "✗ Non"}
                         </button>
                       </div>
-                                      {/* Différé */}
+                    );
+                  })}
+
+                {/* Différé */}
                 <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(148,163,184,0.15)" }}>
                   <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Différé</div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
@@ -1484,6 +1487,7 @@ function ComparateurOffres() {
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <input type="number" value={o.dureeDiffere} step="1" min="0" max="24" onChange={function(e) { updateOffre(o.id, "dureeDiffere", e.target.value); }} style={inputSmall} />
                         <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 28 }}>mois</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1508,10 +1512,6 @@ function ComparateurOffres() {
                     </div>
                   )}
                 </div>
-                    );
-                  })}
-                </div>
-              </div>
 
               {/* Mini résultat dans la carte */}
               <div style={{ marginTop: 12, background: couleur + "10", borderRadius: 12, padding: "10px 12px", border: "1px solid " + couleur + "33" }}>
