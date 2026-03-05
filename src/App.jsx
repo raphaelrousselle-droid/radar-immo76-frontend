@@ -2246,7 +2246,7 @@ function SimulateurSCI() {
           <div style={SECTION}>
             <SectionHeader icon="💶" title="Revenus & charges" />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <Field field="loyerMensuel" label="Loyer mensuel HC" unit="€" step="50" />
+              <SCIField field="loyerMensuel" label="Loyer mensuel HC" unit="€" step="50" />
               <div>
                 <label style={labelS}>Taux d'occupation mensuel</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
