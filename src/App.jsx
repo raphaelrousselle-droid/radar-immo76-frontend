@@ -1701,18 +1701,24 @@ function PVField({ label, value, set, unit, step }) {
 }
 
 function CalculateurPlusValue() {
-  const [prixAchat, setPrixAchat] = useState("175000");
-  const [fraisAchat, setFraisAchat] = useState("13300");
-  const [travauxDeduc, setTravauxDeduc] = useState("0");
-  const [prixVente, setPrixVente] = useState("250000");
-  const [fraisVente, setFraisVente] = useState("0");
-  const [duree, setDuree] = useState("10");
   const [typeBien, setTypeBien] = useState("non-resid");
+  const [duree, setDuree] = useState(10);
+  const [vals, setVals] = useState({
+    prixAchat: "175000",
+    fraisAchat: "13300",
+    travauxDeduc: "0",
+    prixVente: "250000",
+    fraisVente: "0",
+  });
+
+  const handleChange = useCallback(function(field, value) {
+    setVals(function(prev) { return Object.assign({}, prev, { [field]: value }); });
+  }, []);
 
   const calc = useMemo(function() {
-    const pa = pf(prixAchat); const fa = pf(fraisAchat); const tv = pf(travauxDeduc);
-    const pv = pf(prixVente); const fv = pf(fraisVente);
-    const ans = Math.max(0, Math.round(pf(duree)));
+    const pa = pf(vals.prixAchat); const fa = pf(vals.fraisAchat); const tv = pf(vals.travauxDeduc);
+    const pv = pf(vals.prixVente); const fv = pf(vals.fraisVente);
+    const ans = Math.max(0, Math.round(duree));
     const prixRevient = pa + fa + tv;
     const pvBrute = pv - fv - prixRevient;
     if (pvBrute <= 0) return { pvBrute, prixRevient, pvNette: 0, impotIR: 0, impotPS: 0, impotTotal: 0, abattIR: 0, abattPS: 0, exonere: false, ans, surtaxe: 0, baseIR: 0, basePS: 0 };
@@ -1736,24 +1742,12 @@ function CalculateurPlusValue() {
     impotIR += surtaxe;
     const impotPS = basePS * 0.172;
     const impotTotal = impotIR + impotPS;
-    const pvNette = pvBrute - impotTotal;
-    const exonere = abattIR >= 100 && abattPS >= 100;
-    return { pvBrute, prixRevient, pvNette, impotIR, impotPS, impotTotal, abattIR, abattPS, exonere, ans, surtaxe, baseIR, basePS };
-  }, [prixAchat, fraisAchat, travauxDeduc, prixVente, fraisVente, duree, typeBien]);
+    return { pvBrute, prixRevient, pvNette: pvBrute - impotTotal, impotIR, impotPS, impotTotal, abattIR, abattPS, exonere: false, ans, surtaxe, baseIR, basePS };
+  }, [vals, duree, typeBien]);
 
   const inputS = { width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" };
   const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 3 };
-  const PVField = function(props) {
-    return (
-      <div>
-        <label style={labelS}>{props.label}</label>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <input type="number" value={props.value} step={props.step || "1000"} min="0" onChange={function(e) { props.set(e.target.value); }} style={inputS} />
-          {props.unit && <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 20 }}>{props.unit}</span>}
-        </div>
-      </div>
-    );
-  };
+
   const BarAb = function(props) {
     return (
       <div>
@@ -1773,6 +1767,8 @@ function CalculateurPlusValue() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
         <div style={SECTION}>
           <SectionHeader icon="🏠" title="Paramètres de la vente" />
+
+          {/* Type de bien */}
           <div style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 6 }}>Type de bien</div>
             <div style={{ display: "flex", gap: 6 }}>
@@ -1780,7 +1776,7 @@ function CalculateurPlusValue() {
                 const isA = typeBien === t.val;
                 return (
                   <button key={t.val} onClick={function() { setTypeBien(t.val); }}
-                    style={{ flex: 1, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "linear-gradient(135deg,#6366f1,#38bdf8)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#64748b", boxShadow: isA ? "0 2px 8px rgba(99,102,241,0.3)" : "none" }}>
+                    style={{ flex: 1, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "linear-gradient(135deg,#6366f1,#38bdf8)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#64748b" }}>
                     {t.label}
                   </button>
                 );
@@ -1792,18 +1788,64 @@ function CalculateurPlusValue() {
               </div>
             )}
           </div>
+
+          {/* Champs */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5 }}>À l'achat</div>
-            <PVField label="Prix d'achat" value={prixAchat} set={setPrixAchat} unit="€" />
-            <PVField label="Frais de notaire + agence" value={fraisAchat} set={setFraisAchat} unit="€" />
-            <PVField label="Travaux déductibles" value={travauxDeduc} set={setTravauxDeduc} unit="€" step="500" />
+
+            <div>
+              <label style={labelS}>Prix d'achat</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <input type="number" value={vals.prixAchat} step="1000" min="0"
+                  onChange={function(e) { handleChange("prixAchat", e.target.value); }} style={inputS} />
+                <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 20 }}>€</span>
+              </div>
+            </div>
+
+            <div>
+              <label style={labelS}>Frais de notaire + agence</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <input type="number" value={vals.fraisAchat} step="500" min="0"
+                  onChange={function(e) { handleChange("fraisAchat", e.target.value); }} style={inputS} />
+                <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 20 }}>€</span>
+              </div>
+            </div>
+
+            <div>
+              <label style={labelS}>Travaux déductibles</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <input type="number" value={vals.travauxDeduc} step="500" min="0"
+                  onChange={function(e) { handleChange("travauxDeduc", e.target.value); }} style={inputS} />
+                <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 20 }}>€</span>
+              </div>
+            </div>
+
             <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>À la vente</div>
-            <PVField label="Prix de vente" value={prixVente} set={setPrixVente} unit="€" />
-            <PVField label="Frais d'agence vente" value={fraisVente} set={setFraisVente} unit="€" />
+
+            <div>
+              <label style={labelS}>Prix de vente</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <input type="number" value={vals.prixVente} step="1000" min="0"
+                  onChange={function(e) { handleChange("prixVente", e.target.value); }} style={inputS} />
+                <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 20 }}>€</span>
+              </div>
+            </div>
+
+            <div>
+              <label style={labelS}>Frais d'agence vente</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <input type="number" value={vals.fraisVente} step="500" min="0"
+                  onChange={function(e) { handleChange("fraisVente", e.target.value); }} style={inputS} />
+                <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 20 }}>€</span>
+              </div>
+            </div>
+
             <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Détention</div>
             <div>
               <label style={labelS}>Durée de détention : <strong style={{ color: "#4338ca" }}>{calc.ans} ans</strong></label>
-              <input type="range" min="0" max="30" value={duree} onChange={function(e) { setDuree(e.target.value); }} style={{ width: "100%", accentColor: "#6366f1", marginTop: 4 }} />
+              <input type="range" min="0" max="30" value={duree}
+                onChange={function(e) { setDuree(Number(e.target.value)); }}
+                style={{ width: "100%", accentColor: "#6366f1", marginTop: 4 }} />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#94a3b8", marginTop: 2 }}>
                 <span>0 an</span><span>6 ans</span><span>22 ans</span><span>30 ans</span>
               </div>
@@ -1811,15 +1853,16 @@ function CalculateurPlusValue() {
           </div>
         </div>
 
+        {/* Résultats */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={SECTION}>
             <SectionHeader icon="📐" title="Plus-value & prix de revient" />
-            <StatRow label="Prix d'achat" value={fmtEur(pf(prixAchat))} />
-            <StatRow label="Frais notaire + agence achat" value={"+ " + fmtEur(pf(fraisAchat))} />
-            <StatRow label="Travaux déductibles" value={"+ " + fmtEur(pf(travauxDeduc))} />
+            <StatRow label="Prix d'achat" value={fmtEur(pf(vals.prixAchat))} />
+            <StatRow label="Frais notaire + agence achat" value={"+ " + fmtEur(pf(vals.fraisAchat))} />
+            <StatRow label="Travaux déductibles" value={"+ " + fmtEur(pf(vals.travauxDeduc))} />
             <StatRow label="Prix de revient total" value={fmtEur(calc.prixRevient)} bold color="#0f172a" border={false} />
             <div style={{ margin: "10px 0", height: 1, background: "rgba(148,163,184,0.2)" }} />
-            <StatRow label="Prix de vente net" value={fmtEur(pf(prixVente) - pf(fraisVente))} color="#16a34a" />
+            <StatRow label="Prix de vente net" value={fmtEur(pf(vals.prixVente) - pf(vals.fraisVente))} color="#16a34a" />
             <div style={{ marginTop: 10, background: calc.pvBrute > 0 ? "rgba(220,252,231,0.7)" : "rgba(254,226,226,0.7)", borderRadius: 12, padding: "12px 14px", border: "1px solid " + (calc.pvBrute > 0 ? "rgba(22,163,74,0.3)" : "rgba(220,38,38,0.3)") }}>
               <div style={{ fontSize: 12, color: "#64748b" }}>Plus-value brute</div>
               <div style={{ fontSize: 28, fontWeight: 900, color: calc.pvBrute > 0 ? "#15803d" : "#dc2626" }}>
@@ -1869,7 +1912,7 @@ function CalculateurPlusValue() {
                   <div style={{ marginTop: 10, background: "rgba(254,226,226,0.7)", borderRadius: 12, padding: "12px 14px", border: "1px solid rgba(220,38,38,0.3)" }}>
                     <div style={{ fontSize: 12, color: "#64748b" }}>Impôt total</div>
                     <div style={{ fontSize: 26, fontWeight: 900, color: "#dc2626" }}>– {fmtEur(calc.impotTotal)}</div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{pf(prixVente) - pf(fraisVente) > 0 ? ((calc.impotTotal / (pf(prixVente) - pf(fraisVente))) * 100).toFixed(1) : 0}% du prix de vente net</div>
+                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{pf(vals.prixVente) - pf(vals.fraisVente) > 0 ? ((calc.impotTotal / (pf(vals.prixVente) - pf(vals.fraisVente))) * 100).toFixed(1) : 0}% du prix de vente net</div>
                   </div>
                   <div style={{ marginTop: 8, background: "rgba(220,252,231,0.7)", borderRadius: 12, padding: "12px 14px", border: "1px solid rgba(22,163,74,0.3)" }}>
                     <div style={{ fontSize: 12, color: "#64748b" }}>Plus-value nette encaissée</div>
@@ -1881,12 +1924,14 @@ function CalculateurPlusValue() {
           )}
         </div>
       </div>
+
       <div style={{ background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 14px", fontSize: 11, color: "#64748b", border: "1px solid rgba(148,163,184,0.2)" }}>
-        ℹ️ Calcul basé sur le régime général des particuliers (IR 19% + PS 17.2%). Abattements à partir de la 6ème année. Exonération IR à 22 ans, totale à 30 ans. Surtaxe si PV nette IR &gt; 50 000 €. Ne tient pas compte des cas particuliers (SCI, succession, démembrement…).
+        ℹ️ Calcul basé sur le régime général des particuliers (IR 19% + PS 17.2%). Abattements à partir de la 6ème année. Exonération IR à 22 ans, totale à 30 ans. Surtaxe si PV nette IR &gt; 50 000 €.
       </div>
     </div>
   );
 }
+
 
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
