@@ -1681,6 +1681,24 @@ function ComparateurOffres() {
     </div>
   );
 }
+function PVField({ label, value, set, unit, step }) {
+  return (
+    <div>
+      <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 3 }}>{label}</label>
+      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+        <input
+          type="number"
+          value={value}
+          step={step || "1000"}
+          min="0"
+          onChange={function(e) { set(e.target.value); }}
+          style={{ width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" }}
+        />
+        {unit && <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 20 }}>{unit}</span>}
+      </div>
+    </div>
+  );
+}
 
 function CalculateurPlusValue() {
   const [prixAchat, setPrixAchat] = useState("175000");
@@ -1725,7 +1743,7 @@ function CalculateurPlusValue() {
 
   const inputS = { width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" };
   const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 3 };
-  const Field = function(props) {
+  const PVField = function(props) {
     return (
       <div>
         <label style={labelS}>{props.label}</label>
