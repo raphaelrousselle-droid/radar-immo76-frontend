@@ -876,9 +876,37 @@ export default function App() {
             {onglet === "analyse" ? "TOP 10 · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer" : "Paramètre ton projet, sauvegarde-le et visualise l'évolution du cash-flow par régime fiscal."}
           </p>
         </div>
-        {onglet === "analyse" && <AnalyseCommunes />}
-        {onglet === "simulation" && <SimulationProjet />}
-      </main>
-    </div>
-  );
-}
+              {[ 
+        { id: "analyse",   label: "Analyse communes",              icon: "📊" },
+        { id: "simulation",label: "Simulation projet",             icon: "💼" },
+        { id: "credit",    label: "Simulation de crédit",          icon: "🏦" },
+        { id: "offres",    label: "Comparateur offres financement",icon: "📑" },
+        { id: "travaux",   label: "Simulateur coût travaux",       icon: "🛠️" },
+      ].map(function(n) {
+        return (
+          <button
+            key={n.id}
+            onClick={function() { setOnglet(n.id); }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 10px",
+              borderRadius: 10,
+              border: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 500,
+              width: "100%",
+              textAlign: "left",
+              background: onglet === n.id ? "linear-gradient(135deg,rgba(99,102,241,0.12),rgba(56,189,248,0.12))" : "transparent",
+              color: onglet === n.id ? "#4338ca" : "#64748b",
+              borderLeft: onglet === n.id ? "3px solid #6366f1" : "3px solid transparent"
+            }}
+          >
+            <span>{n.icon}</span>
+            <span>{n.label}</span>
+          </button>
+        );
+      })}
+
