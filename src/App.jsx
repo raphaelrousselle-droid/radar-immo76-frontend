@@ -358,6 +358,7 @@ const DEFAULT_INPUTS = {
   chargesImmeubleAn: "250", taxeFonciereAn: "1400", assurancePNOAn: "0",
   gestionLocativePct: "0", provisionTravauxAn: "0", fraisBancairesAn: "300",
   expertComptableAn: "600", coefAmortissement: "4.75", tauxIS: "15", tmi: "11",
+  noteDPE: "",
 };
 
 function SimulationProjet() {
