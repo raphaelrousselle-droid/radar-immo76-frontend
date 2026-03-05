@@ -1557,6 +1557,9 @@ function ComparateurOffres() {
                 { label: "Modulation mensualités", fn: function(r) { return r.offre.modulation ? "✓ Oui" : "✗ Non"; }, best: null },
                 { label: "Remb. anticipé sans pénalité", fn: function(r) { return r.offre.remboursementAnticipe ? "✓ Oui" : "✗ Non"; }, best: null },
                 { label: "Domiciliation obligatoire", fn: function(r) { return r.offre.domiciliation ? "⚠ Oui" : "✓ Non"; }, best: null },
+                { label: "Différé", fn: function(r) { return r.offre.differe ? "✓ " + pf(r.offre.dureeDiffere) + " mois" : "✗ Non"; }, best: null },
+                { label: "Type de garantie", fn: function(r) { return r.offre.typeGarantie === "hypotheque" ? "🏠 Hypothèque" : "🤝 Cautionnement"; }, best: null },
+
               ].map(function(row, idx) {
                 return (
                   <tr key={row.label} style={{ borderBottom: "1px solid rgba(148,163,184,0.1)", background: row.highlight ? "rgba(99,102,241,0.03)" : (idx % 2 === 0 ? "rgba(248,250,252,0.5)" : "transparent") }}>
