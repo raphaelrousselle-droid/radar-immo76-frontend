@@ -1794,12 +1794,12 @@ function CalculateurPlusValue() {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5 }}>À l'achat</div>
-            <Field label="Prix d'achat" value={prixAchat} set={setPrixAchat} unit="€" />
-            <Field label="Frais de notaire + agence" value={fraisAchat} set={setFraisAchat} unit="€" />
-            <Field label="Travaux déductibles" value={travauxDeduc} set={setTravauxDeduc} unit="€" step="500" />
+            <PVField label="Prix d'achat" value={prixAchat} set={setPrixAchat} unit="€" />
+            <PVField label="Frais de notaire + agence" value={fraisAchat} set={setFraisAchat} unit="€" />
+            <PVField label="Travaux déductibles" value={travauxDeduc} set={setTravauxDeduc} unit="€" step="500" />
             <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>À la vente</div>
-            <Field label="Prix de vente" value={prixVente} set={setPrixVente} unit="€" />
-            <Field label="Frais d'agence vente" value={fraisVente} set={setFraisVente} unit="€" />
+            <PVField label="Prix de vente" value={prixVente} set={setPrixVente} unit="€" />
+            <PVField label="Frais d'agence vente" value={fraisVente} set={setFraisVente} unit="€" />
             <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Détention</div>
             <div>
               <label style={labelS}>Durée de détention : <strong style={{ color: "#4338ca" }}>{calc.ans} ans</strong></label>
