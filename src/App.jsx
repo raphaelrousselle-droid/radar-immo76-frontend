@@ -1029,7 +1029,7 @@ function SimulateurCredit() {
 }
 const TRAVAUX_DATA = {
   quantite: [
-    { id: "fenetres",   label: "Fenêtres",              icon: "🪟", delegue: 1200, moi: null,  unite: "fenêtre(s)" },
+    { id: "fenetres",   label: "Fenêtres",              icon: "🪟", delegue: 1200, moi: 800,  unite: "fenêtre(s)" },
     { id: "radiateur",  label: "Radiateur électrique",  icon: "🔥", delegue: 350,  moi: 250,   unite: "radiateur(s)" },
     { id: "chaudiere",  label: "Chaudière électrique",  icon: "⚙️", delegue: 2250, moi: 1750,  unite: "chaudière(s)" },
   ],
