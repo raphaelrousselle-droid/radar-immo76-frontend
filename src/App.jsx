@@ -527,10 +527,10 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
   };
 
   const exportPDF = async function() {
-    if (!window.jspdf) {
-      alert("jsPDF non chargé. Ajoutez dans index.html :\\n<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js\\"></script>");
-      return;
-    }
+  if (!window.jspdf) {
+    alert("jsPDF non chargé. Ajoutez dans index.html :\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js\"></script>");
+    return;
+  }
     try {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
