@@ -1,48 +1,69 @@
-import React
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+
 const API_BASE = "https://radar-immo76-1.onrender.com";
 const CACHE_KEY = "radar-immo-communes-v2";
 const PROJETS_KEY = "radar-immo-projets-v1";
+const INPUTS_KEY = "radar-immo-inputs-v3"; // AUTO-SAVE
 
-const nc = (v) => { if (v == null) return "#94a3b8"; if (v >= 7) return "#16a34a"; if (v >= 5) return "#d97706"; return "#dc2626"; };
-const nLabel = (v) => { if (v == null) return "â€”"; if (v >= 7) return "Bon"; if (v >= 5) return "Moyen"; return "Faible"; };
+const nc = (v) => {
+  if (v == null) return "#94a3b8";
+  if (v >= 7) return "#16a34a";
+  if (v >= 5) return "#d97706";
+  return "#dc2626";
+};
+
+const nLabel = (v) => {
+  if (v == null) return "—";
+  if (v >= 7) return "Bon";
+  if (v >= 5) return "Moyen";
+  return "Faible";
+};
+
 const sn = (v) => (v != null && !isNaN(Number(v)) ? Number(v) : null);
-const pf = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
-const fmt = (n, d) => { const dd = d !== undefined ? d : 0; return n == null ? "â€”" : n.toLocaleString("fr-FR", { minimumFractionDigits: dd, maximumFractionDigits: dd }); };
-const fmtEur = (n) => n == null ? "â€”" : fmt(n) + " â‚¬";
-const fmtPct = (n) => n == null ? "â€”" : fmt(n, 2) + " %";
-const fmtK = (v) => v >= 1000 || v <= -1000 ? (v / 1000).toFixed(1) + "k â‚¬" : Math.round(v) + " â‚¬";
-const LOT_DEFAULT = { id: 1, nom: "Lot 1", surface: "", loyer: "", travaux: "", charges: "" };
 
-const CARD = { background: "rgba(255,255,255,0.7)", borderRadius: 16, padding: 16, boxShadow: "0 2px 12px rgba(99,102,241,0.07)", border: "1px solid rgba(148,163,184,0.2)" };
-const SECTION = { background: "rgba(255,255,255,0.55)", borderRadius: 20, padding: 20, boxShadow: "0 4px 24px rgba(99,102,241,0.07)", border: "1px solid rgba(148,163,184,0.18)", backdropFilter: "blur(18px)" };
+const pf = (v) => {
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+};
 
-function Tag({ color, children }) {
-  const colors = {
-    green: { bg: "rgba(22,163,74,0.1)", text: "#15803d", border: "rgba(22,163,74,0.3)" },
-    orange: { bg: "rgba(217,119,6,0.1)", text: "#b45309", border: "rgba(217,119,6,0.3)" },
-    red: { bg: "rgba(220,38,38,0.1)", text: "#dc2626", border: "rgba(220,38,38,0.3)" },
-    blue: { bg: "rgba(14,165,233,0.1)", text: "#0369a1", border: "rgba(14,165,233,0.3)" },
-    purple: { bg: "rgba(99,102,241,0.1)", text: "#4338ca", border: "rgba(99,102,241,0.3)" },
-  };
-  const c = colors[color] || colors.blue;
-  return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999, background: c.bg, color: c.text, border: "1px solid " + c.border }}>{children}</span>;
-}
+const fmt = (n, d) => {
+  const dd = d !== undefined ? d : 0;
+  return n == null ? "—" : n.toLocaleString("fr-FR", {
+    minimumFractionDigits: dd,
+    maximumFractionDigits: dd
+  });
+};
 
-function SectionHeader({ icon, title, badge }) {
+const fmtEur = (n) => (n == null ? "—" : fmt(n) + " €");
+
+const fmtPct = (n) => (n == null ? "—" : fmt(n, 2) + " %");
+
+const fmtK = (v) => (v >= 1000 || v <= -1000 ? (v / 1000).toFixed(1) + "k €" : Math.round(v) + " €");
+
+const LOT_DEFAULT = {
+  id: 1,
+  nom: "Lot 1",
+  surface: "",
+  loyer: "",
+  travaux: "",
+  charges: ""
+};
+
+// ... reste de tes fonctions
+
+export default function App() {
+  // tes useState
+  const [onglet, setOnglet] = useState("analyse");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // AUTO-SAVE
+  useEffect(() => {
+    localStorage.setItem(INPUTS_KEY, JSON.stringify({onglet}));
+  }, [onglet]);
+
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-      <div style={{ width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg,#6366f1,#38bdf8)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>{icon}</div>
-      <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>{title}</div>
-      {badge && <Tag color="purple">{badge}</Tag>}
-    </div>
-  );
-}
-
-function StatRow({ label, value, color, bold, border }) {
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: border !== false ? "1px solid rgba(148,163,184,0.15)" : "none" }}>
-      <span style={{ fontSize: 13, color: "#64748b" }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: bold ? 700 : 500, color: color || "#0f172a" }}>{value}</span>
+    <div className="App">
+      Radar Immo 76 - Build OK !
     </div>
   );
 }
