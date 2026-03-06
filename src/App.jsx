@@ -528,7 +528,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
 
   const exportPDF = async function() {
     if (!window.jspdf) {
-      alert("jsPDF non chargé. Ajoutez dans index.html :\\n<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js\\"></script>");
+      alert("jsPDF non chargé. Ajoutez dans index.html:\\n<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js\\"></script>");
       return;
     }
     try {
