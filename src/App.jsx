@@ -2114,7 +2114,9 @@ function SCIField({ sciVals, onChange, field, label, unit, step, hint }) {
 const SEUIL_IS_BAS = 42500;
 const TAUX_CCA_LEGAL = 2.5; // taux légal CCA 2024
 
-const DEFAULT_BIEN = function(id) {
+DEFAULT_BIEN = function(id) {
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
   return {
     id: id,
     nom: "Bien " + id,
@@ -2124,8 +2126,10 @@ const DEFAULT_BIEN = function(id) {
     montantCredit: "196000",
     tauxCredit: "4.20",
     dureeCredit: "20",
+    dateAchat: now.getFullYear() + "-" + mm,        // ← NOUVEAU
     loyerMensuel: "900",
     tauxOccupation: "11",
+    tauxRevalorisation: "1.5",                       // ← NOUVEAU
     chargesAn: "1200",
     taxeFonciereAn: "1200",
     assurancePNOAn: "0",
@@ -2153,7 +2157,7 @@ const DEFAULT_SCI_PARAMS = {
 };
 
 // Calcule le résultat fiscal d'UN bien pour l'année Y
-function calcBienAnnee(bien, y) {
+function calcBienAnnee(bien, anneeReelle) {
   const pa = pf(bien.prixAchat);
   const fa = pf(bien.fraisAchat);
   const tv = pf(bien.travaux);
@@ -2161,13 +2165,86 @@ function calcBienAnnee(bien, y) {
   const duree = Math.max(1, Math.round(pf(bien.dureeCredit)));
   const tMensuel = pf(bien.tauxCredit) / 100 / 12;
   const nMois = duree * 12;
-  const mensualite = tMensuel === 0 ? M / nMois : (M * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
-  const loyersAn = pf(bien.loyerMensuel) * pf(bien.tauxOccupation) * Math.pow(1.01, y - 1);
+  const mensualite = tMensuel === 0
+    ? M / nMois
+    : (M * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
+
+  // Année civile d'achat
+  const dateAchat = bien.dateAchat || (new Date().getFullYear() + "-01");
+  const anneeAchat = parseInt(dateAchat.split("-")[0], 10);
+  const moisAchat = parseInt(dateAchat.split("-")[1] || "1", 10) - 1; // 0-based
+
+  // Nombre d'années depuis l'achat (pour cette année civile)
+  const anneesDepuisAchat = anneeReelle - anneeAchat;
+
+  // Bien pas encore acheté
+  if (anneesDepuisAchat < 0) {
+    return {
+      loyersAn: 0, chargesTotal: 0, interetsAn: 0, totalAmort: 0,
+      provisionGros: 0, resultatBrut: 0, remboursementAn: 0,
+      amortBat: 0, amortTrav: 0, amortFraisAcquis: 0, amortFraisDossier: 0,
+      actif: false,
+    };
+  }
+
+  // Revalorisation loyer depuis la date d'achat
+  const tauxReval = pf(bien.tauxRevalorisation) / 100;
+  const loyersAn = pf(bien.loyerMensuel) * pf(bien.tauxOccupation)
+    * Math.pow(1 + tauxReval, anneesDepuisAchat);
+
   const gestionAn = loyersAn * pf(bien.gestionPct) / 100;
-  const assurancePNO = pf(bien.assurancePNOAn) > 0 ? pf(bien.assurancePNOAn) : (pa + tv) * 0.0012;
-  const chargesTotal = pf(bien.chargesAn) + pf(bien.taxeFonciereAn) + assurancePNO + gestionAn
-    + pf(bien.provisionTravauxAn) + pf(bien.expertComptableAn) + pf(bien.fraisBancairesAn);
+  const assurancePNO = pf(bien.assurancePNOAn) > 0
+    ? pf(bien.assurancePNOAn)
+    : (pa + tv) * 0.0012;
+  const chargesTotal = pf(bien.chargesAn) + pf(bien.taxeFonciereAn) + assurancePNO
+    + gestionAn + pf(bien.provisionTravauxAn) + pf(bien.expertComptableAn)
+    + pf(bien.fraisBancairesAn);
   const provisionGros = pf(bien.provisionGrosTravauxAn);
+
+  // Intérêts : calculés en mois absolus depuis l'achat
+  // mois 0 = moisAchat de anneeAchat
+  // L'année civile anneeReelle correspond aux mois absolus [moisDebutAnnee, moisFinAnnee[
+  const moisDebutAnnee = (anneeReelle - anneeAchat) * 12 - moisAchat;
+  const moisFinAnnee = moisDebutAnnee + 12;
+
+  var interetsAn = 0, remboursementAn = 0;
+  if (anneesDepuisAchat < duree && M > 0) {
+    var solde = M;
+    for (var mm = 0; mm < Math.max(0, moisDebutAnnee) && solde > 0 && mm < nMois; mm++) {
+      const intM2 = solde * tMensuel;
+      solde = Math.max(0, solde - (mensualite - intM2));
+    }
+    for (var m = Math.max(0, moisDebutAnnee); m < moisFinAnnee && solde > 0 && m < nMois; m++) {
+      const intM = solde * tMensuel;
+      interetsAn += intM;
+      solde = Math.max(0, solde - (mensualite - intM));
+    }
+    // Mois réellement actifs dans cette année civile
+    const moisActifs = Math.min(moisFinAnnee, nMois) - Math.max(0, moisDebutAnnee);
+    remboursementAn = moisActifs > 0 ? mensualite * Math.max(0, moisActifs) : 0;
+  }
+
+  // Amortissements — utiliser anneesDepuisAchat + 1 comme "y"
+  const y = anneesDepuisAchat + 1;
+  const amortBat = pa * (1 - pf(bien.partTerrain) / 100) * pf(bien.coefAmortBatiment) / 100;
+  const amortTrav = tv * pf(bien.coefAmortTravaux) / 100;
+  const amortFraisAcquis = bien.fraisNotaireAmort === "1" && y <= 5 ? fa / 5 : 0;
+  const fraisAcquisAn1 = bien.fraisNotaireAmort === "0" && y === 1 ? fa : 0;
+  const amortFraisDossier = y <= duree
+    ? pf(bien.fraisDossierCredit) / Math.max(1, pf(bien.dureeFraisDossier))
+    : 0;
+  const totalAmort = amortBat + amortTrav + amortFraisAcquis + amortFraisDossier;
+
+  const resultatBrut = loyersAn - chargesTotal - interetsAn - totalAmort
+    - fraisAcquisAn1 - provisionGros;
+
+  return {
+    loyersAn, chargesTotal, interetsAn, totalAmort, provisionGros,
+    resultatBrut, remboursementAn,
+    amortBat, amortTrav, amortFraisAcquis, amortFraisDossier,
+    actif: true,
+  };
+}
 
   // Intérêts année y
   var interetsAn = 0;
@@ -2214,47 +2291,49 @@ function calcBienAnnee(bien, y) {
 
 // Projection SCI consolidée sur N années
 function projeterSCI(biens, sciParams, ccaAssocies) {
-  const dureeMax = Math.max(...biens.map(function(b) { return Math.round(pf(b.dureeCredit)); })) + 5;
-  const totalYears = Math.min(dureeMax, 30);
+  const anneeActuelle = new Date().getFullYear();
+  const dureeMax = Math.max(...biens.map(function(b) {
+    const anneeAchat = parseInt((b.dateAchat || anneeActuelle + "-01").split("-")[0], 10);
+    return (anneeAchat - anneeActuelle) + Math.round(pf(b.dureeCredit));
+  })) + 5;
+  const totalYears = Math.min(Math.max(dureeMax, 10), 35);
   const tIS = pf(sciParams.tauxIS) / 100;
   const tauxCCA = pf(sciParams.tauxCCA) / 100;
   const tDiv = pf(sciParams.tauxDividendes) / 100;
 
-  // Solde CCA initial par associé
   var soldeCCA = ccaAssocies.reduce(function(acc, a) { return acc + pf(a.montant); }, 0);
 
   var rows = [];
-  for (var y = 1; y <= totalYears; y++) {
-    var loyersTotal = 0, chargesTotal = 0, amortTotal = 0, interetsTotal = 0, remboursementTotal = 0, provisionGrosTotal = 0;
+  for (var i = 0; i < totalYears; i++) {
+    const anneeReelle = anneeActuelle + i;  // ← année civile réelle
+    var loyersTotal = 0, chargesTotal = 0, amortTotal = 0, interetsTotal = 0,
+        remboursementTotal = 0, provisionGrosTotal = 0;
     var bienDetails = [];
+
     biens.forEach(function(bien) {
-      var r = calcBienAnnee(bien, y);
+      var r = calcBienAnnee(bien, anneeReelle);  // ← on passe l'année civile
       loyersTotal += r.loyersAn;
       chargesTotal += r.chargesTotal;
       amortTotal += r.totalAmort;
       interetsTotal += r.interetsAn;
       remboursementTotal += r.remboursementAn;
       provisionGrosTotal += r.provisionGros;
-      bienDetails.push({ nom: bien.nom, resultat: r.resultatBrut, loyers: r.loyersAn });
+      bienDetails.push({ nom: bien.nom, resultat: r.resultatBrut, loyers: r.loyersAn, actif: r.actif !== false });
     });
 
-    // Intérêts CCA déductibles
     const interetsCCA = soldeCCA * tauxCCA;
-
-    // Résultat fiscal consolidé
-    const resultatFiscal = Math.max(0, loyersTotal - chargesTotal - interetsTotal - amortTotal - provisionGrosTotal - interetsCCA);
+    const resultatFiscal = Math.max(0, loyersTotal - chargesTotal - interetsTotal
+      - amortTotal - provisionGrosTotal - interetsCCA);
     const isPartBas = Math.min(resultatFiscal, SEUIL_IS_BAS) * Math.min(tIS, 0.15);
     const isPartHaut = Math.max(0, resultatFiscal - SEUIL_IS_BAS) * 0.25;
     const isTotal = isPartBas + isPartHaut;
     const margeAvantBasculement = Math.max(0, SEUIL_IS_BAS - resultatFiscal);
     const alertePalier = resultatFiscal > SEUIL_IS_BAS * 0.8;
-
     const resultatNetApresIS = Math.max(0, resultatFiscal) - isTotal;
-    const tresoConsolidee = loyersTotal - chargesTotal - remboursementTotal - isTotal - provisionGrosTotal;
+    const tresoConsolidee = loyersTotal - chargesTotal - remboursementTotal
+      - isTotal - provisionGrosTotal;
 
-    // Remboursement CCA ou dividendes
-    var remboursementCCA = 0;
-    var dividendesDistribues = 0;
+    var remboursementCCA = 0, dividendesDistribues = 0;
     if (sciParams.distribuerOuRembourser === "rembourser" && soldeCCA > 0) {
       remboursementCCA = Math.min(soldeCCA, Math.max(0, tresoConsolidee));
     } else {
@@ -2264,14 +2343,12 @@ function projeterSCI(biens, sciParams, ccaAssocies) {
     const dividendesNets = dividendesDistribues * (1 - tDiv);
 
     rows.push({
-      year: y,
-      loyersTotal, chargesTotal, amortTotal, interetsTotal, interetsCCA, provisionGrosTotal,
-      resultatFiscal, isPartBas, isPartHaut, isTotal,
-      margeAvantBasculement, alertePalier,
-      remboursementTotal, tresoConsolidee,
-      soldeCCA, remboursementCCA,
-      resultatNetApresIS, dividendesDistribues, dividendesNets,
-      bienDetails,
+      year: anneeReelle,   // ← "2026" au lieu de "1"
+      loyersTotal, chargesTotal, amortTotal, interetsTotal, interetsCCA,
+      provisionGrosTotal, resultatFiscal, isPartBas, isPartHaut, isTotal,
+      margeAvantBasculement, alertePalier, remboursementTotal, tresoConsolidee,
+      soldeCCA, remboursementCCA, resultatNetApresIS,
+      dividendesDistribues, dividendesNets, bienDetails,
     });
   }
   return rows;
@@ -2582,6 +2659,73 @@ function SimulateurSCI() {
   const [activeTab, setActiveTab] = React.useState("dashboard");
   const [sciParams, setSciParams] = React.useState(DEFAULT_SCI_PARAMS);
   const [ccaAssocies, setCcaAssocies] = React.useState([{ id: 1, nom: "Associé 1", montant: "10000" }]);
+    // ── Sauvegarde ──────────────────────────────────────────────────────────────
+  const SCI_KEY = "radar-immo-sci-v2";
+  const [nomProjet, setNomProjet] = React.useState("");
+  const [saveStatus, setSaveStatus] = React.useState("idle");
+  const [projets, setProjets] = React.useState(function() {
+    try { return JSON.parse(localStorage.getItem(SCI_KEY)) || []; }
+    catch(e) { return []; }
+  });
+  const saveTimer = React.useRef(null);
+
+  useEffect(function() {
+    if (!nomProjet.trim()) return;
+    setSaveStatus("pending");
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(function() { sauvegarder(true); }, 1500);
+    return function() { clearTimeout(saveTimer.current); };
+  }, [biens, sciParams, ccaAssocies]);
+
+  function sauvegarder(silent) {
+    if (!nomProjet.trim()) {
+      if (!silent) alert("Donne un nom à ta simulation SCI");
+      return;
+    }
+    var entry = {
+      id: Date.now(),
+      nom: nomProjet.trim(),
+      biens: biens, sciParams: sciParams, ccaAssocies: ccaAssocies,
+      savedAt: new Date().toLocaleDateString("fr-FR"),
+    };
+    setProjets(function(prev) {
+      var liste = [entry].concat(prev.filter(function(p) { return p.nom !== nomProjet.trim(); }));
+      localStorage.setItem(SCI_KEY, JSON.stringify(liste));
+      return liste;
+    });
+    setSaveStatus("saved");
+    setTimeout(function() { setSaveStatus("idle"); }, 3000);
+  }
+
+  function chargerProjet(p) {
+    setBiens(p.biens);
+    setSciParams(p.sciParams);
+    setCcaAssocies(p.ccaAssocies);
+    setNomProjet(p.nom);
+    setSaveStatus("idle");
+  }
+
+  function supprimerProjet(id) {
+    setProjets(function(prev) {
+      var liste = prev.filter(function(p) { return p.id !== id; });
+      localStorage.setItem(SCI_KEY, JSON.stringify(liste));
+      return liste;
+    });
+  }
+
+  function exportJSON() {
+    var blob = new Blob(
+      [JSON.stringify({ nom: nomProjet, biens, sciParams, ccaAssocies }, null, 2)],
+      { type: "application/json" }
+    );
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "sci-" + (nomProjet || "simulation") + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
 
   const updateBien = useCallback(function(id, field, value) {
     setBiens(function(prev) {
@@ -2635,7 +2779,47 @@ function SimulateurSCI() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-
+{/* ── Barre de sauvegarde ── */}
+<div style={{ ...SECTION, padding: "12px 20px" }}>
+  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <input
+        value={nomProjet}
+        onChange={function(e) { setNomProjet(e.target.value); }}
+        placeholder="Nom de la simulation SCI"
+        style={{ background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "6px 14px", fontSize: 13, color: "#0f172a", width: 220, outline: "none" }}
+      />
+      <button onClick={function() { sauvegarder(false); }}
+        style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 10, padding: "7px 16px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+        💾 Sauver
+      </button>
+      <button onClick={exportJSON}
+        style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 10, padding: "7px 14px", color: "#4338ca", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>
+        ⬇️ Export JSON
+      </button>
+      <span style={{ fontSize: 11, color: saveStatus === "saved" ? "#16a34a" : saveStatus === "pending" ? "#d97706" : "transparent" }}>
+        {saveStatus === "saved" ? "✅ Sauvegardé" : "💾 Modifications en cours..."}
+      </span>
+    </div>
+  </div>
+  {projets.length > 0 && (
+    <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+      {projets.map(function(p) {
+        return (
+          <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 8, padding: "3px 10px" }}>
+            <button onClick={function() { chargerProjet(p); }}
+              style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: "#4338ca", cursor: "pointer" }}>
+              {p.nom}
+            </button>
+            <span style={{ fontSize: 10, color: "#94a3b8" }}>{p.savedAt}</span>
+            <button onClick={function() { supprimerProjet(p.id); }}
+              style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 11 }}>✕</button>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
       {/* Info banner */}
       <div style={{ background: "linear-gradient(135deg,rgba(99,102,241,0.08),rgba(56,189,248,0.08))", borderRadius: 14, padding: "12px 16px", border: "1px solid rgba(99,102,241,0.2)", fontSize: 12, color: "#334155" }}>
         <strong>SCI IS — Pilotage multi-biens</strong> — Consolidez plusieurs biens dans une même SCI. IS calculé sur le résultat global. CCA remboursables sans fiscalité. Seuil 15% / 25% suivi chaque année.
