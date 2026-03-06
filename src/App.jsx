@@ -526,7 +526,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
     e.target.value = "";
   };
 
- const export
+   const exportPDF = async function()
     try {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
