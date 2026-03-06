@@ -528,8 +528,8 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
 
      // Export PDF bancaire
   const exportPDF = function() {
-    if (!window.jspdf) return alert("jsPDF manquant");
-    const { jsPDF }
+  if (!window.jspdf) return alert("jsPDF manquant");
+  const { jsPDF } = window.jspdf;  ← LIGNE COMPLÈTE
 
 
   const result = useMemo(function() { return calculerSimulation(inputs); }, [inputs]);
@@ -3329,8 +3329,6 @@ function SimulateurSCI() {
     </div>
   );
 }
-
-
 export default function App() {
   const [onglet, setOnglet] = useState("analyse");
   const [sidebarOpen, setSidebarOpen] = useState(false);
