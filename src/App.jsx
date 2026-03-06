@@ -2382,8 +2382,12 @@ function calcBienAnnee(bien, anneeReelle) {
   }
 
   const tauxReval = pf(bien.tauxRevalorisation) / 100;
-  const loyersAn = pf(bien.loyerMensuel) * pf(bien.tauxOccupation)
-    * Math.pow(1 + tauxReval, anneesDepuisAchat);
+  const moisDansAnnee = (anneesDepuisAchat === 0)
+  ? Math.max(0, 12 - moisAchat)   // ex: achat juillet → 6 mois
+  : 12;
+const tauxOccupationEffectif = Math.min(pf(bien.tauxOccupation), moisDansAnnee);
+const loyersAn = pf(bien.loyerMensuel) * tauxOccupationEffectif
+  * Math.pow(1 + tauxReval, anneesDepuisAchat);
 
   const gestionAn = loyersAn * pf(bien.gestionPct) / 100;
   const assurancePNO = pf(bien.assurancePNOAn) > 0 ? pf(bien.assurancePNOAn) : (pa + tv) * 0.0012;
