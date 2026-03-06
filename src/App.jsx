@@ -3326,7 +3326,7 @@ function SimulateurSCI() {
       <div style={{ background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 14px", fontSize: 11, color: "#64748b", border: "1px solid rgba(148,163,184,0.2)" }}>
         ℹ️ IS calculé sur le résultat <strong>consolidé</strong> de la SCI (Σ tous biens). Seuil taux réduit 15% : 42 500 €/an. Les loyers sont indexés +1%/an. Les CCA sont remboursables sans imposition et les intérêts versés sont déductibles (taux légal {TAUX_CCA_LEGAL}%). Attention à la plus-value à la revente (amortissements réintégrés).
       </div>
-    </div>;
+    </div>
   );
   const [onglet, setOnglet] = useState("analyse");
   const [sidebarOpen, setSidebarOpen] = useState(false);
