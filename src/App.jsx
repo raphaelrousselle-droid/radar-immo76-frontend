@@ -3536,3 +3536,4 @@ function SimulateurSCI() {
     </div>
   );
 }
+export default App; 
