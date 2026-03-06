@@ -3530,4 +3530,5 @@ function SimulateurSCI() {
   );
 }
 
-export default App; 
+export default function App() {
+  const [onglet,
