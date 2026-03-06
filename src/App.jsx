@@ -5,13 +5,13 @@ const CACHE_KEY = "radar-immo-communes-v2";
 const PROJETS_KEY = "radar-immo-projets-v1";
 
 const nc = (v) => { if (v == null) return "#94a3b8"; if (v >= 7) return "#16a34a"; if (v >= 5) return "#d97706"; return "#dc2626"; };
-const nLabel = (v) => { if (v == null) return "â€”"; if (v >= 7) return "Bon"; if (v >= 5) return "Moyen"; return "Faible"; };
+const nLabel = (v) => { if (v == null) return "—"; if (v >= 7) return "Bon"; if (v >= 5) return "Moyen"; return "Faible"; };
 const sn = (v) => (v != null && !isNaN(Number(v)) ? Number(v) : null);
 const pf = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
-const fmt = (n, d) => { const dd = d !== undefined ? d : 0; return n == null ? "â€”" : n.toLocaleString("fr-FR", { minimumFractionDigits: dd, maximumFractionDigits: dd }); };
-const fmtEur = (n) => n == null ? "â€”" : fmt(n) + " â‚¬";
-const fmtPct = (n) => n == null ? "â€”" : fmt(n, 2) + " %";
-const fmtK = (v) => v >= 1000 || v <= -1000 ? (v / 1000).toFixed(1) + "k â‚¬" : Math.round(v) + " â‚¬";
+const fmt = (n, d) => { const dd = d !== undefined ? d : 0; return n == null ? "—" : n.toLocaleString("fr-FR", { minimumFractionDigits: dd, maximumFractionDigits: dd }); };
+const fmtEur = (n) => n == null ? "—" : fmt(n) + " €";
+const fmtPct = (n) => n == null ? "—" : fmt(n, 2) + " %";
+const fmtK = (v) => v >= 1000 || v <= -1000 ? (v / 1000).toFixed(1) + "k €" : Math.round(v) + " €";
 const LOT_DEFAULT = { id: 1, nom: "Lot 1", surface: "", loyer: "", travaux: "", charges: "" };
 
 const CARD = { background: "rgba(255,255,255,0.7)", borderRadius: 16, padding: 16, boxShadow: "0 2px 12px rgba(99,102,241,0.07)", border: "1px solid rgba(148,163,184,0.2)" };
@@ -63,24 +63,24 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
   const dem = detail && detail.demographie ? detail.demographie : {};
   const pri = detail && detail.prix ? detail.prix : {};
   const configs = {
-    rendement: { title: "DÃ©tail â€” Rendement", color: "#0ea5e9", items: [
-      { label: "Prix appartement/mÂ²", value: pri.appartement_m2 ? pri.appartement_m2.toLocaleString("fr-FR") + " â‚¬" : "â€”" },
-      { label: "Prix maison/mÂ²", value: pri.maison_m2 ? pri.maison_m2.toLocaleString("fr-FR") + " â‚¬" : "â€”" },
-      { label: "Loyer mÃ©dian/mÂ²", value: detail && detail.loyer && detail.loyer.appartement_m2 != null ? Number(detail.loyer.appartement_m2).toFixed(1) + " â‚¬/mÂ²/mois" : "â€”" },
-      { label: "RentabilitÃ© brute", value: detail && detail.rentabilite_brute_pct ? detail.rentabilite_brute_pct + " %" : "â€”", highlight: true },
-    ], note: "Rendement brut â‰ˆ (loyer Ã— 12) / prix mÂ²." },
-    demographie: { title: "DÃ©tail â€” DÃ©mographie", color: "#8b5cf6", items: [
-      { label: "Population", value: detail && detail.population ? detail.population.toLocaleString("fr-FR") + " hab." : "â€”" },
-      { label: "Ã‰volution pop./an", value: dem.evolution_pop_pct_an != null ? dem.evolution_pop_pct_an + " %" : "â€”", highlight: true },
-      { label: "Vacance logements", value: dem.vacance_pct != null ? dem.vacance_pct + " %" : "â€”", highlight: true },
-      { label: "Tension locative", value: dem.tension_locative_pct != null ? dem.tension_locative_pct + " %" : "â€”", highlight: true },
-    ], note: "Score basÃ© sur dynamique dÃ©mographique, vacance et locataires." },
-    socio_eco: { title: "DÃ©tail â€” Socio-Ã©conomique", color: "#22c55e", items: [
-      { label: "Revenu mÃ©dian", value: se.revenu_median ? se.revenu_median.toLocaleString("fr-FR") + " â‚¬" : "â€”", highlight: true },
-      { label: "Taux de chÃ´mage", value: se.chomage_pct != null ? se.chomage_pct + " %" : "â€”", highlight: true },
-      { label: "Taux de pauvretÃ©", value: se.taux_pauvrete_pct != null ? se.taux_pauvrete_pct + " %" : "â€”", highlight: true },
-      { label: "Part cadres", value: se.part_cadres_pct != null ? se.part_cadres_pct + " %" : "â€”" },
-    ], note: "Plus le revenu est Ã©levÃ© et le chÃ´mage faible, meilleur est le score." },
+    rendement: { title: "Détail — Rendement", color: "#0ea5e9", items: [
+      { label: "Prix appartement/m²", value: pri.appartement_m2 ? pri.appartement_m2.toLocaleString("fr-FR") + " €" : "—" },
+      { label: "Prix maison/m²", value: pri.maison_m2 ? pri.maison_m2.toLocaleString("fr-FR") + " €" : "—" },
+      { label: "Loyer médian/m²", value: detail && detail.loyer && detail.loyer.appartement_m2 != null ? Number(detail.loyer.appartement_m2).toFixed(1) + " €/m²/mois" : "—" },
+      { label: "Rentabilité brute", value: detail && detail.rentabilite_brute_pct ? detail.rentabilite_brute_pct + " %" : "—", highlight: true },
+    ], note: "Rendement brut ≈ (loyer × 12) / prix m²." },
+    demographie: { title: "Détail — Démographie", color: "#8b5cf6", items: [
+      { label: "Population", value: detail && detail.population ? detail.population.toLocaleString("fr-FR") + " hab." : "—" },
+      { label: "Évolution pop./an", value: dem.evolution_pop_pct_an != null ? dem.evolution_pop_pct_an + " %" : "—", highlight: true },
+      { label: "Vacance logements", value: dem.vacance_pct != null ? dem.vacance_pct + " %" : "—", highlight: true },
+      { label: "Tension locative", value: dem.tension_locative_pct != null ? dem.tension_locative_pct + " %" : "—", highlight: true },
+    ], note: "Score basé sur dynamique démographique, vacance et locataires." },
+    socio_eco: { title: "Détail — Socio-économique", color: "#22c55e", items: [
+      { label: "Revenu médian", value: se.revenu_median ? se.revenu_median.toLocaleString("fr-FR") + " €" : "—", highlight: true },
+      { label: "Taux de chômage", value: se.chomage_pct != null ? se.chomage_pct + " %" : "—", highlight: true },
+      { label: "Taux de pauvreté", value: se.taux_pauvrete_pct != null ? se.taux_pauvrete_pct + " %" : "—", highlight: true },
+      { label: "Part cadres", value: se.part_cadres_pct != null ? se.part_cadres_pct + " %" : "—" },
+    ], note: "Plus le revenu est élevé et le chômage faible, meilleur est le score." },
   };
   const cfg = configs[scoreKey];
   if (!cfg) return null;
@@ -88,7 +88,7 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
     <div style={{ background: "rgba(255,255,255,0.9)", borderRadius: 12, padding: 12, marginTop: 6, border: "1px solid " + cfg.color + "44" }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, alignItems: "center" }}>
         <div style={{ fontSize: 12, fontWeight: 600, color: cfg.color }}>{cfg.title}</div>
-        <button onClick={onClose} style={{ border: "none", background: "transparent", color: "#94a3b8", cursor: "pointer", fontSize: 13 }}>âœ•</button>
+        <button onClick={onClose} style={{ border: "none", background: "transparent", color: "#94a3b8", cursor: "pointer", fontSize: 13 }}>✕</button>
       </div>
       {cfg.items.map(function(item) {
         return (
@@ -118,7 +118,8 @@ function calculerSimulation(i) {
   const loyersAnnuels = pf(i.loyerMensuelHC) * pf(i.tauxOccupation);
   const assurancePNO = pf(i.assurancePNOAn) > 0 ? pf(i.assurancePNOAn) : depenseNette * 0.0012;
   const gestionAn = (loyersAnnuels * pf(i.gestionLocativePct)) / 100;
-  const totalFraisAnnuels = pf(i.chargesImmeubleAn) + pf(i.taxeFonciereAn) + assurancePNO + gestionAn + pf(i.provisionTravauxAn) + pf(i.fraisBancairesAn) + pf(i.expertComptableAn);
+  const gliAn = (loyersAnnuels * pf(i.gliPct)) / 100;
+  const totalFraisAnnuels = pf(i.chargesImmeubleAn) + pf(i.taxeFonciereAn) + assurancePNO + gestionAn + gliAn + pf(i.provisionTravauxAn) + pf(i.fraisBancairesAn) + pf(i.expertComptableAn);
   const amortissement = (depenseNette * pf(i.coefAmortissement)) / 100;
   const tis = pf(i.tauxIS);
   const tmi = pf(i.tmi);
@@ -140,9 +141,9 @@ function calculerSimulation(i) {
     rendBrut: depenseNette > 0 ? (loyersAnnuels / depenseNette) * 100 : 0,
     regimes: {
       "SAS / SCI IS": mkR(bIS * (tis / 100)),
-      "LMNP RÃ©el": mkR(bIS * ((tmi + 17.2) / 100)),
+      "LMNP Réel": mkR(bIS * ((tmi + 17.2) / 100)),
       "LMNP Micro BIC": mkR(Math.max(0, loyersAnnuels * 0.5) * ((tmi + 17.2) / 100)),
-      "Foncier RÃ©el": mkR(bFR * ((tmi + 17.2) / 100)),
+      "Foncier Réel": mkR(bFR * ((tmi + 17.2) / 100)),
       "Micro Foncier": mkR(Math.max(0, loyersAnnuels * 0.7) * ((tmi + 17.2) / 100)),
     },
   };
@@ -169,8 +170,8 @@ function getNoteColor(note) {
   if (note >= 30) return "#f97316"; return "#dc2626";
 }
 function getNoteLabel(note) {
-  if (note >= 80) return "Excellent"; if (note >= 65) return "TrÃ¨s bon";
-  if (note >= 50) return "Correct"; if (note >= 35) return "Passable"; return "RisquÃ©";
+  if (note >= 80) return "Excellent"; if (note >= 65) return "Très bon";
+  if (note >= 50) return "Correct"; if (note >= 35) return "Passable"; return "Risqué";
 }
 
 function projeterCashFlow(inputs, regimeNom) {
@@ -189,16 +190,17 @@ function projeterCashFlow(inputs, regimeNom) {
   for (var y = 1; y <= dur + 5; y++) {
     const loyersAn = pf(inputs.loyerMensuelHC) * pf(inputs.tauxOccupation) * Math.pow(1.01, y - 1);
     const gestionAn = (loyersAn * pf(inputs.gestionLocativePct)) / 100;
-    const fraisAn = pf(inputs.chargesImmeubleAn) + pf(inputs.taxeFonciereAn) + assurancePNOBase + gestionAn + pf(inputs.provisionTravauxAn) + pf(inputs.fraisBancairesAn) + pf(inputs.expertComptableAn);
+    const gliAn = (loyersAn * pf(inputs.gliPct)) / 100;
+    const fraisAn = pf(inputs.chargesImmeubleAn) + pf(inputs.taxeFonciereAn) + assurancePNOBase + gestionAn + gliAn + pf(inputs.provisionTravauxAn) + pf(inputs.fraisBancairesAn) + pf(inputs.expertComptableAn);
     var interetsAn = 0; const creditAn = y <= dur ? remboursementAnnuel : 0;
     if (y <= dur && tMensuel > 0) { for (var m = 0; m < 12; m++) { const intM = solde * tMensuel; interetsAn += intM; solde = Math.max(0, solde - (mensualite - intM)); } }
     const baseDeductible = Math.max(0, loyersAn - fraisAn - interetsAn - amortissement);
     const baseFoncierR = Math.max(0, loyersAn - fraisAn - interetsAn);
     var impots = 0;
     if (regimeNom === "SAS / SCI IS") impots = baseDeductible * (tis / 100);
-    else if (regimeNom === "LMNP RÃ©el") impots = baseDeductible * ((tmi + 17.2) / 100);
+    else if (regimeNom === "LMNP Réel") impots = baseDeductible * ((tmi + 17.2) / 100);
     else if (regimeNom === "LMNP Micro BIC") impots = Math.max(0, loyersAn * 0.5) * ((tmi + 17.2) / 100);
-    else if (regimeNom === "Foncier RÃ©el") impots = baseFoncierR * ((tmi + 17.2) / 100);
+    else if (regimeNom === "Foncier Réel") impots = baseFoncierR * ((tmi + 17.2) / 100);
     else if (regimeNom === "Micro Foncier") impots = Math.max(0, loyersAn * 0.7) * ((tmi + 17.2) / 100);
     data.push({ year: y, loyers: loyersAn, frais: fraisAn, credit: creditAn, impots: impots, cashflow: loyersAn - fraisAn - creditAn - impots });
   }
@@ -224,11 +226,11 @@ function CashFlowChart({ data }) {
   const tooltipRows = h == null ? [] : [
     { label: "Loyers", value: h.loyers, color: "#16a34a" },
     { label: "Charges", value: -h.frais, color: "#64748b" },
-    { label: "CrÃ©dit", value: -h.credit, color: "#d97706" },
-    { label: "ImpÃ´ts", value: -h.impots, color: "#dc2626" },
+    { label: "Crédit", value: -h.credit, color: "#d97706" },
+    { label: "Impôts", value: -h.impots, color: "#dc2626" },
     { label: "Cash-Flow", value: h.cashflow, color: h.cashflow >= 0 ? "#0369a1" : "#dc2626" },
   ];
-  const legend = [{ color: "#4ade80", label: "Loyers" }, { color: "#94a3b8", label: "Charges" }, { color: "#fbbf24", label: "CrÃ©dit" }, { color: "#f87171", label: "ImpÃ´ts" }, { color: "#38bdf8", label: "Cash-Flow" }];
+  const legend = [{ color: "#4ade80", label: "Loyers" }, { color: "#94a3b8", label: "Charges" }, { color: "#fbbf24", label: "Crédit" }, { color: "#f87171", label: "Impôts" }, { color: "#38bdf8", label: "Cash-Flow" }];
   return (
     <div style={{ overflowX: "auto" }}>
       <svg viewBox={"0 0 " + W + " " + H} style={{ width: "100%", minWidth: 480, fontFamily: "system-ui,sans-serif" }} onMouseLeave={function() { setHovered(null); }}>
@@ -256,12 +258,12 @@ function CashFlowChart({ data }) {
         <polyline points={data.map(function(d, i) { return barCenterX(i) + "," + toY(d.cashflow); }).join(" ")} fill="none" stroke="#38bdf8" strokeWidth={2.5} strokeLinejoin="round" />
         {data.map(function(d, i) { return <circle key={i} cx={barCenterX(i)} cy={toY(d.cashflow)} r={hovered === i ? 5 : 3} fill={hovered === i ? "#0ea5e9" : "#38bdf8"} stroke="white" strokeWidth={1.5} onMouseEnter={function() { setHovered(i); }} style={{ cursor: "pointer" }} />; })}
         {data.map(function(d, i) { if (i === 0 || (i + 1) % 5 === 0) return <text key={i} x={barCenterX(i)} y={H - padB + 14} textAnchor="middle" fontSize={10} fill="#94a3b8">{d.year}</text>; return null; })}
-        <text x={padL + chartW / 2} y={H - 4} textAnchor="middle" fontSize={10} fill="#94a3b8">AnnÃ©e</text>
+        <text x={padL + chartW / 2} y={H - 4} textAnchor="middle" fontSize={10} fill="#94a3b8">Année</text>
         {legend.map(function(l, i) { return (<g key={l.label} transform={"translate(" + (W - padR + 12) + "," + (padT + 14 + i * 20) + ")"}><rect x={0} y={-9} width={12} height={12} fill={l.color} rx={3} /><text x={17} y={2} fontSize={10} fill="#475569">{l.label}</text></g>); })}
         {h != null && (
           <g>
             <rect x={ttX} y={2} width={TW} height={TH} rx={8} fill="rgba(255,255,255,0.97)" stroke="rgba(148,163,184,0.35)" strokeWidth={1} />
-            <text x={ttX + 8} y={17} fontSize={11} fontWeight="700" fill="#0f172a">AnnÃ©e {h.year}</text>
+            <text x={ttX + 8} y={17} fontSize={11} fontWeight="700" fill="#0f172a">Année {h.year}</text>
             {tooltipRows.map(function(row, idx) { return (<g key={row.label} transform={"translate(" + (ttX + 8) + "," + (24 + idx * 16) + ")"}><circle cx={4} cy={-3} r={3} fill={row.color} /><text x={11} y={0} fontSize={9} fill="#475569">{row.label}</text><text x={TW - 10} y={0} fontSize={9} fontWeight="600" fill={row.color} textAnchor="end">{fmtK(row.value)}</text></g>); })}
           </g>
         )}
@@ -277,7 +279,7 @@ function InputField({ label, name, value, onChange, unit, step, min }) {
       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
         <input type="number" name={name} value={value} step={step || "1000"} min={min || "0"} onChange={onChange}
           style={{ width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "6px 10px", color: "#0f172a", fontSize: 13, outline: "none" }} />
-        {(unit !== undefined ? unit : "â‚¬") && <span style={{ color: "#94a3b8", fontSize: 11, minWidth: 24 }}>{unit !== undefined ? unit : "â‚¬"}</span>}
+        {(unit !== undefined ? unit : "€") && <span style={{ color: "#94a3b8", fontSize: 11, minWidth: 24 }}>{unit !== undefined ? unit : "€"}</span>}
       </div>
     </div>
   );
@@ -303,7 +305,7 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>DÃ©tail des lots ({lots.length})</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>Détail des lots ({lots.length})</div>
         <button onClick={addLot} style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 8, padding: "5px 12px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>+ Lot</button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -315,10 +317,10 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
                   <div style={{ width: 20, height: 20, borderRadius: 6, background: "linear-gradient(135deg,#6366f1,#38bdf8)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700 }}>#{idx + 1}</div>
                   <input value={lot.nom} onChange={function(e) { updateLot(lot.id, "nom", e.target.value); }} style={{ fontWeight: 600, fontSize: 13, color: "#0f172a", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed #cbd5e1" }} />
                 </div>
-                <button onClick={function() { removeLot(lot.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 6, padding: "2px 8px", color: "#dc2626", cursor: lots.length > 1 ? "pointer" : "not-allowed", fontSize: 11, opacity: lots.length > 1 ? 1 : 0.3 }}>âœ•</button>
+                <button onClick={function() { removeLot(lot.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 6, padding: "2px 8px", color: "#dc2626", cursor: lots.length > 1 ? "pointer" : "not-allowed", fontSize: 11, opacity: lots.length > 1 ? 1 : 0.3 }}>✕</button>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6 }}>
-                {[{ label: "Surface (mÂ²)", field: "surface", unit: "mÂ²", step: "1" }, { label: "Loyer HC/mois", field: "loyer", unit: "â‚¬", step: "50" }, { label: "Travaux", field: "travaux", unit: "â‚¬", step: "500" }, { label: "Charges/an", field: "charges", unit: "â‚¬", step: "100" }].map(function(col) {
+                {[{ label: "Surface (m²)", field: "surface", unit: "m²", step: "1" }, { label: "Loyer HC/mois", field: "loyer", unit: "€", step: "50" }, { label: "Travaux", field: "travaux", unit: "€", step: "500" }, { label: "Charges/an", field: "charges", unit: "€", step: "100" }].map(function(col) {
                   return (<div key={col.field}>
                     <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 3 }}>{col.label}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
@@ -335,23 +337,24 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
       </div>
       <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
         {[
-          { label: "Î£ Surface", value: fmt(totalSurface, 0) + " mÂ²", ok: surfOk, ref: surfaceGlobale > 0, refVal: fmt(surfaceGlobale, 0) + " mÂ²" },
-          { label: "Î£ Loyers", value: fmtEur(totalLoyer), ok: loyerOk, ref: loyerGlobal > 0, refVal: fmtEur(loyerGlobal) },
-          { label: "Î£ Travaux", value: fmtEur(totalTravaux), ok: true, ref: false },
-          { label: "Î£ Charges", value: fmtEur(totalCharges), ok: true, ref: false },
+          { label: "Σ Surface", value: fmt(totalSurface, 0) + " m²", ok: surfOk, ref: surfaceGlobale > 0, refVal: fmt(surfaceGlobale, 0) + " m²" },
+          { label: "Σ Loyers", value: fmtEur(totalLoyer), ok: loyerOk, ref: loyerGlobal > 0, refVal: fmtEur(loyerGlobal) },
+          { label: "Σ Travaux", value: fmtEur(totalTravaux), ok: true, ref: false },
+          { label: "Σ Charges", value: fmtEur(totalCharges), ok: true, ref: false },
         ].map(function(s) {
           return (<div key={s.label} style={{ background: s.ref ? (s.ok ? "rgba(220,252,231,0.7)" : "rgba(254,243,199,0.7)") : "rgba(241,245,249,0.7)", borderRadius: 10, padding: "7px 10px", border: "1px solid " + (s.ref ? (s.ok ? "rgba(22,163,74,0.2)" : "rgba(251,191,36,0.3)") : "rgba(148,163,184,0.15)") }}>
             <div style={{ fontSize: 10, color: "#94a3b8" }}>{s.label}</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: s.ref ? (s.ok ? "#15803d" : "#92400e") : "#0f172a" }}>{s.value} {s.ref && <span style={{ fontSize: 10, fontWeight: 400 }}>{s.ok ? "âœ“" : "â‰  " + s.refVal}</span>}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: s.ref ? (s.ok ? "#15803d" : "#92400e") : "#0f172a" }}>{s.value} {s.ref && <span style={{ fontSize: 10, fontWeight: 400 }}>{s.ok ? "✓" : "≠ " + s.refVal}</span>}</div>
           </div>);
         })}
       </div>
-      {(!surfOk && surfaceGlobale > 0) && <div style={{ marginTop: 6, background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#92400e" }}>âš  Surfaces : {fmt(totalSurface, 0)} mÂ² â‰  {fmt(surfaceGlobale, 0)} mÂ² (global)</div>}
-      {(!loyerOk && loyerGlobal > 0) && <div style={{ marginTop: 4, background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#92400e" }}>âš  Loyers : {fmtEur(totalLoyer)} â‰  {fmtEur(loyerGlobal)} (global)</div>}
+      {(!surfOk && surfaceGlobale > 0) && <div style={{ marginTop: 6, background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#92400e" }}>⚠ Surfaces : {fmt(totalSurface, 0)} m² ≠ {fmt(surfaceGlobale, 0)} m² (global)</div>}
+      {(!loyerOk && loyerGlobal > 0) && <div style={{ marginTop: 4, background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#92400e" }}>⚠ Loyers : {fmtEur(totalLoyer)} ≠ {fmtEur(loyerGlobal)} (global)</div>}
     </div>
   );
 }
 const DEFAULT_INPUTS = {
+  commune: "",
   prixVente: "175000", fraisNotaire: "13300", travaux: "0", amenagements: "0",
   fraisAgencePct: "5", apport: "14000", tauxCredit: "4.2", dureeAnnees: "25",
   surfaceGlobale: "0", loyerMensuelHC: "1000", tauxOccupation: "11.5",
@@ -359,14 +362,110 @@ const DEFAULT_INPUTS = {
   gestionLocativePct: "0", provisionTravauxAn: "0", fraisBancairesAn: "300",
   expertComptableAn: "600", coefAmortissement: "4.75", tauxIS: "15", tmi: "11",
   noteDPE: "",
+  gliPct: "0",
 };
 
-function SimulationProjet() {
-  const [inputs, setInputs] = useState(DEFAULT_INPUTS);
+function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharger, onProjetCharge }) {
+  const [inputs, setInputs] = useState(function() {
+    // Pas de persistence directe des inputs - on repart de DEFAULT_INPUTS
+    // La persistence se fait via les projets sauvegardés
+    return Object.assign({}, DEFAULT_INPUTS);
+  });
   const [lots, setLots] = useState([Object.assign({}, LOT_DEFAULT)]);
   const [regimeActif, setRegimeActif] = useState("SAS / SCI IS");
   const [nomProjet, setNomProjet] = useState("");
-  const [projets, setProjets] = useState(function() { try { return JSON.parse(localStorage.getItem(PROJETS_KEY)) || []; } catch(e) { return []; } });
+  // projets et photos reçus en props depuis App (persistent lors des changements d'onglet)
+  // Sync photos dans localStorage à chaque modif
+  useEffect(function() {
+    try { localStorage.setItem("radar-immo-photos-v1", JSON.stringify(photos)); }
+    catch(e) {}
+  }, [photos]);
+
+  // Commune + donnees marche
+  const [communeSearch, setCommuneSearch] = useState(inputs.commune || "");
+  const [communeSuggestions, setCommuneSuggestions] = useState([]);
+  const [donneesCommune, setDonneesCommune] = useState(null);
+  const [loadingCommune, setLoadingCommune] = useState(false);
+
+  // Autocompletion dans le cache sessionStorage des communes
+  useEffect(function() {
+    if (!communeSearch || communeSearch.length < 2) { setCommuneSuggestions([]); return; }
+    try {
+      var cached = JSON.parse(sessionStorage.getItem(CACHE_KEY)) || [];
+      var matches = cached.filter(function(c) {
+        return c.nom.toLowerCase().includes(communeSearch.toLowerCase());
+      }).slice(0, 6);
+      setCommuneSuggestions(matches);
+    } catch(e) { setCommuneSuggestions([]); }
+  }, [communeSearch]);
+
+  // Charger les données de la commune sélectionnée
+  var fetchDonneesCommune = useCallback(function(nom) {
+    if (!nom) return;
+    // Chercher dans le cache sessionStorage (instantane, pas d appel API)
+    try {
+      var cached = JSON.parse(sessionStorage.getItem(CACHE_KEY)) || [];
+      var found = cached.find(function(c) { return c.nom === nom; });
+      if (found && (found.prix || found.loyer)) {
+        setDonneesCommune(found);
+        return;
+      }
+    } catch(e) {}
+    // Cache absent : appel API
+    setLoadingCommune(true);
+    setDonneesCommune(null);
+    fetch(API_BASE + "/analyse/" + encodeURIComponent(nom))
+      .then(function(r) { if (!r.ok) throw new Error("Erreur"); return r.json(); })
+      .then(function(d) { setDonneesCommune(d); })
+      .catch(function() { setDonneesCommune(null); })
+      .finally(function() { setLoadingCommune(false); });
+  }, []);
+
+  useEffect(function() {
+    if (inputs.commune) {
+      setCommuneSearch(inputs.commune);
+      fetchDonneesCommune(inputs.commune);
+    }
+  }, [inputs.commune]);
+
+  // Charger un projet depuis l'onglet Favoris
+  useEffect(function() {
+    if (!projetACharger) return;
+    // Merger avec DEFAULT_INPUTS pour ne jamais perdre les nouveaux champs
+    var mergedInputs = Object.assign({}, DEFAULT_INPUTS, projetACharger.inputs);
+    setInputs(mergedInputs);
+    setRegimeActif(projetACharger.regimeActif || "SAS SCI IS");
+    if (projetACharger.lots) setLots(projetACharger.lots);
+    setNomProjet(projetACharger.nom);
+    var restoredPhotos = projetACharger.photos || [];
+    setPhotos(restoredPhotos);
+    // Sync commune si présente
+    if (mergedInputs.commune) {
+      setCommuneSearch(mergedInputs.commune);
+      fetchDonneesCommune(mergedInputs.commune);
+    }
+    try { localStorage.setItem("radar-immo-photos-v1", JSON.stringify(restoredPhotos)); } catch(e) {}
+    if (onProjetCharge) onProjetCharge();
+  }, [projetACharger]);
+
+  const handlePhotos = function(e) {
+    var files = Array.from(e.target.files);
+    files.forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        setPhotos(function(prev) {
+          var updated = prev.concat({ id: Date.now() + Math.random(), url: ev.target.result, name: file.name });
+          return updated;
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
+  };
+
+  const removePhoto = function(id) {
+    setPhotos(function(prev) { return prev.filter(function(p) { return p.id !== id; }); });
+  };
   const [activeTab, setActiveTab] = useState("params");
 
   const handleChange = function(e) { const name = e.target.name; const value = e.target.value; setInputs(function(prev) { return Object.assign({}, prev, { [name]: value }); }); };
@@ -380,19 +479,58 @@ function SimulationProjet() {
       lots: lots,
       regimeActif: regimeActif,
       savedAt: new Date().toLocaleDateString("fr-FR"),
+      coverPhoto: photos.length > 0 ? photos[0].url : (existing ? existing.coverPhoto : null),
+      photos: photos,
     };
     const liste = [entry].concat(projets.filter(function(p) { return p.nom !== nomProjet.trim(); }));
     setProjets(liste);
     localStorage.setItem(PROJETSKEY, JSON.stringify(liste));
-    // Ne PAS vider nomProjet ici pour permettre de rÃ©-enregistrer
+    // Ne PAS vider nomProjet ici pour permettre de ré-enregistrer
   };
   const charger = function(p) {
     setInputs(p.inputs);
     setRegimeActif(p.regimeActif);
     if (p.lots) setLots(p.lots);
     setNomProjet(p.nom);
+    var restoredPhotos = p.photos || [];
+    setPhotos(restoredPhotos);
+    try { localStorage.setItem("radar-immo-photos-v1", JSON.stringify(restoredPhotos)); } catch(e) {}
   };
   const supprimer = function(id) { const liste = projets.filter(function(p) { return p.id !== id; }); setProjets(liste); localStorage.setItem(PROJETSKEY, JSON.stringify(liste)); };
+
+  const exportJSON = function() {
+    var data = { nom: nomProjet, inputs: inputs, lots: lots, regimeActif: regimeActif };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "simulation-" + (nomProjet || "projet") + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importJSON = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var data = JSON.parse(ev.target.result);
+        if (data.inputs) setInputs(data.inputs);
+        if (data.lots) setLots(data.lots);
+        if (data.regimeActif) setRegimeActif(data.regimeActif);
+        if (data.nom) setNomProjet(data.nom);
+      } catch(err) { alert("Fichier JSON invalide"); }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+     // Export PDF bancaire
+  const exportPDF = function() {
+    if (!window.jspdf) return alert("jsPDF manquant");
+    const { jsPDF }
+
 
   const result = useMemo(function() { return calculerSimulation(inputs); }, [inputs]);
   const regime = result.regimes[regimeActif];
@@ -406,7 +544,7 @@ function SimulationProjet() {
   const dash = (Math.min(100, Math.max(0, note)) / 100) * circumference;
   const tresoPMois = regime.tresorerie / 12;
 
-  const tabs = [{ id: "params", label: "ParamÃ¨tres" }, { id: "bilan", label: "Bilan" }, { id: "projection", label: "Projection" }, { id: "comparatif", label: "Comparatif" }];
+  const tabs = [{ id: "params", label: "Paramètres" }, { id: "bilan", label: "Bilan" }, { id: "projection", label: "Projection" }, { id: "comparatif", label: "Comparatif" }];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -426,8 +564,8 @@ function SimulationProjet() {
             <div>
               <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>Simulation projet</div>
               <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                {pf(inputs.prixVente) > 0 && <span>{fmt(pf(inputs.prixVente))} â‚¬ Â· </span>}
-                {pf(inputs.surfaceGlobale) > 0 && <span>{fmt(pf(inputs.surfaceGlobale), 0)} mÂ² Â· </span>}
+                {pf(inputs.prixVente) > 0 && <span>{fmt(pf(inputs.prixVente))} € · </span>}
+                {pf(inputs.surfaceGlobale) > 0 && <span>{fmt(pf(inputs.surfaceGlobale), 0)} m² · </span>}
                                 <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 2 }}>
                   <Tag color="purple">{regimeActif}</Tag>
                   {inputs.noteDPE && (
@@ -447,7 +585,7 @@ function SimulationProjet() {
               { label: "Loyers/mois", value: fmtEur(pf(inputs.loyerMensuelHC)), color: "#0ea5e9" },
               { label: "Rdt brut", value: fmtPct(result.rendBrut), color: "#6366f1" },
               { label: "Rdt net", value: fmtPct(regime.rendNet), color: "#16a34a" },
-              { label: "Cashflow/mois", value: (tresoPMois >= 0 ? "+" : "") + fmt(tresoPMois, 0) + " â‚¬", color: tresoPMois >= 0 ? "#16a34a" : "#dc2626" },
+              { label: "Cashflow/mois", value: (tresoPMois >= 0 ? "+" : "") + fmt(tresoPMois, 0) + " €", color: tresoPMois >= 0 ? "#16a34a" : "#dc2626" },
             ].map(function(s) {
               return (<div key={s.label} style={{ textAlign: "center", minWidth: 80 }}>
                 <div style={{ fontSize: 11, color: "#94a3b8" }}>{s.label}</div>
@@ -456,21 +594,55 @@ function SimulationProjet() {
             })}
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <input value={nomProjet} onChange={function(e) { setNomProjet(e.target.value); }} placeholder="Nom du projetâ€¦"
+            <input value={nomProjet} onChange={function(e) { setNomProjet(e.target.value); }} placeholder="Nom du projet…"
               style={{ background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "6px 12px", fontSize: 12, color: "#0f172a", width: 160, outline: "none" }} />
-            <button onClick={sauvegarder} style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500, opacity: nomProjet.trim() ? 1 : 0.5 }}>ðŸ’¾ Sauver</button>
+            <button onClick={sauvegarder} style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500, opacity: nomProjet.trim() ? 1 : 0.5 }}>💾 Sauver</button>
+            <button onClick={exportJSON} style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 10, padding: "7px 12px", color: "#4338ca", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>⬇️ JSON</button>
+            <label style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 10, padding: "7px 12px", color: "#4338ca", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>
+              ⬆️ Import<input type="file" accept=".json" onChange={importJSON} style={{ display: "none" }} />
+            </label>
+            <button onClick={exportPDF} style={{ background: "linear-gradient(135deg,#dc2626,#f97316)", border: "none", borderRadius: 10, padding: "7px 12px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>📄 Export PDF</button>
           </div>
         </div>
         {projets.length > 0 && (
           <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
             {projets.map(function(p) {
               return (<div key={p.id} style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 8, padding: "3px 10px" }}>
-                <button onClick={function() { charger(p); }} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: "#4338ca", cursor: "pointer" }}>ðŸ“‚ {p.nom}</button>
+                {p.coverPhoto && <img src={p.coverPhoto} alt="" style={{ width: 36, height: 28, objectFit: "cover", borderRadius: 5, flexShrink: 0 }} />}
+                <button onClick={function() { charger(p); }} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: "#4338ca", cursor: "pointer" }}>📂 {p.nom}</button>
                 <span style={{ fontSize: 10, color: "#94a3b8" }}>{p.savedAt}</span>
-                <button onClick={function() { supprimer(p.id); }} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 11 }}>âœ•</button>
+                <button onClick={function() { supprimer(p.id); }} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 11 }}>✕</button>
               </div>);
             })}
           </div>
+        )}
+      </div>
+
+      {/* ── Bloc Photos ── */}
+      <div style={Object.assign({}, SECTION, { padding: "14px 20px" })}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: photos.length > 0 ? 12 : 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>📷 Photos du projet <span style={{ fontSize: 10, color: "#94a3b8", fontWeight: 400 }}>({photos.length} photo{photos.length > 1 ? "s" : ""})</span></div>
+          <label style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 10, padding: "6px 14px", color: "#4338ca", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>
+            + Ajouter
+            <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{ display: "none" }} />
+          </label>
+        </div>
+        {photos.length > 0 && (
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {photos.map(function(ph, idx) {
+              return (
+                <div key={ph.id} style={{ position: "relative", borderRadius: 10, overflow: "hidden", border: idx === 0 ? "2px solid #6366f1" : "1px solid rgba(148,163,184,0.3)" }}>
+                  {idx === 0 && <div style={{ position: "absolute", top: 4, left: 4, background: "rgba(99,102,241,0.9)", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 6 }}>Couverture</div>}
+                  <img src={ph.url} alt={ph.name} style={{ width: 110, height: 80, objectFit: "cover", display: "block" }} />
+                  <button onClick={function() { removePhoto(ph.id); }}
+                    style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.55)", border: "none", borderRadius: "50%", width: 20, height: 20, color: "#fff", cursor: "pointer", fontSize: 12, lineHeight: "20px", padding: 0 }}>✕</button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {photos.length === 0 && (
+          <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>Ajoute des photos pour les retrouver facilement dans tes projets sauvegardés</div>
         )}
       </div>
 
@@ -482,19 +654,85 @@ function SimulationProjet() {
         })}
       </div>
 
-      {/* Tab: ParamÃ¨tres */}
+      {/* Tab: Paramètres */}
       {activeTab === "params" && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+          {/* Bloc Commune */}
+          <div style={Object.assign({}, SECTION, { padding: "14px 20px", isolation: "isolate", zIndex: 10, position: "relative" })}>
+            <SectionHeader icon="📍" title="Commune du bien" />
+            <div style={{ position: "relative", zIndex: 1000 }}>
+              <input value={communeSearch}
+                onChange={function(e) { setCommuneSearch(e.target.value); if (!e.target.value) { setInputs(function(p) { return Object.assign({}, p, { commune: "" }); }); setDonneesCommune(null); setCommuneSuggestions([]); } }}
+                placeholder="Rechercher une commune (Seine-Maritime)..."
+                style={{ width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "8px 14px", fontSize: 13, color: "#0f172a", outline: "none", boxSizing: "border-box" }} />
+              {communeSuggestions.length > 0 && (
+                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 1000, background: "#fff", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.18)", marginTop: 4, overflow: "hidden" }}>
+                  {communeSuggestions.map(function(c) {
+                    return <div key={c.nom}
+                      onClick={function() { setCommuneSearch(c.nom); setCommuneSuggestions([]); setInputs(function(p) { return Object.assign({}, p, { commune: c.nom }); }); fetchDonneesCommune(c.nom); }}
+                      onMouseEnter={function(e) { e.currentTarget.style.background = "rgba(99,102,241,0.06)"; }}
+                      onMouseLeave={function(e) { e.currentTarget.style.background = ""; }}
+                      style={{ padding: "9px 14px", cursor: "pointer", fontSize: 13, color: "#0f172a", borderBottom: "1px solid rgba(148,163,184,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span>{c.nom}</span>
+                      {c.scores && <span style={{ fontSize: 11, color: "#94a3b8" }}>Score {c.scores.global != null ? c.scores.global.toFixed(1) : "—"}/10</span>}
+                    </div>;
+                  })}
+                </div>
+              )}
+            </div>
+            {loadingCommune && <div style={{ marginTop: 8, fontSize: 12, color: "#94a3b8" }}>⏳ Chargement des données marché...</div>}
+            {donneesCommune && donneesCommune.prix && (function() {
+              var pri = donneesCommune.prix;
+              var loy = donneesCommune.loyer;
+              var surf = pf(inputs.surfaceGlobale);
+              var prixM2Projet = surf > 0 ? pf(inputs.prixVente) / surf : null;
+              var prixM2Appart = pri.appartement_m2 ? Number(pri.appartement_m2) : null;
+              var prixM2Maison = pri.maison_m2 ? Number(pri.maison_m2) : null;
+              var loyerM2 = loy && loy.appartement_m2 != null ? Number(loy.appartement_m2) : null;
+              var diffA = prixM2Projet && prixM2Appart ? (prixM2Projet - prixM2Appart) / prixM2Appart * 100 : null;
+              var diffM = prixM2Projet && prixM2Maison ? (prixM2Projet - prixM2Maison) / prixM2Maison * 100 : null;
+              var gc = function(d) { return d == null ? "#6366f1" : d > 10 ? "#dc2626" : d > 0 ? "#d97706" : "#16a34a"; };
+              var gb = function(d) { return d == null ? "rgba(241,245,249,0.8)" : d > 10 ? "rgba(254,226,226,0.5)" : d > 0 ? "rgba(254,243,199,0.5)" : "rgba(220,252,231,0.5)"; };
+              var diffLabel = function(d) { return d != null ? (d > 0 ? "⬆️ +" : "⬇️ ") + Math.abs(d).toFixed(1) + "% vs votre projet" : surf > 0 ? "—" : "Renseigne la surface"; };
+              return (
+                <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+                  {prixM2Appart && <div style={{ background: gb(diffA), borderRadius: 12, padding: "10px 14px", border: "1px solid rgba(148,163,184,0.15)" }}>
+                    <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>Prix marché appart.</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: gc(diffA), margin: "3px 0 2px" }}>{fmt(prixM2Appart, 0)} €/m²</div>
+                    <div style={{ fontSize: 11, color: "#64748b" }}>{diffLabel(diffA)}</div>
+                  </div>}
+                  {prixM2Maison && <div style={{ background: gb(diffM), borderRadius: 12, padding: "10px 14px", border: "1px solid rgba(148,163,184,0.15)" }}>
+                    <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>Prix marché maison</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: gc(diffM), margin: "3px 0 2px" }}>{fmt(prixM2Maison, 0)} €/m²</div>
+                    <div style={{ fontSize: 11, color: "#64748b" }}>{diffLabel(diffM)}</div>
+                  </div>}
+                  {loyerM2 && <div style={{ background: "rgba(224,242,254,0.5)", borderRadius: 12, padding: "10px 14px", border: "1px solid rgba(148,163,184,0.15)" }}>
+                    <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>Loyer marché /m²</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#0ea5e9", margin: "3px 0 2px" }}>{loyerM2.toFixed(1)} €/m²/mois</div>
+                    <div style={{ fontSize: 11, color: "#64748b" }}>{surf > 0 ? "→ Loyer estimé : " + fmt(loyerM2 * surf, 0) + " €/mois" : "Renseigne la surface"}</div>
+                  </div>}
+                  {prixM2Projet && <div style={{ background: "rgba(238,242,255,0.7)", borderRadius: 12, padding: "10px 14px", border: "1px solid rgba(148,163,184,0.15)" }}>
+                    <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>Votre prix /m²</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#6366f1", margin: "3px 0 2px" }}>{fmt(prixM2Projet, 0)} €/m²</div>
+                    <div style={{ fontSize: 11, color: "#64748b" }}>{fmt(pf(inputs.prixVente), 0)} € ÷ {fmt(surf, 0)} m²</div>
+                  </div>}
+                </div>
+              );
+            })()}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
           <div style={SECTION}>
-            <SectionHeader icon="ðŸ " title="Achat & Financement" />
+            <SectionHeader icon="🏠" title="Achat & Financement" />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               <InputField label="Prix de vente" name="prixVente" value={inputs.prixVente} onChange={handleChange} />
               <InputField label="Frais de notaire" name="fraisNotaire" value={inputs.fraisNotaire} onChange={handleChange} />
               <InputField label="Travaux (global)" name="travaux" value={inputs.travaux} onChange={handleChange} />
-              <InputField label="AmÃ©nagements" name="amenagements" value={inputs.amenagements} onChange={handleChange} />
+              <InputField label="Aménagements" name="amenagements" value={inputs.amenagements} onChange={handleChange} />
               <InputField label="Frais d'agence" name="fraisAgencePct" value={inputs.fraisAgencePct} onChange={handleChange} unit="%" step="0.5" />
               <InputField label="Apport personnel" name="apport" value={inputs.apport} onChange={handleChange} />
-              <InputField label="Surface globale" name="surfaceGlobale" value={inputs.surfaceGlobale} onChange={handleChange} unit="mÂ²" step="1" />
+              <InputField label="Surface globale" name="surfaceGlobale" value={inputs.surfaceGlobale} onChange={handleChange} unit="m²" step="1" />
                             <div style={{ gridColumn: "1 / -1" }}>
                 <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4, fontWeight: 500 }}>Note DPE</div>
                 <div style={{ display: "flex", gap: 6 }}>
@@ -516,21 +754,21 @@ function SimulationProjet() {
               </div>
             </div>
             <div style={{ marginTop: 8, background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 12px" }}>
-              <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 6, fontWeight: 600, textTransform: "uppercase" }}>CrÃ©dit</div>
+              <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 6, fontWeight: 600, textTransform: "uppercase" }}>Crédit</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                <InputField label="Taux crÃ©dit" name="tauxCredit" value={inputs.tauxCredit} onChange={handleChange} unit="%" step="0.05" />
-                <InputField label="DurÃ©e" name="dureeAnnees" value={inputs.dureeAnnees} onChange={handleChange} unit="ans" step="1" />
+                <InputField label="Taux crédit" name="tauxCredit" value={inputs.tauxCredit} onChange={handleChange} unit="%" step="0.05" />
+                <InputField label="Durée" name="dureeAnnees" value={inputs.dureeAnnees} onChange={handleChange} unit="ans" step="1" />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 6, background: "rgba(99,102,241,0.06)", borderRadius: 10, padding: "8px 10px" }}>
                 <div><div style={{ fontSize: 10, color: "#94a3b8" }}>Emprunt</div><div style={{ fontSize: 14, fontWeight: 700, color: "#4338ca" }}>{fmtEur(result.sommeEmpruntee)}</div></div>
-                <div><div style={{ fontSize: 10, color: "#94a3b8" }}>MensualitÃ©</div><div style={{ fontSize: 14, fontWeight: 700, color: "#4338ca" }}>{fmtEur(result.mensualite)}</div></div>
-                <div><div style={{ fontSize: 10, color: "#94a3b8" }}>CoÃ»t total</div><div style={{ fontSize: 14, fontWeight: 700, color: "#4338ca" }}>{fmtEur(result.coutPretTotal)}</div></div>
+                <div><div style={{ fontSize: 10, color: "#94a3b8" }}>Mensualité</div><div style={{ fontSize: 14, fontWeight: 700, color: "#4338ca" }}>{fmtEur(result.mensualite)}</div></div>
+                <div><div style={{ fontSize: 10, color: "#94a3b8" }}>Coût total</div><div style={{ fontSize: 14, fontWeight: 700, color: "#4338ca" }}>{fmtEur(result.coutPretTotal)}</div></div>
               </div>
             </div>
           </div>
 
           <div style={SECTION}>
-            <SectionHeader icon="ðŸ“Š" title="Exploitation & FiscalitÃ©" />
+            <SectionHeader icon="📊" title="Exploitation & Fiscalité" />
             <SectionTitle>Revenus</SectionTitle>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               <InputField label="Loyer mensuel HC total" name="loyerMensuelHC" value={inputs.loyerMensuelHC} onChange={handleChange} step="50" />
@@ -539,14 +777,15 @@ function SimulationProjet() {
             <SectionTitle>Charges annuelles</SectionTitle>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               <InputField label="Charges immeuble" name="chargesImmeubleAn" value={inputs.chargesImmeubleAn} onChange={handleChange} step="100" />
-              <InputField label="Taxe fonciÃ¨re" name="taxeFonciereAn" value={inputs.taxeFonciereAn} onChange={handleChange} step="100" />
+              <InputField label="Taxe foncière" name="taxeFonciereAn" value={inputs.taxeFonciereAn} onChange={handleChange} step="100" />
               <InputField label="Assurance PNO" name="assurancePNOAn" value={inputs.assurancePNOAn} onChange={handleChange} step="50" />
               <InputField label="Gestion locative" name="gestionLocativePct" value={inputs.gestionLocativePct} onChange={handleChange} unit="%" step="0.5" />
+              <InputField label="GLI (loyers impayés)" name="gliPct" value={inputs.gliPct} onChange={handleChange} unit="%" step="0.1" />
               <InputField label="Provision travaux" name="provisionTravauxAn" value={inputs.provisionTravauxAn} onChange={handleChange} step="100" />
               <InputField label="Frais bancaires" name="fraisBancairesAn" value={inputs.fraisBancairesAn} onChange={handleChange} step="50" />
               <InputField label="Expert-comptable/CFE" name="expertComptableAn" value={inputs.expertComptableAn} onChange={handleChange} step="50" />
             </div>
-            <SectionTitle>FiscalitÃ©</SectionTitle>
+            <SectionTitle>Fiscalité</SectionTitle>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
               <InputField label="Coef. amort." name="coefAmortissement" value={inputs.coefAmortissement} onChange={handleChange} unit="%" step="0.25" />
               <InputField label="Taux IS" name="tauxIS" value={inputs.tauxIS} onChange={handleChange} unit="%" step="1" />
@@ -555,16 +794,17 @@ function SimulationProjet() {
           </div>
 
           <div style={SECTION}>
-            <SectionHeader icon="ðŸ˜ï¸" title="Lots / Biens" badge={lots.length + " lot" + (lots.length > 1 ? "s" : "")} />
+            <SectionHeader icon="🏘️" title="Lots / Biens" badge={lots.length + " lot" + (lots.length > 1 ? "s" : "")} />
             <GestionLots lots={lots} onChange={setLots} surfaceGlobale={pf(inputs.surfaceGlobale)} loyerGlobal={pf(inputs.loyerMensuelHC)} />
           </div>
         </div>
+          </div>
       )}
 
       {/* Tab: Bilan */}
       {activeTab === "bilan" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* SÃ©lecteur rÃ©gime */}
+          {/* Sélecteur régime */}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {Object.keys(result.regimes).map(function(r) {
               return (<button key={r} onClick={function() { setRegimeActif(r); }}
@@ -575,65 +815,65 @@ function SimulationProjet() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
             {/* Ce que vous payez */}
             <div style={SECTION}>
-              <SectionHeader icon="ðŸ’¸" title="Ce que vous payez" />
+              <SectionHeader icon="💸" title="Ce que vous payez" />
               <StatRow label="Prix d'achat" value={fmtEur(pf(inputs.prixVente))} />
               <StatRow label="Frais de notaire" value={fmtEur(pf(inputs.fraisNotaire))} />
               <StatRow label="Travaux" value={fmtEur(pf(inputs.travaux) + pf(inputs.amenagements))} />
               <StatRow label="Frais d'agence" value={fmtEur(pf(inputs.prixVente) * pf(inputs.fraisAgencePct) / 100)} />
-              <StatRow label="CoÃ»t total" value={fmtEur(result.depenseNette)} bold color="#0f172a" border={false} />
+              <StatRow label="Coût total" value={fmtEur(result.depenseNette)} bold color="#0f172a" border={false} />
               <div style={{ marginTop: 10, background: "rgba(99,102,241,0.06)", borderRadius: 12, padding: "10px 12px", border: "1px solid rgba(99,102,241,0.15)" }}>
-                <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>CrÃ©dit Â· {fmt(pf(inputs.dureeAnnees), 0)} ans Â· {pf(inputs.tauxCredit)}%</div>
+                <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Crédit · {fmt(pf(inputs.dureeAnnees), 0)} ans · {pf(inputs.tauxCredit)}%</div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-                  <span style={{ color: "#64748b" }}>Montant empruntÃ©</span><span style={{ fontWeight: 600, color: "#4338ca" }}>{fmtEur(result.sommeEmpruntee)}</span>
+                  <span style={{ color: "#64748b" }}>Montant emprunté</span><span style={{ fontWeight: 600, color: "#4338ca" }}>{fmtEur(result.sommeEmpruntee)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginTop: 4 }}>
-                  <span style={{ color: "#64748b" }}>MensualitÃ©</span><span style={{ fontWeight: 700, color: "#4338ca", fontSize: 15 }}>{fmtEur(result.mensualite)}</span>
+                  <span style={{ color: "#64748b" }}>Mensualité</span><span style={{ fontWeight: 700, color: "#4338ca", fontSize: 15 }}>{fmtEur(result.mensualite)}</span>
                 </div>
               </div>
             </div>
 
             {/* Ce que vous gagnez */}
             <div style={SECTION}>
-              <SectionHeader icon="ðŸ“ˆ" title="Ce que vous gagnez" />
+              <SectionHeader icon="📈" title="Ce que vous gagnez" />
               <StatRow label="Loyer mensuel" value={"+" + fmtEur(pf(inputs.loyerMensuelHC))} color="#16a34a" />
               <StatRow label="Loyer annuel" value={"+" + fmtEur(result.loyersAnnuels)} color="#16a34a" />
               <div style={{ margin: "8px 0", background: "rgba(220,252,231,0.5)", borderRadius: 10, padding: "8px 10px" }}>
-                <div style={{ fontSize: 11, color: "#64748b" }}>RentabilitÃ© brute</div>
+                <div style={{ fontSize: 11, color: "#64748b" }}>Rentabilité brute</div>
                 <div style={{ fontSize: 20, fontWeight: 700, color: "#15803d" }}>{fmtPct(result.rendBrut)}</div>
-                <div style={{ fontSize: 11, color: "#94a3b8" }}>Loyers annuels / CoÃ»t total</div>
+                <div style={{ fontSize: 11, color: "#94a3b8" }}>Loyers annuels / Coût total</div>
               </div>
-              <StatRow label="Charges annuelles" value={"â€“" + fmtEur(result.totalFraisAnnuels)} color="#d97706" />
+              <StatRow label="Charges annuelles" value={"–" + fmtEur(result.totalFraisAnnuels)} color="#d97706" />
               <StatRow label="EBE" value={fmtEur(regime.ebe)} color="#0ea5e9" />
-              <StatRow label="FiscalitÃ© annuelle" value={"â€“" + fmtEur(regime.impot)} color="#dc2626" />
+              <StatRow label="Fiscalité annuelle" value={"–" + fmtEur(regime.impot)} color="#dc2626" />
               <div style={{ margin: "8px 0", background: "rgba(220,252,231,0.5)", borderRadius: 10, padding: "8px 10px" }}>
-                <div style={{ fontSize: 11, color: "#64748b" }}>RentabilitÃ© nette Â· {regimeActif}</div>
+                <div style={{ fontSize: 11, color: "#64748b" }}>Rentabilité nette · {regimeActif}</div>
                 <div style={{ fontSize: 20, fontWeight: 700, color: "#15803d" }}>{fmtPct(regime.rendNet)}</div>
-                <div style={{ fontSize: 11, color: "#94a3b8" }}>(Loyers â€“ Charges) / CoÃ»t total</div>
+                <div style={{ fontSize: 11, color: "#94a3b8" }}>(Loyers – Charges) / Coût total</div>
               </div>
             </div>
 
             {/* Effort mensuel */}
             <div style={SECTION}>
-              <SectionHeader icon="ðŸ“…" title="Effort mensuel" />
-              <StatRow label="Loyer perÃ§u" value={"+" + fmt(pf(inputs.loyerMensuelHC), 0) + " â‚¬"} color="#16a34a" />
-              <StatRow label="MensualitÃ© crÃ©dit" value={"â€“" + fmt(result.mensualite, 0) + " â‚¬"} color="#dc2626" />
-              <StatRow label="Charges moy./mois" value={"â€“" + fmt(result.totalFraisAnnuels / 12, 0) + " â‚¬"} color="#d97706" />
-              <StatRow label="ImpÃ´ts moy./mois" value={"â€“" + fmt(regime.impot / 12, 0) + " â‚¬"} color="#f97316" />
+              <SectionHeader icon="📅" title="Effort mensuel" />
+              <StatRow label="Loyer perçu" value={"+" + fmt(pf(inputs.loyerMensuelHC), 0) + " €"} color="#16a34a" />
+              <StatRow label="Mensualité crédit" value={"–" + fmt(result.mensualite, 0) + " €"} color="#dc2626" />
+              <StatRow label="Charges moy./mois" value={"–" + fmt(result.totalFraisAnnuels / 12, 0) + " €"} color="#d97706" />
+              <StatRow label="Impôts moy./mois" value={"–" + fmt(regime.impot / 12, 0) + " €"} color="#f97316" />
               <div style={{ marginTop: 10, background: tresoPMois >= 0 ? "rgba(220,252,231,0.7)" : "rgba(254,226,226,0.7)", borderRadius: 12, padding: "10px 12px", border: "1px solid " + (tresoPMois >= 0 ? "rgba(22,163,74,0.3)" : "rgba(220,38,38,0.3)") }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#334155" }}>Cashflow net aprÃ¨s impÃ´t</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#334155" }}>Cashflow net après impôt</div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: tresoPMois >= 0 ? "#15803d" : "#dc2626", marginTop: 2 }}>
-                  {tresoPMois >= 0 ? "+" : ""}{fmt(tresoPMois, 0)} â‚¬/mois
+                  {tresoPMois >= 0 ? "+" : ""}{fmt(tresoPMois, 0)} €/mois
                 </div>
               </div>
 
               <div style={{ marginTop: 10 }}>
-                <SectionTitle>Indicateurs clÃ©s</SectionTitle>
+                <SectionTitle>Indicateurs clés</SectionTitle>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   {[
-                    { label: "RÃ¨gle des 70%", value: regime.regle70 != null ? fmt(regime.regle70, 2) : "â€”", color: couleur70, sub: regime.regle70 != null ? (regime.regle70 < 0.7 ? "âœ“ OK" : "âœ— Ã‰levÃ©") : "" },
-                    { label: "TRI (Payback)", value: regime.tri != null ? fmt(regime.tri, 1) + " ans" : "â€”", color: regime.tri != null && regime.tri <= 15 ? "#16a34a" : "#d97706", sub: "DÃ©p. nette / EBE" },
+                    { label: "Règle des 70%", value: regime.regle70 != null ? fmt(regime.regle70, 2) : "—", color: couleur70, sub: regime.regle70 != null ? (regime.regle70 < 0.7 ? "✓ OK" : "✗ Élevé") : "" },
+                    { label: "TRI (Payback)", value: regime.tri != null ? fmt(regime.tri, 1) + " ans" : "—", color: regime.tri != null && regime.tri <= 15 ? "#16a34a" : "#d97706", sub: "Dép. nette / EBE" },
                     { label: "Amortissement/an", value: fmtEur(result.amortissement), color: "#6366f1", sub: pf(inputs.coefAmortissement) + "% de la valeur" },
-                    { label: "DÃ©pense nette", value: fmtEur(result.depenseNette), color: "#0f172a", sub: "Tout inclus" },
+                    { label: "Dépense nette", value: fmtEur(result.depenseNette), color: "#0f172a", sub: "Tout inclus" },
                   ].map(function(k) {
                     return (<div key={k.label} style={{ background: "rgba(248,250,252,0.9)", borderRadius: 12, padding: "8px 10px", border: "1px solid rgba(148,163,184,0.15)" }}>
                       <div style={{ fontSize: 10, color: "#94a3b8" }}>{k.label}</div>
@@ -658,8 +898,8 @@ function SimulationProjet() {
             })}
           </div>
           <div style={SECTION}>
-            <SectionHeader icon="ðŸ“‰" title={"Cash-Flow sur " + (pf(inputs.dureeAnnees) + 5) + " ans"} badge={regimeActif} />
-            <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 12 }}>Loyers indexÃ©s +1%/an Â· survole pour le dÃ©tail</div>
+            <SectionHeader icon="📉" title={"Cash-Flow sur " + (pf(inputs.dureeAnnees) + 5) + " ans"} badge={regimeActif} />
+            <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 12 }}>Loyers indexés +1%/an · survole pour le détail</div>
             <CashFlowChart data={cashFlowData} />
           </div>
         </div>
@@ -668,13 +908,13 @@ function SimulationProjet() {
       {/* Tab: Comparatif */}
       {activeTab === "comparatif" && (
         <div style={SECTION}>
-          <SectionHeader icon="âš–ï¸" title="Comparatif des rÃ©gimes fiscaux" />
+          <SectionHeader icon="⚖️" title="Comparatif des régimes fiscaux" />
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
-                  {["RÃ©gime", "TrÃ©so/an", "Cashflow/mois", "ImpÃ´t/an", "Rdt brut", "Rdt net", "TRI", "RÃ¨gle 70%", "Note"].map(function(h) {
-                    return <th key={h} style={{ textAlign: h === "RÃ©gime" ? "left" : "right", padding: "8px 10px", fontWeight: 600, color: "#64748b", fontSize: 12 }}>{h}</th>;
+                  {["Régime", "Tréso/an", "Cashflow/mois", "Impôt/an", "Rdt brut", "Rdt net", "TRI", "Règle 70%", "Note"].map(function(h) {
+                    return <th key={h} style={{ textAlign: h === "Régime" ? "left" : "right", padding: "8px 10px", fontWeight: 600, color: "#64748b", fontSize: 12 }}>{h}</th>;
                   })}
                 </tr>
               </thead>
@@ -687,12 +927,12 @@ function SimulationProjet() {
                     <tr key={nom} onClick={function() { setRegimeActif(nom); }} style={{ borderBottom: "1px solid rgba(148,163,184,0.12)", background: isActive ? "rgba(99,102,241,0.06)" : "transparent", cursor: "pointer" }}>
                       <td style={{ padding: "10px 10px", fontWeight: isActive ? 700 : 500, color: isActive ? "#4338ca" : "#1e293b" }}>{nom}</td>
                       <td style={{ padding: "10px 10px", textAlign: "right", color: r.tresorerie >= 0 ? "#16a34a" : "#dc2626", fontWeight: 600 }}>{fmtEur(r.tresorerie)}</td>
-                      <td style={{ padding: "10px 10px", textAlign: "right", color: r.tresorerie >= 0 ? "#16a34a" : "#dc2626", fontWeight: 700 }}>{(r.tresorerie / 12 >= 0 ? "+" : "") + fmt(r.tresorerie / 12, 0) + " â‚¬"}</td>
+                      <td style={{ padding: "10px 10px", textAlign: "right", color: r.tresorerie >= 0 ? "#16a34a" : "#dc2626", fontWeight: 700 }}>{(r.tresorerie / 12 >= 0 ? "+" : "") + fmt(r.tresorerie / 12, 0) + " €"}</td>
                       <td style={{ padding: "10px 10px", textAlign: "right", color: "#d97706" }}>{fmtEur(r.impot)}</td>
                       <td style={{ padding: "10px 10px", textAlign: "right", color: "#334155" }}>{fmtPct(r.rendBrut)}</td>
                       <td style={{ padding: "10px 10px", textAlign: "right", color: "#16a34a", fontWeight: 600 }}>{fmtPct(r.rendNet)}</td>
-                      <td style={{ padding: "10px 10px", textAlign: "right", color: r.tri != null && r.tri <= 15 ? "#16a34a" : "#d97706" }}>{r.tri != null ? fmt(r.tri, 1) + " ans" : "â€”"}</td>
-                      <td style={{ padding: "10px 10px", textAlign: "right", color: r.regle70 != null && r.regle70 < 0.7 ? "#16a34a" : "#dc2626", fontWeight: 600 }}>{r.regle70 != null ? fmt(r.regle70, 2) : "â€”"}</td>
+                      <td style={{ padding: "10px 10px", textAlign: "right", color: r.tri != null && r.tri <= 15 ? "#16a34a" : "#d97706" }}>{r.tri != null ? fmt(r.tri, 1) + " ans" : "—"}</td>
+                      <td style={{ padding: "10px 10px", textAlign: "right", color: r.regle70 != null && r.regle70 < 0.7 ? "#16a34a" : "#dc2626", fontWeight: 600 }}>{r.regle70 != null ? fmt(r.regle70, 2) : "—"}</td>
                       <td style={{ padding: "10px 10px", textAlign: "right" }}><span style={{ fontWeight: 800, color: getNoteColor(n), background: getNoteColor(n) + "18", borderRadius: 8, padding: "2px 8px" }}>{n}/100</span></td>
                     </tr>
                   );
@@ -704,6 +944,48 @@ function SimulationProjet() {
       )}
     </div>
   );
+}
+
+function lineChart(cx, cy, w, h, data) {
+  var maxY = Math.max(...data.map(function(d) { return d.cashflow; })) * 1.1;
+  var minY = Math.min(...data.map(function(d) { return d.cashflow; })) * 1.1;
+  var rangeY = maxY - minY;
+  var pad = 20;
+  var scaleX = (w - pad * 2) / (data.length - 1);
+  var scaleY = (h - pad * 2) / rangeY;
+
+  // Grille
+  doc.setDrawColor(240, 240, 240);
+  doc.setLineWidth(0.3);
+  for (var i = 0; i < data.length; i += 2) {
+    doc.line(cx + pad + i * scaleX, cy + pad, cx + pad + i * scaleX, cy + h - pad);
+  }
+  for (var y = 0; y <= 5; y++) {
+    doc.line(cx + pad, cy + pad + y * (h - pad * 2) / 5, cx + w - pad, cy + pad + y * (h - pad * 2) / 5);
+  }
+
+  // Ligne cashflow
+  doc.setLineWidth(2.5);
+  doc.setDrawColor(VERT[0], VERT[1], VERT[2]);
+  doc.line(cx + pad, cy + h - pad - (data[0].cashflow - minY) * scaleY,
+           cx + w - pad, cy + h - pad - (data[data.length-1].cashflow - minY) * scaleY);
+
+  // Points
+  data.forEach(function(d, i) {
+    var x = cx + pad + i * scaleX;
+    var y = cy + h - pad - (d.cashflow - minY) * scaleY;
+    doc.setFillColor(VERT[0], VERT[1], VERT[2]);
+    doc.circle(x, y, 2.5, "F");
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(1);
+    doc.circle(x, y, 3, "S");
+  });
+
+  // Axes
+  doc.setLineWidth(1.5);
+  doc.setDrawColor(GRIS[0], GRIS[1], GRIS[2]);
+  doc.line(cx + pad, cy + pad, cx + pad, cy + h - pad); // Y
+  doc.line(cx + pad, cy + h - pad, cx + w - pad, cy + h - pad); // X
 }
 function AnalyseCommunes() {
   const [communes, setCommunes] = useState([]);
@@ -751,27 +1033,27 @@ function AnalyseCommunes() {
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div style={{ maxWidth: 820, flex: 1, display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", borderRadius: 999, background: "rgba(255,255,255,0.75)", boxShadow: "0 4px 20px rgba(99,102,241,0.1)", backdropFilter: "blur(18px)", border: "1px solid rgba(148,163,184,0.25)" }}>
-          <span style={{ fontSize: 16 }}>ðŸ”</span>
-          <input value={search} onChange={function(e) { setSearch(e.target.value); }} placeholder="Rechercher une communeâ€¦ (TOP 10 affichÃ©)" style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 14, color: "#0f172a" }} />
+          <span style={{ fontSize: 16 }}>🔍</span>
+          <input value={search} onChange={function(e) { setSearch(e.target.value); }} placeholder="Rechercher une commune… (TOP 10 affiché)" style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 14, color: "#0f172a" }} />
           <select value={sortKey} onChange={function(e) { setSortKey(e.target.value); }} style={{ background: "rgba(241,245,249,0.9)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 8, padding: "5px 10px", fontSize: 12, color: "#334155", outline: "none" }}>
-            {[{ key: "global", label: "Score global" }, { key: "rendement", label: "Rendement" }, { key: "demographie", label: "DÃ©mographie" }, { key: "socio_eco", label: "Socio-Ã©co" }].map(function(k) { return <option key={k.key} value={k.key}>{k.label}</option>; })}
+            {[{ key: "global", label: "Score global" }, { key: "rendement", label: "Rendement" }, { key: "demographie", label: "Démographie" }, { key: "socio_eco", label: "Socio-éco" }].map(function(k) { return <option key={k.key} value={k.key}>{k.label}</option>; })}
           </select>
           <select value={filterMin} onChange={function(e) { setFilterMin(Number(e.target.value)); }} style={{ background: "rgba(241,245,249,0.9)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 8, padding: "5px 10px", fontSize: 12, color: "#334155", outline: "none" }}>
-            <option value={0}>Tous</option><option value={5}>â‰¥ 5</option><option value={6}>â‰¥ 6</option><option value={7}>â‰¥ 7</option>
+            <option value={0}>Tous</option><option value={5}>≥ 5</option><option value={6}>≥ 6</option><option value={7}>≥ 7</option>
           </select>
         </div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ fontSize: 11, color: "#94a3b8" }}>{filtered.length} communes Â· top 10 Â· clic = dÃ©tail Â· clic droit = comparer</span>
+        <span style={{ fontSize: 11, color: "#94a3b8" }}>{filtered.length} communes · top 10 · clic = détail · clic droit = comparer</span>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={function() { loadCommunes(true); }} style={{ background: "linear-gradient(135deg,#38bdf8,#6366f1)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>â†» Actualiser</button>
+          <button onClick={function() { loadCommunes(true); }} style={{ background: "linear-gradient(135deg,#38bdf8,#6366f1)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>↻ Actualiser</button>
           {compareList.length > 0 && <button onClick={function() { setShowCompare(true); }} style={{ background: "linear-gradient(135deg,#a855f7,#ec4899)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>Comparer ({compareList.length})</button>}
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 16 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          {loading && <div style={{ color: "#94a3b8", padding: 40, textAlign: "center" }}>Chargementâ€¦</div>}
+          {loading && <div style={{ color: "#94a3b8", padding: 40, textAlign: "center" }}>Chargement…</div>}
           {error && <div style={{ color: "#dc2626", padding: 20 }}>Erreur : {error}</div>}
           {!loading && !error && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10 }}>
@@ -784,16 +1066,37 @@ function AnalyseCommunes() {
                     style={{ background: "rgba(255,255,255,0.7)", borderRadius: 16, padding: "12px 14px", boxShadow: isSelected ? "0 6px 24px rgba(99,102,241,0.18)" : "0 2px 10px rgba(99,102,241,0.06)", border: isSelected ? "1.5px solid #6366f1" : isCompared ? "1.5px solid #a855f7" : "1px solid rgba(148,163,184,0.2)", cursor: "pointer", backdropFilter: "blur(12px)", transition: "box-shadow 0.2s" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                       <div style={{ fontWeight: 700, fontSize: 13, color: "#0f172a" }}>{c.nom}</div>
-                      <div style={{ fontSize: 20, fontWeight: 800, color: nc(g) }}>{g != null ? g.toFixed(1) : "â€”"}</div>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: nc(g) }}>{g != null ? g.toFixed(1) : "—"}</div>
                     </div>
-                    {c.population && <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 8 }}>{c.population.toLocaleString("fr-FR")} hab.</div>}
+                    {c.population && <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 6 }}>{c.population.toLocaleString("fr-FR")} hab.</div>}
+                    {/* Indicateurs rapides : prix m² + tension locative */}
+                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 8 }}>
+                      {c.prix && c.prix.appartement_m2 && (
+                        <span style={{ fontSize: 10, fontWeight: 600, background: "rgba(99,102,241,0.08)", color: "#4338ca", borderRadius: 6, padding: "2px 7px" }}>
+                          {Number(c.prix.appartement_m2).toLocaleString("fr-FR")} €/m²
+                        </span>
+                      )}
+                      {c.demographie && c.demographie.tension_locative_pct != null && (
+                        <span style={{ fontSize: 10, fontWeight: 600,
+                          background: c.demographie.tension_locative_pct > 15 ? "rgba(220,38,38,0.1)" : c.demographie.tension_locative_pct > 8 ? "rgba(217,119,6,0.1)" : "rgba(22,163,74,0.1)",
+                          color: c.demographie.tension_locative_pct > 15 ? "#dc2626" : c.demographie.tension_locative_pct > 8 ? "#d97706" : "#16a34a",
+                          borderRadius: 6, padding: "2px 7px" }}>
+                          🔥 {c.demographie.tension_locative_pct} % tension
+                        </span>
+                      )}
+                      {c.loyer && c.loyer.appartement_m2 != null && (
+                        <span style={{ fontSize: 10, fontWeight: 600, background: "rgba(14,165,233,0.08)", color: "#0369a1", borderRadius: 6, padding: "2px 7px" }}>
+                          {Number(c.loyer.appartement_m2).toFixed(1)} €/m²/mois
+                        </span>
+                      )}
+                    </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                       {["rendement", "demographie", "socio_eco"].map(function(k) {
                         const v = sn(c.scores && c.scores[k]);
                         return (<div key={k} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <div style={{ fontSize: 10, color: "#94a3b8", width: 76 }}>{k === "rendement" ? "Rendement" : k === "demographie" ? "DÃ©mographie" : "Socio-Ã©co"}</div>
+                          <div style={{ fontSize: 10, color: "#94a3b8", width: 76 }}>{k === "rendement" ? "Rendement" : k === "demographie" ? "Démographie" : "Socio-éco"}</div>
                           <ProgressBar value={v} />
-                          <div style={{ fontSize: 11, color: nc(v), minWidth: 26, textAlign: "right", fontWeight: 600 }}>{v != null ? v.toFixed(1) : "â€”"}</div>
+                          <div style={{ fontSize: 11, color: nc(v), minWidth: 26, textAlign: "right", fontWeight: 600 }}>{v != null ? v.toFixed(1) : "—"}</div>
                         </div>);
                       })}
                     </div>
@@ -806,58 +1109,81 @@ function AnalyseCommunes() {
 
         {selected && (
           <div style={{ width: 350, minWidth: 310, background: "rgba(255,255,255,0.8)", borderRadius: 20, padding: 16, boxShadow: "0 8px 32px rgba(99,102,241,0.12)", backdropFilter: "blur(22px)", border: "1px solid rgba(148,163,184,0.25)" }}>
-            {loadingDetail && <div style={{ color: "#94a3b8", textAlign: "center", marginTop: 40 }}>Chargementâ€¦</div>}
+            {loadingDetail && <div style={{ color: "#94a3b8", textAlign: "center", marginTop: 40 }}>Chargement…</div>}
             {detail && detail.error && <div style={{ color: "#dc2626" }}>Erreur : {detail.error}</div>}
             {detail && !detail.error && (
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14, alignItems: "flex-start" }}>
                   <div>
                     <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a" }}>{detail.commune}</div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{detail.code_insee} Â· Zone {detail.zonage_abc}</div>
+                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{detail.code_insee} · Zone {detail.zonage_abc}</div>
                   </div>
-                  <button onClick={function() { setSelected(null); setDetail(null); setOpenScore(null); }} style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 18 }}>âœ•</button>
+                  <button onClick={function() { setSelected(null); setDetail(null); setOpenScore(null); }} style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 18 }}>✕</button>
                 </div>
                 <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 600, marginBottom: 6, textTransform: "uppercase" }}>Scores Â· clic = dÃ©tail</div>
-                  {[{ key: "global", label: "Global", v: sn(detail.scores && detail.scores.global) }, { key: "rendement", label: "Rendement", v: sn(detail.scores && detail.scores.rendement) }, { key: "demographie", label: "DÃ©mographie", v: sn(detail.scores && detail.scores.demographie) }, { key: "socio_eco", label: "Socio-Ã©co", v: sn(detail.scores && detail.scores.socio_eco) }].map(function(item) {
+                  <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 600, marginBottom: 6, textTransform: "uppercase" }}>Scores · clic = détail</div>
+                  {[{ key: "global", label: "Global", v: sn(detail.scores && detail.scores.global) }, { key: "rendement", label: "Rendement", v: sn(detail.scores && detail.scores.rendement) }, { key: "demographie", label: "Démographie", v: sn(detail.scores && detail.scores.demographie) }, { key: "socio_eco", label: "Socio-éco", v: sn(detail.scores && detail.scores.socio_eco) }].map(function(item) {
                     const clickable = item.key !== "global"; const isOpen = openScore === item.key;
                     return (<div key={item.key} style={{ marginBottom: 5 }}>
                       <div onClick={function() { if (clickable) setOpenScore(isOpen ? null : item.key); }} style={{ display: "flex", alignItems: "center", gap: 7, cursor: clickable ? "pointer" : "default", padding: "2px 0" }}>
                         <div style={{ fontSize: 12, width: 76, color: "#475569" }}>{item.label}</div>
                         <ProgressBar value={item.v} clickable={clickable} />
-                        <div style={{ fontSize: 13, fontWeight: 700, color: nc(item.v), minWidth: 30, textAlign: "right" }}>{item.v != null ? item.v.toFixed(1) : "â€”"}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: nc(item.v), minWidth: 30, textAlign: "right" }}>{item.v != null ? item.v.toFixed(1) : "—"}</div>
                         <div style={{ fontSize: 10, color: nc(item.v), minWidth: 38 }}>{nLabel(item.v)}</div>
-                        {clickable && <div style={{ fontSize: 10, color: "#94a3b8" }}>{isOpen ? "â–²" : "â–¼"}</div>}
+                        {clickable && <div style={{ fontSize: 10, color: "#94a3b8" }}>{isOpen ? "▲" : "▼"}</div>}
                       </div>
                       {isOpen && clickable && <ScoreDetail scoreKey={item.key} detail={detail} onClose={function() { setOpenScore(null); }} />}
                     </div>);
                   })}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
-                  {[{ label: "Appartement", value: detail.prix && detail.prix.appartement_m2 ? detail.prix.appartement_m2.toLocaleString("fr-FR") + " â‚¬/mÂ²" : "â€”", sub: detail.prix && detail.prix.nb_ventes_apt ? detail.prix.nb_ventes_apt + " ventes" : "" }, { label: "Maison", value: detail.prix && detail.prix.maison_m2 ? detail.prix.maison_m2.toLocaleString("fr-FR") + " â‚¬/mÂ²" : "â€”", sub: detail.prix && detail.prix.nb_ventes_mai ? detail.prix.nb_ventes_mai + " ventes" : "" }].map(function(x) {
+                  {[{ label: "Appartement", value: detail.prix && detail.prix.appartement_m2 ? detail.prix.appartement_m2.toLocaleString("fr-FR") + " €/m²" : "—", sub: detail.prix && detail.prix.nb_ventes_apt ? detail.prix.nb_ventes_apt + " ventes" : "" }, { label: "Maison", value: detail.prix && detail.prix.maison_m2 ? detail.prix.maison_m2.toLocaleString("fr-FR") + " €/m²" : "—", sub: detail.prix && detail.prix.nb_ventes_mai ? detail.prix.nb_ventes_mai + " ventes" : "" }].map(function(x) {
                     return (<div key={x.label} style={{ background: "rgba(241,245,249,0.8)", borderRadius: 10, padding: "8px 10px" }}><div style={{ fontSize: 10, color: "#94a3b8" }}>{x.label}</div><div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>{x.value}</div>{x.sub && <div style={{ fontSize: 10, color: "#94a3b8" }}>{x.sub}</div>}</div>);
                   })}
                 </div>
                 {detail.loyer && detail.loyer.appartement_m2 != null && (
                   <div style={{ marginBottom: 10, background: "rgba(224,242,254,0.8)", borderRadius: 10, padding: "8px 10px", border: "1px solid rgba(56,189,248,0.3)" }}>
-                    <div style={{ fontSize: 10, color: "#0369a1" }}>Loyer mÃ©dian</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>{Number(detail.loyer.appartement_m2).toFixed(1)} â‚¬/mÂ²/mois</div>
+                    <div style={{ fontSize: 10, color: "#0369a1" }}>Loyer médian</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>{Number(detail.loyer.appartement_m2).toFixed(1)} €/m²/mois</div>
                   </div>
                 )}
+                {detail.demographie && detail.demographie.tension_locative_pct != null && (function() {
+                  var t = detail.demographie.tension_locative_pct;
+                  var color = t > 15 ? "#dc2626" : t > 8 ? "#d97706" : "#16a34a";
+                  var bg = t > 15 ? "rgba(254,226,226,0.8)" : t > 8 ? "rgba(254,243,199,0.8)" : "rgba(220,252,231,0.8)";
+                  var border = t > 15 ? "rgba(220,38,38,0.3)" : t > 8 ? "rgba(217,119,6,0.3)" : "rgba(22,163,74,0.3)";
+                  var label = t > 15 ? "Marché très tendu" : t > 8 ? "Marché tendu" : "Marché détendu";
+                  return (
+                    <div style={{ marginBottom: 10, background: bg, borderRadius: 10, padding: "10px 12px", border: "1px solid " + border }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: color, fontWeight: 600, textTransform: "uppercase" }}>Tension locative</div>
+                          <div style={{ fontSize: 22, fontWeight: 800, color: color, lineHeight: 1.1 }}>{t} %</div>
+                          <div style={{ fontSize: 11, color: color, marginTop: 2 }}>{label}</div>
+                        </div>
+                        <div style={{ fontSize: 32 }}>{t > 15 ? "🔥" : t > 8 ? "⚡" : "🟢"}</div>
+                      </div>
+                      <div style={{ marginTop: 8, background: "rgba(255,255,255,0.5)", borderRadius: 6, height: 6, overflow: "hidden" }}>
+                        <div style={{ width: Math.min(100, t * 4) + "%", height: "100%", background: color, borderRadius: 6, transition: "width 0.4s" }} />
+                      </div>
+                      <div style={{ fontSize: 9, color: color, marginTop: 3, opacity: 0.7 }}>Ratio demandes / offres locatives disponibles</div>
+                    </div>
+                  );
+                })()}
                 {detail.rentabilite_brute_pct && (
                   <div style={{ marginBottom: 10, background: "rgba(220,252,231,0.8)", borderRadius: 10, padding: "8px 10px", border: "1px solid rgba(34,197,94,0.3)" }}>
-                    <div style={{ fontSize: 10, color: "#15803d" }}>RentabilitÃ© brute estimÃ©e</div>
+                    <div style={{ fontSize: 10, color: "#15803d" }}>Rentabilité brute estimée</div>
                     <div style={{ fontSize: 18, fontWeight: 800, color: "#15803d" }}>{detail.rentabilite_brute_pct} %</div>
                   </div>
                 )}
-                {[{ title: "Socio-Ã©co", rows: [{ label: "Revenu mÃ©dian", v: detail.socio_eco && detail.socio_eco.revenu_median ? detail.socio_eco.revenu_median.toLocaleString("fr-FR") + " â‚¬" : "â€”" }, { label: "ChÃ´mage", v: detail.socio_eco && detail.socio_eco.chomage_pct != null ? detail.socio_eco.chomage_pct + " %" : "â€”" }, { label: "Taux pauvretÃ©", v: detail.socio_eco && detail.socio_eco.taux_pauvrete_pct != null ? detail.socio_eco.taux_pauvrete_pct + " %" : "â€”" }] }, { title: "DÃ©mographie", rows: [{ label: "Population", v: detail.population ? detail.population.toLocaleString("fr-FR") + " hab." : "â€”" }, { label: "Ã‰volution/an", v: detail.demographie && detail.demographie.evolution_pop_pct_an != null ? detail.demographie.evolution_pop_pct_an + " %" : "â€”" }, { label: "Vacance", v: detail.demographie && detail.demographie.vacance_pct != null ? detail.demographie.vacance_pct + " %" : "â€”" }] }].map(function(block) {
+                {[{ title: "Socio-éco", rows: [{ label: "Revenu médian", v: detail.socio_eco && detail.socio_eco.revenu_median ? detail.socio_eco.revenu_median.toLocaleString("fr-FR") + " €" : "—" }, { label: "Chômage", v: detail.socio_eco && detail.socio_eco.chomage_pct != null ? detail.socio_eco.chomage_pct + " %" : "—" }, { label: "Taux pauvreté", v: detail.socio_eco && detail.socio_eco.taux_pauvrete_pct != null ? detail.socio_eco.taux_pauvrete_pct + " %" : "—" }] }, { title: "Démographie", rows: [{ label: "Population", v: detail.population ? detail.population.toLocaleString("fr-FR") + " hab." : "—" }, { label: "Évolution/an", v: detail.demographie && detail.demographie.evolution_pop_pct_an != null ? detail.demographie.evolution_pop_pct_an + " %" : "—" }, { label: "Vacance", v: detail.demographie && detail.demographie.vacance_pct != null ? detail.demographie.vacance_pct + " %" : "—" }, { label: "Tension locative", v: detail.demographie && detail.demographie.tension_locative_pct != null ? detail.demographie.tension_locative_pct + " %" : "—", highlight: true }] }].map(function(block) {
                   return (<div key={block.title} style={{ marginBottom: 10 }}>
                     <div style={{ fontSize: 10, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", marginBottom: 4 }}>{block.title}</div>
                     {block.rows.map(function(row) { return (<div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px solid rgba(148,163,184,0.12)", fontSize: 12 }}><span style={{ color: "#64748b" }}>{row.label}</span><span style={{ fontWeight: 500, color: "#0f172a" }}>{row.v}</span></div>); })}
                   </div>);
                 })}
-                {detail.prix && detail.prix.avertissement_apt && <div style={{ background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "6px 10px", fontSize: 11, color: "#92400e", marginBottom: 8 }}>âš  {detail.prix.avertissement_apt}</div>}
-                <div style={{ fontSize: 10, color: "#94a3b8" }}>Sources : {detail.prix && detail.prix.source} Â· {detail.loyer && detail.loyer.source}</div>
+                {detail.prix && detail.prix.avertissement_apt && <div style={{ background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "6px 10px", fontSize: 11, color: "#92400e", marginBottom: 8 }}>⚠ {detail.prix.avertissement_apt}</div>}
+                <div style={{ fontSize: 10, color: "#94a3b8" }}>Sources : {detail.prix && detail.prix.source} · {detail.loyer && detail.loyer.source}</div>
               </div>
             )}
           </div>
@@ -869,12 +1195,12 @@ function AnalyseCommunes() {
           <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 20, padding: 20, minWidth: 500, maxWidth: 820, maxHeight: "80vh", overflowY: "auto", boxShadow: "0 20px 50px rgba(15,23,42,0.2)" }} onClick={function(e) { e.stopPropagation(); }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14, alignItems: "center" }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Comparaison de communes</div>
-              <button onClick={function() { setShowCompare(false); }} style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 18 }}>âœ•</button>
+              <button onClick={function() { setShowCompare(false); }} style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 18 }}>✕</button>
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-              <thead><tr style={{ color: "#94a3b8" }}><th style={{ textAlign: "left", padding: "6px 8px" }}>CritÃ¨re</th>{compareList.map(function(c) { return <th key={c.nom} style={{ textAlign: "right", padding: "6px 8px", color: "#0f172a", fontWeight: 600 }}>{c.nom}</th>; })}</tr></thead>
+              <thead><tr style={{ color: "#94a3b8" }}><th style={{ textAlign: "left", padding: "6px 8px" }}>Critère</th>{compareList.map(function(c) { return <th key={c.nom} style={{ textAlign: "right", padding: "6px 8px", color: "#0f172a", fontWeight: 600 }}>{c.nom}</th>; })}</tr></thead>
               <tbody>
-                {[{ label: "Score global", fn: function(c) { const v = sn(c.scores && c.scores.global); return v != null ? v.toFixed(1) : "â€”"; } }, { label: "Rendement", fn: function(c) { const v = sn(c.scores && c.scores.rendement); return v != null ? v.toFixed(1) : "â€”"; } }, { label: "DÃ©mographie", fn: function(c) { const v = sn(c.scores && c.scores.demographie); return v != null ? v.toFixed(1) : "â€”"; } }, { label: "Socio-Ã©co", fn: function(c) { const v = sn(c.scores && c.scores.socio_eco); return v != null ? v.toFixed(1) : "â€”"; } }, { label: "Population", fn: function(c) { return c.population ? c.population.toLocaleString("fr-FR") : "â€”"; } }].map(function(row) {
+                {[{ label: "Score global", fn: function(c) { const v = sn(c.scores && c.scores.global); return v != null ? v.toFixed(1) : "—"; } }, { label: "Rendement", fn: function(c) { const v = sn(c.scores && c.scores.rendement); return v != null ? v.toFixed(1) : "—"; } }, { label: "Démographie", fn: function(c) { const v = sn(c.scores && c.scores.demographie); return v != null ? v.toFixed(1) : "—"; } }, { label: "Socio-éco", fn: function(c) { const v = sn(c.scores && c.scores.socio_eco); return v != null ? v.toFixed(1) : "—"; } }, { label: "Population", fn: function(c) { return c.population ? c.population.toLocaleString("fr-FR") : "—"; } }].map(function(row) {
                   return (<tr key={row.label} style={{ borderBottom: "1px solid rgba(148,163,184,0.2)" }}><td style={{ padding: "7px 8px", color: "#64748b" }}>{row.label}</td>{compareList.map(function(c) { return <td key={c.nom} style={{ padding: "7px 8px", textAlign: "right", fontWeight: 500 }}>{row.fn(c)}</td>; })}</tr>);
                 })}
               </tbody>
@@ -933,22 +1259,22 @@ function SimulateurCredit() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-      {/* Formulaire + rÃ©sultat principal */}
+      {/* Formulaire + résultat principal */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
 
         {/* Inputs */}
         <div style={SECTION}>
-          <SectionHeader icon="ðŸ¦" title="ParamÃ¨tres du prÃªt" />
+          <SectionHeader icon="🏦" title="Paramètres du prêt" />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div>
-              <label style={labelStyle}>Montant empruntÃ©</label>
+              <label style={labelStyle}>Montant emprunté</label>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input type="number" value={montant} step="5000" min="0" onChange={function(e) { setMontant(e.target.value); }} style={inputStyle} />
-                <span style={{ color: "#94a3b8", fontSize: 13, minWidth: 16 }}>â‚¬</span>
+                <span style={{ color: "#94a3b8", fontSize: 13, minWidth: 16 }}>€</span>
               </div>
             </div>
             <div>
-              <label style={labelStyle}>DurÃ©e du prÃªt</label>
+              <label style={labelStyle}>Durée du prêt</label>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input type="number" value={duree} step="1" min="1" max="30" onChange={function(e) { setDuree(e.target.value); }} style={inputStyle} />
                 <span style={{ color: "#94a3b8", fontSize: 13, minWidth: 28 }}>ans</span>
@@ -970,7 +1296,7 @@ function SimulateurCredit() {
             </div>
           </div>
 
-          {/* Barre durÃ©e visuelle */}
+          {/* Barre durée visuelle */}
           <div style={{ marginTop: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>
               <span>1 an</span><span>{duree} ans</span><span>30 ans</span>
@@ -980,41 +1306,41 @@ function SimulateurCredit() {
           </div>
         </div>
 
-        {/* RÃ©sultat principal */}
+        {/* Résultat principal */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-          {/* MensualitÃ© hero */}
+          {/* Mensualité hero */}
           <div style={Object.assign({}, SECTION, { textAlign: "center", padding: "24px 20px" })}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 8 }}>Votre mensualitÃ© sera de</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 8 }}>Votre mensualité sera de</div>
             <div style={{ fontSize: 48, fontWeight: 800, color: "#6366f1", lineHeight: 1 }}>
-              {fmt(calc.mensualiteTotale, 0)} <span style={{ fontSize: 32 }}>â‚¬</span>
+              {fmt(calc.mensualiteTotale, 0)} <span style={{ fontSize: 32 }}>€</span>
             </div>
             <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 6 }}>
-              dont {fmt(calc.mensualiteAssur, 0)} â‚¬ d'assurance / mois
+              dont {fmt(calc.mensualiteAssur, 0)} € d'assurance / mois
             </div>
             <div style={{ marginTop: 14, height: 8, borderRadius: 999, background: "rgba(148,163,184,0.2)", overflow: "hidden", display: "flex" }}>
               <div style={{ flex: calc.mensualiteHorsAssur, background: "linear-gradient(90deg,#6366f1,#38bdf8)", borderRadius: "999px 0 0 999px" }} />
               <div style={{ flex: calc.mensualiteAssur, background: "#f97316", borderRadius: "0 999px 999px 0" }} />
             </div>
             <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 6, fontSize: 11, color: "#94a3b8" }}>
-              <span>ðŸŸ£ CrÃ©dit : {fmt(calc.mensualiteHorsAssur, 0)} â‚¬</span>
-              <span>ðŸŸ  Assurance : {fmt(calc.mensualiteAssur, 0)} â‚¬</span>
+              <span>🟣 Crédit : {fmt(calc.mensualiteHorsAssur, 0)} €</span>
+              <span>🟠 Assurance : {fmt(calc.mensualiteAssur, 0)} €</span>
             </div>
           </div>
 
-          {/* DÃ©tail chiffres */}
+          {/* Détail chiffres */}
           <div style={SECTION}>
-            <SectionHeader icon="ðŸ“‹" title="RÃ©capitulatif" />
-            <StatRow label="Montant de votre prÃªt" value={fmtEur(M)} bold />
-            <StatRow label="MensualitÃ© hors assurance" value={fmt(calc.mensualiteHorsAssur, 2) + " â‚¬/mois"} />
-            <StatRow label="dont assurance" value={fmt(calc.mensualiteAssur, 2) + " â‚¬/mois"} color="#f97316" />
-            <StatRow label="MensualitÃ© totale" value={fmt(calc.mensualiteTotale, 2) + " â‚¬/mois"} bold color="#6366f1" />
+            <SectionHeader icon="📋" title="Récapitulatif" />
+            <StatRow label="Montant de votre prêt" value={fmtEur(M)} bold />
+            <StatRow label="Mensualité hors assurance" value={fmt(calc.mensualiteHorsAssur, 2) + " €/mois"} />
+            <StatRow label="dont assurance" value={fmt(calc.mensualiteAssur, 2) + " €/mois"} color="#f97316" />
+            <StatRow label="Mensualité totale" value={fmt(calc.mensualiteTotale, 2) + " €/mois"} bold color="#6366f1" />
             <div style={{ margin: "8px 0", background: "rgba(241,245,249,0.8)", borderRadius: 10, height: 1 }} />
-            <StatRow label="CoÃ»t total du crÃ©dit (intÃ©rÃªts)" value={fmtEur(calc.coutTotalHorsAssur)} color="#dc2626" />
-            <StatRow label="CoÃ»t total assurance" value={fmtEur(calc.coutTotalAssur)} color="#f97316" />
-            <StatRow label="CoÃ»t total (intÃ©rÃªts + assurance)" value={fmtEur(calc.coutTotal)} bold color="#dc2626" border={false} />
+            <StatRow label="Coût total du crédit (intérêts)" value={fmtEur(calc.coutTotalHorsAssur)} color="#dc2626" />
+            <StatRow label="Coût total assurance" value={fmtEur(calc.coutTotalAssur)} color="#f97316" />
+            <StatRow label="Coût total (intérêts + assurance)" value={fmtEur(calc.coutTotal)} bold color="#dc2626" border={false} />
             <div style={{ marginTop: 10, background: "rgba(254,226,226,0.5)", borderRadius: 10, padding: "8px 12px", border: "1px solid rgba(220,38,38,0.15)" }}>
-              <div style={{ fontSize: 11, color: "#94a3b8" }}>CoÃ»t total remboursÃ© (capital + intÃ©rÃªts + assurance)</div>
+              <div style={{ fontSize: 11, color: "#94a3b8" }}>Coût total remboursé (capital + intérêts + assurance)</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: "#dc2626" }}>{fmtEur(M + calc.coutTotal)}</div>
             </div>
           </div>
@@ -1023,13 +1349,13 @@ function SimulateurCredit() {
 
       {/* Tableau d'amortissement */}
       <div style={SECTION}>
-        <SectionHeader icon="ðŸ“…" title="Tableau d'amortissement" badge={duree + " ans"} />
+        <SectionHeader icon="📅" title="Tableau d'amortissement" badge={duree + " ans"} />
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
-                {["AnnÃ©e", "Capital remboursÃ©", "IntÃ©rÃªts", "Assurance", "MensualitÃ© totale", "Capital restant dÃ»"].map(function(h) {
-                  return <th key={h} style={{ padding: "8px 12px", textAlign: h === "AnnÃ©e" ? "left" : "right", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 }}>{h}</th>;
+                {["Année", "Capital remboursé", "Intérêts", "Assurance", "Mensualité totale", "Capital restant dû"].map(function(h) {
+                  return <th key={h} style={{ padding: "8px 12px", textAlign: h === "Année" ? "left" : "right", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 }}>{h}</th>;
                 })}
               </tr>
             </thead>
@@ -1038,12 +1364,12 @@ function SimulateurCredit() {
                 const isEven = idx % 2 === 0;
                 return (
                   <tr key={row.annee} style={{ background: isEven ? "rgba(248,250,252,0.6)" : "transparent", borderBottom: "1px solid rgba(148,163,184,0.1)" }}>
-                    <td style={{ padding: "8px 12px", fontWeight: 600, color: "#334155" }}>AnnÃ©e {row.annee}</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#16a34a", fontWeight: 500 }}>{fmt(row.capital, 0)} â‚¬</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#dc2626" }}>{fmt(row.interets, 0)} â‚¬</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#f97316" }}>{fmt(row.assurance, 0)} â‚¬</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: "#4338ca" }}>{fmt(row.capital + row.interets + row.assurance, 0)} â‚¬</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#64748b" }}>{fmt(row.solde, 0)} â‚¬</td>
+                    <td style={{ padding: "8px 12px", fontWeight: 600, color: "#334155" }}>Année {row.annee}</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#16a34a", fontWeight: 500 }}>{fmt(row.capital, 0)} €</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#dc2626" }}>{fmt(row.interets, 0)} €</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#f97316" }}>{fmt(row.assurance, 0)} €</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: "#4338ca" }}>{fmt(row.capital + row.interets + row.assurance, 0)} €</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "#64748b" }}>{fmt(row.solde, 0)} €</td>
                   </tr>
                 );
               })}
@@ -1054,7 +1380,7 @@ function SimulateurCredit() {
                 <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#dc2626" }}>{fmtEur(calc.coutTotalHorsAssur)}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#f97316" }}>{fmtEur(calc.coutTotalAssur)}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#4338ca" }}>{fmtEur(M + calc.coutTotal)}</td>
-                <td style={{ padding: "10px 12px", textAlign: "right", color: "#16a34a", fontWeight: 700 }}>0 â‚¬</td>
+                <td style={{ padding: "10px 12px", textAlign: "right", color: "#16a34a", fontWeight: 700 }}>0 €</td>
               </tr>
             </tbody>
           </table>
@@ -1066,37 +1392,37 @@ function SimulateurCredit() {
 }
 const TRAVAUX_DATA = {
   quantite: [
-    { id: "fenetres",   label: "FenÃªtres",              icon: "ðŸªŸ", delegue: 1200, moi: 800,  unite: "fenÃªtre(s)" },
-    { id: "radiateur",  label: "Radiateur Ã©lectrique",  icon: "ðŸ”¥", delegue: 350,  moi: 250,   unite: "radiateur(s)" },
-    { id: "chaudiere",  label: "ChaudiÃ¨re Ã©lectrique",  icon: "âš™ï¸", delegue: 2250, moi: 1750,  unite: "chaudiÃ¨re(s)" },
+    { id: "fenetres",   label: "Fenêtres",              icon: "🪟", delegue: 1200, moi: 800,  unite: "fenêtre(s)" },
+    { id: "radiateur",  label: "Radiateur électrique",  icon: "🔥", delegue: 350,  moi: 250,   unite: "radiateur(s)" },
+    { id: "chaudiere",  label: "Chaudière électrique",  icon: "⚙️", delegue: 2250, moi: 1750,  unite: "chaudière(s)" },
   ],
   fixe: [
-    { id: "cuisine",    label: "Cuisine",               icon: "ðŸ³", delegue_inf: 5000, delegue_sup: 6000, moi_inf: 3000, moi_sup: 4000 },
-    { id: "sdb",        label: "Salle de bains",        icon: "ðŸš¿", delegue_inf: 4000, delegue_sup: 5500, moi_inf: 2500, moi_sup: 3000 },
-    { id: "vmc",        label: "VMC",                   icon: "ðŸ’¨", delegue_inf: 800,  delegue_sup: 1200, moi_inf: 400,  moi_sup: 600  },
-    { id: "tableau",    label: "Tableau Ã©lectrique",    icon: "âš¡", delegue_inf: 1750, delegue_sup: 1750, moi_inf: 600,  moi_sup: 600  },
+    { id: "cuisine",    label: "Cuisine",               icon: "🍳", delegue_inf: 5000, delegue_sup: 6000, moi_inf: 3000, moi_sup: 4000 },
+    { id: "sdb",        label: "Salle de bains",        icon: "🚿", delegue_inf: 4000, delegue_sup: 5500, moi_inf: 2500, moi_sup: 3000 },
+    { id: "vmc",        label: "VMC",                   icon: "💨", delegue_inf: 800,  delegue_sup: 1200, moi_inf: 400,  moi_sup: 600  },
+    { id: "tableau",    label: "Tableau électrique",    icon: "⚡", delegue_inf: 1750, delegue_sup: 1750, moi_inf: 600,  moi_sup: 600  },
   ],
   m2: [
-    { id: "elec",       label: "Ã‰lectricitÃ© (complet)", icon: "ðŸ’¡", delegue: 120, moi: 50  },
-    { id: "normes",     label: "Mise aux normes Ã©lec.", icon: "ðŸ”Œ", delegue: 75,  moi: 25  },
-    { id: "plomberie",  label: "Plomberie",             icon: "ðŸš°", delegue: 100, moi: 45  },
-    { id: "cloisons",   label: "Cloisons intÃ©rieures",  icon: "ðŸ§±", delegue: 60,  moi: 20  },
-    { id: "isolation",  label: "Isolation",             icon: "ðŸ ", delegue: 40,  moi: 20  },
-    { id: "peinture",   label: "Peinture murs/plafond", icon: "ðŸŽ¨", delegue: 50,  moi: 20  },
-    { id: "sol",        label: "Sol",                   icon: "ðŸ¡", delegue: 80,  moi: 30  },
+    { id: "elec",       label: "Électricité (complet)", icon: "💡", delegue: 120, moi: 50  },
+    { id: "normes",     label: "Mise aux normes élec.", icon: "🔌", delegue: 75,  moi: 25  },
+    { id: "plomberie",  label: "Plomberie",             icon: "🚰", delegue: 100, moi: 45  },
+    { id: "cloisons",   label: "Cloisons intérieures",  icon: "🧱", delegue: 60,  moi: 20  },
+    { id: "isolation",  label: "Isolation",             icon: "🏠", delegue: 40,  moi: 20  },
+    { id: "peinture",   label: "Peinture murs/plafond", icon: "🎨", delegue: 50,  moi: 20  },
+    { id: "sol",        label: "Sol",                   icon: "🏡", delegue: 80,  moi: 30  },
   ],
   batiment: [
-    { id: "toiture",    label: "Remplacement couverture toiture", icon: "ðŸ—ï¸", delegue: 230, moi: 50,   type: "toiture" },
-    { id: "tuiles",     label: "RÃ©vision tuiles/chevrons",        icon: "ðŸ”§", delegue: 38,  moi: 10,   type: "toiture" },
-    { id: "charpente",  label: "Remplacement charpente",          icon: "ðŸªµ", delegue: 200, moi: null, type: "toiture" },
-    { id: "ravalement", label: "Ravalement faÃ§ade",               icon: "ðŸ¢", delegue: 70,  moi: 10,   type: "facade" },
+    { id: "toiture",    label: "Remplacement couverture toiture", icon: "🏗️", delegue: 230, moi: 50,   type: "toiture" },
+    { id: "tuiles",     label: "Révision tuiles/chevrons",        icon: "🔧", delegue: 38,  moi: 10,   type: "toiture" },
+    { id: "charpente",  label: "Remplacement charpente",          icon: "🪵", delegue: 200, moi: null, type: "toiture" },
+    { id: "ravalement", label: "Ravalement façade",               icon: "🏢", delegue: 70,  moi: 10,   type: "facade" },
   ],
 };
 
 function Toggle({ value, onChange }) {
   return (
     <button onClick={function() { onChange(!value); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.15s", background: value ? "rgba(99,102,241,0.9)" : "rgba(220,38,38,0.12)", color: value ? "#fff" : "#dc2626", boxShadow: value ? "0 2px 8px rgba(99,102,241,0.3)" : "inset 0 0 0 1.5px rgba(220,38,38,0.4)" }}>
-      {value ? "âœ“ Oui" : "âœ— Non"}
+      {value ? "✓ Oui" : "✗ Non"}
     </button>
   );
 }
@@ -1106,7 +1432,7 @@ function SimulateurTravaux() {
   const [surfaceToiture, setSurfaceToiture] = useState("60");
   const [surfaceFacade, setSurfaceFacade] = useState("100");
 
-  // Ã‰tat pour chaque poste : { actif, delegue, quantite }
+  // État pour chaque poste : { actif, delegue, quantite }
   const initState = function(items, defQty) {
     const s = {};
     items.forEach(function(item) { s[item.id] = { actif: false, delegue: true, quantite: defQty || "1" }; });
@@ -1210,7 +1536,7 @@ function SimulateurTravaux() {
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 16 }}>{item.icon}</span>
               <span style={{ fontSize: 13, fontWeight: 500, color: "#0f172a" }}>{item.label}</span>
-              {item.moi === null && isActif && s.delegue === false && <Tag color="orange">DÃ©lÃ©gatoire uniquement</Tag>}
+              {item.moi === null && isActif && s.delegue === false && <Tag color="orange">Délégatoire uniquement</Tag>}
             </div>
           </td>
           <td style={{ padding: "10px 12px", textAlign: "center" }}>
@@ -1220,23 +1546,23 @@ function SimulateurTravaux() {
             {isActif ? (
               <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
                 <button onClick={function() { updateState(setter, item.id, "delegue", true); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: s.delegue ? "rgba(99,102,241,0.9)" : "rgba(148,163,184,0.2)", color: s.delegue ? "#fff" : "#64748b" }}>Entreprise</button>
-                <button onClick={function() { if (item.moi !== null && item.moi_inf !== undefined || item.moi !== null) updateState(setter, item.id, "delegue", false); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: item.moi !== null ? "pointer" : "not-allowed", fontSize: 11, fontWeight: 600, background: !s.delegue ? "rgba(22,163,74,0.85)" : "rgba(148,163,184,0.2)", color: !s.delegue ? "#fff" : "#64748b", opacity: item.moi === null && item.moi_inf === undefined ? 0.4 : 1 }}>Moi-mÃªme</button>
+                <button onClick={function() { if (item.moi !== null && item.moi_inf !== undefined || item.moi !== null) updateState(setter, item.id, "delegue", false); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: item.moi !== null ? "pointer" : "not-allowed", fontSize: 11, fontWeight: 600, background: !s.delegue ? "rgba(22,163,74,0.85)" : "rgba(148,163,184,0.2)", color: !s.delegue ? "#fff" : "#64748b", opacity: item.moi === null && item.moi_inf === undefined ? 0.4 : 1 }}>Moi-même</button>
               </div>
-            ) : <span style={{ fontSize: 11, color: "#cbd5e1" }}>â€”</span>}
+            ) : <span style={{ fontSize: 11, color: "#cbd5e1" }}>—</span>}
           </td>
           {showQty === "quantite" && (
             <td style={{ padding: "10px 12px", textAlign: "center" }}>
               {isActif ? (
                 <input type="number" value={s.quantite} min="1" step="1" onChange={function(e) { updateState(setter, item.id, "quantite", e.target.value); }}
                   style={{ width: 60, background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "4px 8px", fontSize: 12, color: "#0f172a", outline: "none", textAlign: "center" }} />
-              ) : <span style={{ fontSize: 11, color: "#cbd5e1" }}>â€”</span>}
+              ) : <span style={{ fontSize: 11, color: "#cbd5e1" }}>—</span>}
             </td>
           )}
           <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12, color: "#94a3b8" }}>
-            {isActif && prix != null ? fmt(prix, 0) + " â‚¬" + (showQty !== "fixe" ? (showQty === "quantite" ? "/u" : "/mÂ²") : "") : "â€”"}
+            {isActif && prix != null ? fmt(prix, 0) + " €" + (showQty !== "fixe" ? (showQty === "quantite" ? "/u" : "/m²") : "") : "—"}
           </td>
           <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: montant != null ? "#4338ca" : "#f97316", fontSize: 13 }}>
-            {montant != null ? fmtEur(montant) : isActif ? "âš  N/A" : "â€”"}
+            {montant != null ? fmtEur(montant) : isActif ? "⚠ N/A" : "—"}
           </td>
         </tr>
       );
@@ -1251,17 +1577,17 @@ function SimulateurTravaux() {
 
       {/* Avertissement */}
       <div style={{ background: "rgba(254,243,199,0.9)", borderRadius: 14, padding: "10px 16px", border: "1px solid rgba(251,191,36,0.4)", fontSize: 12, color: "#92400e" }}>
-        âš ï¸ <strong>Estimation indicative uniquement.</strong> Les prix peuvent varier selon la rÃ©gion et les artisans. Faites venir plusieurs devis pour une estimation prÃ©cise.
+        ⚠️ <strong>Estimation indicative uniquement.</strong> Les prix peuvent varier selon la région et les artisans. Faites venir plusieurs devis pour une estimation précise.
       </div>
 
       {/* Surfaces */}
       <div style={sectionStyle}>
-        <SectionHeader icon="ðŸ“" title="Surfaces de rÃ©fÃ©rence" />
+        <SectionHeader icon="📐" title="Surfaces de référence" />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
           {[
-            { label: "Surface habitable", value: surface, setter: setSurface, unit: "mÂ²", sub: "UtilisÃ©e pour les postes au mÂ²" },
-            { label: "Surface toiture", value: surfaceToiture, setter: setSurfaceToiture, unit: "mÂ²", sub: "UtilisÃ©e pour les postes toiture" },
-            { label: "Surface faÃ§ade", value: surfaceFacade, setter: setSurfaceFacade, unit: "mÂ²", sub: "UtilisÃ©e pour le ravalement" },
+            { label: "Surface habitable", value: surface, setter: setSurface, unit: "m²", sub: "Utilisée pour les postes au m²" },
+            { label: "Surface toiture", value: surfaceToiture, setter: setSurfaceToiture, unit: "m²", sub: "Utilisée pour les postes toiture" },
+            { label: "Surface façade", value: surfaceFacade, setter: setSurfaceFacade, unit: "m²", sub: "Utilisée pour le ravalement" },
           ].map(function(f) {
             return (
               <div key={f.label} style={{ background: "rgba(248,250,252,0.9)", borderRadius: 12, padding: "12px 14px", border: "1px solid rgba(148,163,184,0.2)" }}>
@@ -1278,16 +1604,16 @@ function SimulateurTravaux() {
         </div>
       </div>
 
-      {/* Section Prix Ã  la quantitÃ© */}
+      {/* Section Prix à la quantité */}
       <div style={sectionStyle}>
-        <SectionHeader icon="ðŸ”¢" title="Prix Ã  la quantitÃ©" badge={"Sous-total : " + fmtEur(calcQ.total)} />
+        <SectionHeader icon="🔢" title="Prix à la quantité" badge={"Sous-total : " + fmtEur(calcQ.total)} />
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
-              <th style={thStyle("center")}>Ã€ rÃ©nover ?</th>
-              <th style={thStyle("center")}>Qui rÃ©nove ?</th>
-              <th style={thStyle("center")}>QuantitÃ©</th>
+              <th style={thStyle("center")}>À rénover ?</th>
+              <th style={thStyle("center")}>Qui rénove ?</th>
+              <th style={thStyle("center")}>Quantité</th>
               <th style={thStyle("right")}>Prix unitaire</th>
               <th style={thStyle("right")}>Montant</th>
             </tr></thead>
@@ -1298,13 +1624,13 @@ function SimulateurTravaux() {
 
       {/* Section Prix fixe */}
       <div style={sectionStyle}>
-        <SectionHeader icon="ðŸ " title={"Prix fixe (logement " + (grand ? "> 50 mÂ²" : "< 50 mÂ²") + ")"} badge={"Sous-total : " + fmtEur(calcF.total)} />
+        <SectionHeader icon="🏠" title={"Prix fixe (logement " + (grand ? "> 50 m²" : "< 50 m²") + ")"} badge={"Sous-total : " + fmtEur(calcF.total)} />
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
-              <th style={thStyle("center")}>Ã€ rÃ©nover ?</th>
-              <th style={thStyle("center")}>Qui rÃ©nove ?</th>
+              <th style={thStyle("center")}>À rénover ?</th>
+              <th style={thStyle("center")}>Qui rénove ?</th>
               <th style={thStyle("right")}>Prix</th>
               <th style={thStyle("right")}>Montant</th>
             </tr></thead>
@@ -1313,16 +1639,16 @@ function SimulateurTravaux() {
         </div>
       </div>
 
-      {/* Section Prix au mÂ² (habitable) */}
+      {/* Section Prix au m² (habitable) */}
       <div style={sectionStyle}>
-        <SectionHeader icon="ðŸ“" title={"Prix au mÂ² habitable (" + fmt(surf, 0) + " mÂ²)"} badge={"Sous-total : " + fmtEur(calcM.total)} />
+        <SectionHeader icon="📏" title={"Prix au m² habitable (" + fmt(surf, 0) + " m²)"} badge={"Sous-total : " + fmtEur(calcM.total)} />
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
-              <th style={thStyle("center")}>Ã€ rÃ©nover ?</th>
-              <th style={thStyle("center")}>Qui rÃ©nove ?</th>
-              <th style={thStyle("right")}>Prix/mÂ²</th>
+              <th style={thStyle("center")}>À rénover ?</th>
+              <th style={thStyle("center")}>Qui rénove ?</th>
+              <th style={thStyle("right")}>Prix/m²</th>
               <th style={thStyle("right")}>Montant</th>
             </tr></thead>
             <tbody>{renderRows(TRAVAUX_DATA.m2, stateM, setStateM, "m2_logement")}</tbody>
@@ -1330,37 +1656,37 @@ function SimulateurTravaux() {
         </div>
       </div>
 
-      {/* Section BÃ¢timent */}
+      {/* Section Bâtiment */}
       <div style={sectionStyle}>
-        <SectionHeader icon="ðŸ—ï¸" title="BÃ¢timent (toiture & faÃ§ade)" badge={"Sous-total : " + fmtEur(calcB.total)} />
+        <SectionHeader icon="🏗️" title="Bâtiment (toiture & façade)" badge={"Sous-total : " + fmtEur(calcB.total)} />
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
-              <th style={thStyle("center")}>Ã€ rÃ©nover ?</th>
-              <th style={thStyle("center")}>Qui rÃ©nove ?</th>
-              <th style={thStyle("right")}>Prix/mÂ²</th>
+              <th style={thStyle("center")}>À rénover ?</th>
+              <th style={thStyle("center")}>Qui rénove ?</th>
+              <th style={thStyle("right")}>Prix/m²</th>
               <th style={thStyle("right")}>Montant</th>
             </tr></thead>
             <tbody>
-              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 11, fontWeight: 600, color: "#94a3b8", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Toiture â€” {fmt(surfT, 0)} mÂ²</td></tr>
+              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 11, fontWeight: 600, color: "#94a3b8", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Toiture — {fmt(surfT, 0)} m²</td></tr>
               {renderRows(TRAVAUX_DATA.batiment.filter(function(i) { return i.type === "toiture"; }), stateB, setStateB, "m2_toiture")}
-              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 11, fontWeight: 600, color: "#94a3b8", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>FaÃ§ade â€” {fmt(surfF, 0)} mÂ²</td></tr>
+              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 11, fontWeight: 600, color: "#94a3b8", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Façade — {fmt(surfF, 0)} m²</td></tr>
               {renderRows(TRAVAUX_DATA.batiment.filter(function(i) { return i.type === "facade"; }), stateB, setStateB, "m2_facade")}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* RÃ©cap total */}
+      {/* Récap total */}
       <div style={Object.assign({}, sectionStyle, { background: "linear-gradient(135deg,rgba(99,102,241,0.08),rgba(56,189,248,0.08))", border: "1.5px solid rgba(99,102,241,0.25)" })}>
-        <SectionHeader icon="ðŸ’°" title="RÃ©capitulatif total" />
+        <SectionHeader icon="💰" title="Récapitulatif total" />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 16 }}>
           {[
-            { label: "QuantitÃ©", value: fmtEur(calcQ.total), color: "#6366f1" },
+            { label: "Quantité", value: fmtEur(calcQ.total), color: "#6366f1" },
             { label: "Prix fixe", value: fmtEur(calcF.total), color: "#8b5cf6" },
-            { label: "Au mÂ² habitable", value: fmtEur(calcM.total), color: "#0ea5e9" },
-            { label: "BÃ¢timent", value: fmtEur(calcB.total), color: "#d97706" },
+            { label: "Au m² habitable", value: fmtEur(calcM.total), color: "#0ea5e9" },
+            { label: "Bâtiment", value: fmtEur(calcB.total), color: "#d97706" },
           ].map(function(c) {
             return (
               <div key={c.label} style={{ background: "rgba(255,255,255,0.75)", borderRadius: 12, padding: "10px 14px", border: "1px solid rgba(148,163,184,0.2)" }}>
@@ -1372,12 +1698,12 @@ function SimulateurTravaux() {
         </div>
         <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ background: "rgba(255,255,255,0.85)", borderRadius: 16, padding: "14px 20px", flex: 1, minWidth: 180, border: "1px solid rgba(99,102,241,0.25)" }}>
-            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>CoÃ»t total estimÃ©</div>
+            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>Coût total estimé</div>
             <div style={{ fontSize: 32, fontWeight: 800, color: "#4338ca" }}>{fmtEur(totalGeneral)}</div>
           </div>
           <div style={{ background: "rgba(255,255,255,0.85)", borderRadius: 16, padding: "14px 20px", flex: 1, minWidth: 180, border: "1px solid rgba(148,163,184,0.2)" }}>
-            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>Prix rÃ©novation / mÂ² habitable</div>
-            <div style={{ fontSize: 32, fontWeight: 800, color: "#0f172a" }}>{fmt(prixM2, 0)} <span style={{ fontSize: 16 }}>â‚¬/mÂ²</span></div>
+            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>Prix rénovation / m² habitable</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: "#0f172a" }}>{fmt(prixM2, 0)} <span style={{ fontSize: 16 }}>€/m²</span></div>
           </div>
         </div>
       </div>
@@ -1429,7 +1755,7 @@ function ComparateurOffres() {
     return Math.abs(val - best) < 0.01;
   };
 
-  // Score global pondÃ©rÃ© /100
+  // Score global pondéré /100
   const calculerScore = function(r) {
     var score = 0;
     const ecartMens = meilleurMensualite > 0 ? (r.calc.mensualiteTotale - meilleurMensualite) / meilleurMensualite : 0;
@@ -1462,14 +1788,14 @@ function ComparateurOffres() {
   const inputSmall = { background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 8, padding: "5px 8px", fontSize: 13, color: "#0f172a", outline: "none", width: "100%" };
 
   const BestBadge = function() {
-    return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 999, background: "rgba(22,163,74,0.15)", color: "#15803d", border: "1px solid rgba(22,163,74,0.3)", marginLeft: 5 }}>âœ“ Meilleur</span>;
+    return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 999, background: "rgba(22,163,74,0.15)", color: "#15803d", border: "1px solid rgba(22,163,74,0.3)", marginLeft: 5 }}>✓ Meilleur</span>;
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: 12, color: "#94a3b8" }}>{offres.length} offre{offres.length > 1 ? "s" : ""} comparÃ©e{offres.length > 1 ? "s" : ""} Â· Sauvegarde automatique</div>
+        <div style={{ fontSize: 12, color: "#94a3b8" }}>{offres.length} offre{offres.length > 1 ? "s" : ""} comparée{offres.length > 1 ? "s" : ""} · Sauvegarde automatique</div>
         <button onClick={ajouterOffre} style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>+ Ajouter une offre</button>
       </div>
 
@@ -1487,18 +1813,18 @@ function ComparateurOffres() {
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: couleur }} />
                   <input value={o.banque} onChange={function(e) { updateOffre(o.id, "banque", e.target.value); }} style={{ fontWeight: 700, fontSize: 14, color: "#0f172a", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed " + couleur + "66", width: 140 }} />
                 </div>
-                <button onClick={function() { supprimerOffre(o.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 8, padding: "3px 9px", color: "#dc2626", cursor: offres.length > 1 ? "pointer" : "not-allowed", fontSize: 12, opacity: offres.length > 1 ? 1 : 0.3 }}>âœ•</button>
+                <button onClick={function() { supprimerOffre(o.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 8, padding: "3px 9px", color: "#dc2626", cursor: offres.length > 1 ? "pointer" : "not-allowed", fontSize: 12, opacity: offres.length > 1 ? 1 : 0.3 }}>✕</button>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[
-                  { label: "Montant empruntÃ©", field: "montant", unit: "â‚¬", step: "5000" },
-                  { label: "DurÃ©e", field: "duree", unit: "ans", step: "1" },
+                  { label: "Montant emprunté", field: "montant", unit: "€", step: "5000" },
+                  { label: "Durée", field: "duree", unit: "ans", step: "1" },
                   { label: "Taux hors assurance", field: "taux", unit: "%", step: "0.05" },
                   { label: "Taux assurance", field: "assurance", unit: "%", step: "0.01" },
-                  { label: "Frais de dossier", field: "fraisDossier", unit: "â‚¬", step: "100" },
-                  { label: "Frais de garantie", field: "fraisGarantie", unit: "â‚¬", step: "100" },
-                  { label: "Frais de courtier", field: "fraisCourtier", unit: "â‚¬", step: "100" },
+                  { label: "Frais de dossier", field: "fraisDossier", unit: "€", step: "100" },
+                  { label: "Frais de garantie", field: "fraisGarantie", unit: "€", step: "100" },
+                  { label: "Frais de courtier", field: "fraisCourtier", unit: "€", step: "100" },
                 ].map(function(f) {
                   return (
                     <div key={f.field}>
@@ -1515,8 +1841,8 @@ function ComparateurOffres() {
                 <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 5 }}>
                   <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Options</div>
                   {[
-                    { field: "modulation", label: "Modulation des mensualitÃ©s" },
-                    { field: "remboursementAnticipe", label: "Remboursement anticipÃ© sans pÃ©nalitÃ©" },
+                    { field: "modulation", label: "Modulation des mensualités" },
+                    { field: "remboursementAnticipe", label: "Remboursement anticipé sans pénalité" },
                     { field: "domiciliation", label: "Domiciliation bancaire obligatoire" },
                   ].map(function(opt) {
                     return (
@@ -1524,26 +1850,26 @@ function ComparateurOffres() {
                         <span style={{ fontSize: 11, color: "#475569" }}>{opt.label}</span>
                         <button onClick={function() { updateOffre(o.id, opt.field, !o[opt.field]); }}
                           style={{ padding: "2px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, background: o[opt.field] ? "rgba(99,102,241,0.9)" : "rgba(220,38,38,0.1)", color: o[opt.field] ? "#fff" : "#dc2626", boxShadow: o[opt.field] ? "0 2px 6px rgba(99,102,241,0.3)" : "inset 0 0 0 1px rgba(220,38,38,0.3)" }}>
-                          {o[opt.field] ? "âœ“ Oui" : "âœ— Non"}
+                          {o[opt.field] ? "✓ Oui" : "✗ Non"}
                         </button>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* DiffÃ©rÃ© */}
+                {/* Différé */}
                 <div style={{ marginTop: 4, paddingTop: 6, borderTop: "1px solid rgba(148,163,184,0.15)" }}>
-                  <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>DiffÃ©rÃ©</div>
+                  <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Différé</div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                    <span style={{ fontSize: 11, color: "#475569" }}>DiffÃ©rÃ© de remboursement</span>
+                    <span style={{ fontSize: 11, color: "#475569" }}>Différé de remboursement</span>
                     <button onClick={function() { updateOffre(o.id, "differe", !o.differe); }}
                       style={{ padding: "2px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, background: o.differe ? "rgba(99,102,241,0.9)" : "rgba(220,38,38,0.1)", color: o.differe ? "#fff" : "#dc2626", boxShadow: o.differe ? "0 2px 6px rgba(99,102,241,0.3)" : "inset 0 0 0 1px rgba(220,38,38,0.3)" }}>
-                      {o.differe ? "âœ“ Oui" : "âœ— Non"}
+                      {o.differe ? "✓ Oui" : "✗ Non"}
                     </button>
                   </div>
                   {o.differe && (
                     <div>
-                      <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2 }}>DurÃ©e du diffÃ©rÃ©</div>
+                      <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2 }}>Durée du différé</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <input type="number" value={o.dureeDiffere} step="1" min="0" max="24" onChange={function(e) { updateOffre(o.id, "dureeDiffere", e.target.value); }} style={inputSmall} />
                         <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 28 }}>mois</span>
@@ -1556,7 +1882,7 @@ function ComparateurOffres() {
                 <div style={{ marginTop: 4, paddingTop: 6, borderTop: "1px solid rgba(148,163,184,0.15)" }}>
                   <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Type de garantie</div>
                   <div style={{ display: "flex", gap: 6 }}>
-                    {[{ val: "caution", label: "ðŸ¤ Cautionnement" }, { val: "hypotheque", label: "ðŸ  HypothÃ¨que" }].map(function(g) {
+                    {[{ val: "caution", label: "🤝 Cautionnement" }, { val: "hypotheque", label: "🏠 Hypothèque" }].map(function(g) {
                       const isActive = o.typeGarantie === g.val;
                       return (
                         <button key={g.val} onClick={function() { updateOffre(o.id, "typeGarantie", g.val); }}
@@ -1568,28 +1894,28 @@ function ComparateurOffres() {
                   </div>
                   {o.typeGarantie === "hypotheque" && (
                     <div style={{ marginTop: 5, background: "rgba(254,243,199,0.8)", borderRadius: 8, padding: "5px 8px", fontSize: 10, color: "#92400e" }}>
-                      âš  HypothÃ¨que : frais de mainlevÃ©e Ã  prÃ©voir en cas de revente anticipÃ©e
+                      ⚠ Hypothèque : frais de mainlevée à prévoir en cas de revente anticipée
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Mini rÃ©sultat */}
+              {/* Mini résultat */}
               <div style={{ marginTop: 12, background: couleur + "10", borderRadius: 12, padding: "10px 12px", border: "1px solid " + couleur + "33" }}>
-                <div style={{ fontSize: 11, color: "#64748b" }}>MensualitÃ© totale</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: couleur }}>{fmt(r.mensualiteTotale, 0)} â‚¬<span style={{ fontSize: 13, fontWeight: 400 }}>/mois</span></div>
-                <div style={{ fontSize: 11, color: "#94a3b8" }}>dont {fmt(r.mensualiteAssur, 0)} â‚¬ assurance</div>
+                <div style={{ fontSize: 11, color: "#64748b" }}>Mensualité totale</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: couleur }}>{fmt(r.mensualiteTotale, 0)} €<span style={{ fontSize: 13, fontWeight: 400 }}>/mois</span></div>
+                <div style={{ fontSize: 11, color: "#94a3b8" }}>dont {fmt(r.mensualiteAssur, 0)} € assurance</div>
               </div>
 
               {/* Score global */}
               <div style={{ marginTop: 8, background: scoreColor + "10", borderRadius: 10, padding: "8px 12px", border: "1px solid " + scoreColor + "33", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Score global</div>
-                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>MensualitÃ© Â· CoÃ»t Â· TAEG Â· DiffÃ©rÃ© Â· Garantie</div>
+                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>Mensualité · Coût · TAEG · Différé · Garantie</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div style={{ fontSize: 26, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{s}<span style={{ fontSize: 13, fontWeight: 500 }}>/100</span></div>
-                  {s === meilleurScore && <div style={{ fontSize: 10, fontWeight: 700, color: "#15803d", marginTop: 2 }}>ðŸ† Meilleure offre</div>}
+                  {s === meilleurScore && <div style={{ fontSize: 10, fontWeight: 700, color: "#15803d", marginTop: 2 }}>🏆 Meilleure offre</div>}
                 </div>
               </div>
             </div>
@@ -1599,12 +1925,12 @@ function ComparateurOffres() {
 
       {/* Tableau comparatif */}
       <div style={SECTION}>
-        <SectionHeader icon="âš–ï¸" title="Tableau comparatif" />
+        <SectionHeader icon="⚖️" title="Tableau comparatif" />
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
-                <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase" }}>CritÃ¨re</th>
+                <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase" }}>Critère</th>
                 {offres.map(function(o, idx) {
                   return <th key={o.id} style={{ padding: "10px 12px", textAlign: "right", fontSize: 13, fontWeight: 700, color: couleurs[idx % couleurs.length] }}>{o.banque}</th>;
                 })}
@@ -1612,24 +1938,24 @@ function ComparateurOffres() {
             </thead>
             <tbody>
               {[
-                { label: "â­ Score global /100",              fn: function(r) { return getScore(r.id) + " / 100"; }, bestVal: meilleurScore, bestFn: function(r) { return getScore(r.id); }, highlight: true },
+                { label: "⭐ Score global /100",              fn: function(r) { return getScore(r.id) + " / 100"; }, bestVal: meilleurScore, bestFn: function(r) { return getScore(r.id); }, highlight: true },
                 { label: "Montant",                           fn: function(r) { return fmtEur(pf(r.offre.montant)); } },
-                { label: "DurÃ©e",                             fn: function(r) { return fmt(pf(r.offre.duree), 0) + " ans"; } },
-                { label: "Taux crÃ©dit",                       fn: function(r) { return pf(r.offre.taux).toFixed(2) + " %"; } },
+                { label: "Durée",                             fn: function(r) { return fmt(pf(r.offre.duree), 0) + " ans"; } },
+                { label: "Taux crédit",                       fn: function(r) { return pf(r.offre.taux).toFixed(2) + " %"; } },
                 { label: "Taux assurance",                    fn: function(r) { return pf(r.offre.assurance).toFixed(2) + " %"; } },
-                { label: "MensualitÃ© crÃ©dit",                 fn: function(r) { return fmt(r.calc.mensualiteCredit, 0) + " â‚¬"; } },
-                { label: "MensualitÃ© assurance",              fn: function(r) { return fmt(r.calc.mensualiteAssur, 0) + " â‚¬"; } },
-                { label: "MensualitÃ© totale",                 fn: function(r) { return fmt(r.calc.mensualiteTotale, 0) + " â‚¬"; }, bestVal: meilleurMensualite, bestFn: function(r) { return r.calc.mensualiteTotale; }, highlight: true },
-                { label: "CoÃ»t des intÃ©rÃªts",                 fn: function(r) { return fmtEur(r.calc.coutInterets); } },
-                { label: "CoÃ»t assurance totale",             fn: function(r) { return fmtEur(r.calc.coutAssurance); } },
+                { label: "Mensualité crédit",                 fn: function(r) { return fmt(r.calc.mensualiteCredit, 0) + " €"; } },
+                { label: "Mensualité assurance",              fn: function(r) { return fmt(r.calc.mensualiteAssur, 0) + " €"; } },
+                { label: "Mensualité totale",                 fn: function(r) { return fmt(r.calc.mensualiteTotale, 0) + " €"; }, bestVal: meilleurMensualite, bestFn: function(r) { return r.calc.mensualiteTotale; }, highlight: true },
+                { label: "Coût des intérêts",                 fn: function(r) { return fmtEur(r.calc.coutInterets); } },
+                { label: "Coût assurance totale",             fn: function(r) { return fmtEur(r.calc.coutAssurance); } },
                 { label: "Frais (dossier+garantie+courtier)", fn: function(r) { return fmtEur(r.calc.fraisTotaux); } },
-                { label: "CoÃ»t total",                        fn: function(r) { return fmtEur(r.calc.coutTotal); }, bestVal: meilleurCoutTotal, bestFn: function(r) { return r.calc.coutTotal; }, highlight: true },
-                { label: "TAEG estimÃ©",                       fn: function(r) { return r.calc.taeg.toFixed(2) + " %"; }, bestVal: meilleurTaeg, bestFn: function(r) { return r.calc.taeg; }, highlight: true },
-                { label: "DiffÃ©rÃ©",                           fn: function(r) { return r.offre.differe ? "âœ“ " + pf(r.offre.dureeDiffere) + " mois" : "âœ— Non"; }, bestVal: meilleurDiffere > 0 ? meilleurDiffere : null, bestFn: function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }, highlight: meilleurDiffere > 0 },
-                { label: "Type de garantie",                  fn: function(r) { return r.offre.typeGarantie === "hypotheque" ? "ðŸ  HypothÃ¨que" : "ðŸ¤ Cautionnement"; }, bestVal: "caution", bestFn: function(r) { return r.offre.typeGarantie; }, highlight: true },
-                { label: "Modulation mensualitÃ©s",            fn: function(r) { return r.offre.modulation ? "âœ“ Oui" : "âœ— Non"; } },
-                { label: "Remb. anticipÃ© sans pÃ©nalitÃ©",      fn: function(r) { return r.offre.remboursementAnticipe ? "âœ“ Oui" : "âœ— Non"; } },
-                { label: "Domiciliation obligatoire",         fn: function(r) { return r.offre.domiciliation ? "âš  Oui" : "âœ“ Non"; } },
+                { label: "Coût total",                        fn: function(r) { return fmtEur(r.calc.coutTotal); }, bestVal: meilleurCoutTotal, bestFn: function(r) { return r.calc.coutTotal; }, highlight: true },
+                { label: "TAEG estimé",                       fn: function(r) { return r.calc.taeg.toFixed(2) + " %"; }, bestVal: meilleurTaeg, bestFn: function(r) { return r.calc.taeg; }, highlight: true },
+                { label: "Différé",                           fn: function(r) { return r.offre.differe ? "✓ " + pf(r.offre.dureeDiffere) + " mois" : "✗ Non"; }, bestVal: meilleurDiffere > 0 ? meilleurDiffere : null, bestFn: function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }, highlight: meilleurDiffere > 0 },
+                { label: "Type de garantie",                  fn: function(r) { return r.offre.typeGarantie === "hypotheque" ? "🏠 Hypothèque" : "🤝 Cautionnement"; }, bestVal: "caution", bestFn: function(r) { return r.offre.typeGarantie; }, highlight: true },
+                { label: "Modulation mensualités",            fn: function(r) { return r.offre.modulation ? "✓ Oui" : "✗ Non"; } },
+                { label: "Remb. anticipé sans pénalité",      fn: function(r) { return r.offre.remboursementAnticipe ? "✓ Oui" : "✗ Non"; } },
+                { label: "Domiciliation obligatoire",         fn: function(r) { return r.offre.domiciliation ? "⚠ Oui" : "✓ Non"; } },
               ].map(function(row, idx) {
                 return (
                   <tr key={row.label} style={{ borderBottom: "1px solid rgba(148,163,184,0.1)", background: row.highlight ? "rgba(99,102,241,0.03)" : (idx % 2 === 0 ? "rgba(248,250,252,0.5)" : "transparent") }}>
@@ -1653,15 +1979,15 @@ function ComparateurOffres() {
 
       {/* Verdict */}
       <div style={Object.assign({}, SECTION, { background: "linear-gradient(135deg,rgba(99,102,241,0.07),rgba(56,189,248,0.07))", border: "1.5px solid rgba(99,102,241,0.2)" })}>
-        <SectionHeader icon="ðŸ†" title="Verdict" />
+        <SectionHeader icon="🏆" title="Verdict" />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
           {[
             { label: "Meilleur score global",    best: meilleurScore,                                fn: function(r) { return getScore(r.id); },                                    format: function(v) { return v + " / 100"; } },
-            { label: "MensualitÃ© la plus basse", best: meilleurMensualite,                          fn: function(r) { return r.calc.mensualiteTotale; },                           format: function(v) { return fmt(v, 0) + " â‚¬/mois"; } },
-            { label: "CoÃ»t total le plus bas",   best: meilleurCoutTotal,                           fn: function(r) { return r.calc.coutTotal; },                                  format: function(v) { return fmtEur(v); } },
+            { label: "Mensualité la plus basse", best: meilleurMensualite,                          fn: function(r) { return r.calc.mensualiteTotale; },                           format: function(v) { return fmt(v, 0) + " €/mois"; } },
+            { label: "Coût total le plus bas",   best: meilleurCoutTotal,                           fn: function(r) { return r.calc.coutTotal; },                                  format: function(v) { return fmtEur(v); } },
             { label: "TAEG le plus bas",         best: meilleurTaeg,                                fn: function(r) { return r.calc.taeg; },                                       format: function(v) { return v.toFixed(2) + " %"; } },
-            { label: "DiffÃ©rÃ© le plus long",     best: meilleurDiffere > 0 ? meilleurDiffere : null, fn: function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }, format: function(v) { return v + " mois"; } },
-            { label: "Meilleure garantie",       best: "caution",                                   fn: function(r) { return r.offre.typeGarantie; },                              format: function() { return "ðŸ¤ Cautionnement"; } },
+            { label: "Différé le plus long",     best: meilleurDiffere > 0 ? meilleurDiffere : null, fn: function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }, format: function(v) { return v + " mois"; } },
+            { label: "Meilleure garantie",       best: "caution",                                   fn: function(r) { return r.offre.typeGarantie; },                              format: function() { return "🤝 Cautionnement"; } },
           ].filter(function(c) { return c.best !== null; }).map(function(critere) {
             const winner = resultats.find(function(r) { return isBest(critere.fn(r), critere.best); });
             if (!winner) return null;
@@ -1713,7 +2039,7 @@ function CalculateurPlusValue() {
     const prixRevient = pa + fa + tv;
     const pvBrute = pv - fv - prixRevient;
 
-    // CrÃ©dit
+    // Crédit
     const M = pf(vals.montantCredit);
     const tMensuel = pf(vals.tauxCredit) / 100 / 12;
     const nMois = Math.max(1, pf(vals.dureeCredit)) * 12;
@@ -1741,7 +2067,7 @@ function CalculateurPlusValue() {
 
     if (pvBrute <= 0) return base0;
 
-    // RÃ©sidence principale : exonÃ©ration totale
+    // Résidence principale : exonération totale
     if (typeBien === "resid-principale") return Object.assign({}, base0, { abattIR: 100, abattPS: 100, exonere: true, pvNette: produitNetAvantImpot });
 
     // ---- SCI IS ----
@@ -1803,13 +2129,13 @@ function CalculateurPlusValue() {
 
         {/* Colonne gauche - Inputs */}
         <div style={SECTION}>
-          <SectionHeader icon="ðŸ " title="ParamÃ¨tres de la vente" />
+          <SectionHeader icon="🏠" title="Paramètres de la vente" />
 
           {/* Type de bien */}
           <div style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 6 }}>Type de bien</div>
             <div style={{ display: "flex", gap: 6 }}>
-              {[{ val: "resid-principale", label: "ðŸ¡ RÃ©sidence principale" }, { val: "non-resid", label: "ðŸ¢ Locatif / secondaire" }].map(function(t) {
+              {[{ val: "resid-principale", label: "🏡 Résidence principale" }, { val: "non-resid", label: "🏢 Locatif / secondaire" }].map(function(t) {
                 const isA = typeBien === t.val;
                 return (
                   <button key={t.val} onClick={function() { setTypeBien(t.val); }}
@@ -1821,17 +2147,17 @@ function CalculateurPlusValue() {
             </div>
             {typeBien === "resid-principale" && (
               <div style={{ marginTop: 8, background: "rgba(220,252,231,0.8)", borderRadius: 8, padding: "6px 10px", fontSize: 11, color: "#15803d" }}>
-                âœ… ExonÃ©ration totale, quelle que soit la durÃ©e de dÃ©tention.
+                ✅ Exonération totale, quelle que soit la durée de détention.
               </div>
             )}
           </div>
 
-          {/* RÃ©gime fiscal */}
+          {/* Régime fiscal */}
           {typeBien !== "resid-principale" && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 6 }}>RÃ©gime fiscal</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 6 }}>Régime fiscal</div>
               <div style={{ display: "flex", gap: 6 }}>
-                {[{ val: "particulier", label: "ðŸ‘¤ Particulier / LMNP" }, { val: "sci-is", label: "ðŸ¢ SCI Ã  l'IS" }].map(function(r) {
+                {[{ val: "particulier", label: "👤 Particulier / LMNP" }, { val: "sci-is", label: "🏢 SCI à l'IS" }].map(function(r) {
                   const isA = regime === r.val;
                   return (
                     <button key={r.val} onClick={function() { setRegime(r.val); }}
@@ -1845,12 +2171,12 @@ function CalculateurPlusValue() {
           )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {/* Ã€ l'achat */}
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5 }}>Ã€ l'achat</div>
+            {/* À l'achat */}
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5 }}>À l'achat</div>
             {[
-              { field: "prixAchat",    label: "Prix d'achat",              unit: "â‚¬", step: "1000" },
-              { field: "fraisAchat",   label: "Frais notaire + agence",    unit: "â‚¬", step: "500"  },
-              { field: "travauxDeduc", label: "Travaux dÃ©ductibles",       unit: "â‚¬", step: "500"  },
+              { field: "prixAchat",    label: "Prix d'achat",              unit: "€", step: "1000" },
+              { field: "fraisAchat",   label: "Frais notaire + agence",    unit: "€", step: "500"  },
+              { field: "travauxDeduc", label: "Travaux déductibles",       unit: "€", step: "500"  },
             ].map(function(f) {
               return (
                 <div key={f.field}>
@@ -1864,11 +2190,11 @@ function CalculateurPlusValue() {
               );
             })}
 
-            {/* Ã€ la vente */}
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Ã€ la vente</div>
+            {/* À la vente */}
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>À la vente</div>
             {[
-              { field: "prixVente",  label: "Prix de vente",        unit: "â‚¬", step: "1000" },
-              { field: "fraisVente", label: "Frais d'agence vente",  unit: "â‚¬", step: "500"  },
+              { field: "prixVente",  label: "Prix de vente",        unit: "€", step: "1000" },
+              { field: "fraisVente", label: "Frais d'agence vente",  unit: "€", step: "500"  },
             ].map(function(f) {
               return (
                 <div key={f.field}>
@@ -1885,7 +2211,7 @@ function CalculateurPlusValue() {
             {/* SCI IS params */}
             {regime === "sci-is" && typeBien !== "resid-principale" && (
               <>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>ParamÃ¨tres SCI IS</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Paramètres SCI IS</div>
                 <div>
                   <label style={labelS}>Taux d'amortissement annuel</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -1893,12 +2219,12 @@ function CalculateurPlusValue() {
                       onChange={function(e) { handleChange("coefAmortissement", e.target.value); }} style={inputS} />
                     <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 40 }}>%/an</span>
                   </div>
-                  <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>GÃ©nÃ©ralement 2.5% pour l'immobilier (hors terrain)</div>
+                  <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>Généralement 2.5% pour l'immobilier (hors terrain)</div>
                 </div>
                 <div>
                   <label style={labelS}>Taux IS applicable</label>
                   <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
-                    {[{ val: "15", label: "15% (â‰¤ 42 500 â‚¬)" }, { val: "25", label: "25% (taux normal)" }].map(function(t) {
+                    {[{ val: "15", label: "15% (≤ 42 500 €)" }, { val: "25", label: "25% (taux normal)" }].map(function(t) {
                       const isA = vals.tauxIS === t.val;
                       return (
                         <button key={t.val} onClick={function() { handleChange("tauxIS", t.val); }}
@@ -1912,12 +2238,12 @@ function CalculateurPlusValue() {
               </>
             )}
 
-            {/* CrÃ©dit */}
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>CrÃ©dit immobilier</div>
+            {/* Crédit */}
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Crédit immobilier</div>
             {[
-              { field: "montantCredit", label: "Montant empruntÃ©",    unit: "â‚¬",   step: "5000" },
+              { field: "montantCredit", label: "Montant emprunté",    unit: "€",   step: "5000" },
               { field: "tauxCredit",    label: "Taux hors assurance", unit: "%",   step: "0.05" },
-              { field: "dureeCredit",   label: "DurÃ©e du crÃ©dit",     unit: "ans", step: "1"    },
+              { field: "dureeCredit",   label: "Durée du crédit",     unit: "ans", step: "1"    },
             ].map(function(f) {
               return (
                 <div key={f.field}>
@@ -1931,12 +2257,12 @@ function CalculateurPlusValue() {
               );
             })}
             <div>
-              <label style={labelS}>Date de dÃ©but du crÃ©dit</label>
+              <label style={labelS}>Date de début du crédit</label>
               <div style={{ display: "flex", gap: 8 }}>
                 <select value={debutMois} onChange={function(e) { setDebutMois(e.target.value); }}
                   style={{ flex: 1, background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" }}>
                   {["01","02","03","04","05","06","07","08","09","10","11","12"].map(function(m, i) {
-                    const labels = ["Janvier","FÃ©vrier","Mars","Avril","Mai","Juin","Juillet","AoÃ»t","Septembre","Octobre","Novembre","DÃ©cembre"];
+                    const labels = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
                     return <option key={m} value={m}>{labels[i]}</option>;
                   })}
                 </select>
@@ -1949,8 +2275,8 @@ function CalculateurPlusValue() {
               </div>
             </div>
 
-            {/* DÃ©tention */}
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>DurÃ©e de dÃ©tention</div>
+            {/* Détention */}
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Durée de détention</div>
             <div>
               <label style={labelS}>Revente dans : <strong style={{ color: "#4338ca" }}>{duree} ans</strong></label>
               <input type="range" min="0" max="30" value={duree}
@@ -1963,15 +2289,15 @@ function CalculateurPlusValue() {
           </div>
         </div>
 
-        {/* Colonne droite - RÃ©sultats */}
+        {/* Colonne droite - Résultats */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
           {/* Prix de revient */}
           <div style={SECTION}>
-            <SectionHeader icon="ðŸ“" title="Plus-value & prix de revient" />
+            <SectionHeader icon="📐" title="Plus-value & prix de revient" />
             <StatRow label="Prix d'achat" value={fmtEur(pf(vals.prixAchat))} />
             <StatRow label="Frais notaire + agence" value={"+ " + fmtEur(pf(vals.fraisAchat))} />
-            <StatRow label="Travaux dÃ©ductibles" value={"+ " + fmtEur(pf(vals.travauxDeduc))} />
+            <StatRow label="Travaux déductibles" value={"+ " + fmtEur(pf(vals.travauxDeduc))} />
             <StatRow label="Prix de revient total" value={fmtEur(calc.prixRevient)} bold color="#0f172a" border={false} />
             <div style={{ margin: "10px 0", height: 1, background: "rgba(148,163,184,0.2)" }} />
             <StatRow label="Prix de vente net vendeur" value={fmtEur(pf(vals.prixVente) - pf(vals.fraisVente))} color="#16a34a" />
@@ -1983,37 +2309,37 @@ function CalculateurPlusValue() {
             </div>
           </div>
 
-          {/* CrÃ©dit */}
+          {/* Crédit */}
           {pf(vals.montantCredit) > 0 && (
             <div style={SECTION}>
-              <SectionHeader icon="ðŸ¦" title="Remboursement anticipÃ© du crÃ©dit" />
-              <StatRow label="Capital empruntÃ©" value={fmtEur(pf(vals.montantCredit))} />
-              <StatRow label="MensualitÃ© estimÃ©e" value={fmt(calc.mensualite, 0) + " â‚¬/mois"} />
-              <StatRow label="Mois Ã©coulÃ©s Ã  la revente" value={calc.moisEcoules + " mois"} />
-              <StatRow label="Capital dÃ©jÃ  remboursÃ©" value={fmtEur(calc.creditRembourse)} color="#16a34a" />
-              <StatRow label="Capital restant dÃ»" value={"â€“ " + fmtEur(calc.creditRestant)} color="#dc2626" bold border={false} />
+              <SectionHeader icon="🏦" title="Remboursement anticipé du crédit" />
+              <StatRow label="Capital emprunté" value={fmtEur(pf(vals.montantCredit))} />
+              <StatRow label="Mensualité estimée" value={fmt(calc.mensualite, 0) + " €/mois"} />
+              <StatRow label="Mois écoulés à la revente" value={calc.moisEcoules + " mois"} />
+              <StatRow label="Capital déjà remboursé" value={fmtEur(calc.creditRembourse)} color="#16a34a" />
+              <StatRow label="Capital restant dû" value={"– " + fmtEur(calc.creditRestant)} color="#dc2626" bold border={false} />
               <div style={{ marginTop: 8, background: "rgba(254,243,199,0.7)", borderRadius: 10, padding: "6px 10px", fontSize: 10, color: "#92400e", border: "1px solid rgba(251,191,36,0.3)" }}>
-                âš  IRA (indemnitÃ©s remboursement anticipÃ©) non incluses â€” max 3% du capital restant ou 6 mois d'intÃ©rÃªts.
+                ⚠ IRA (indemnités remboursement anticipé) non incluses — max 3% du capital restant ou 6 mois d'intérêts.
               </div>
             </div>
           )}
 
-          {/* Abattements â€” uniquement particulier */}
+          {/* Abattements — uniquement particulier */}
           {typeBien !== "resid-principale" && regime === "particulier" && calc.pvBrute > 0 && (
             <div style={SECTION}>
-              <SectionHeader icon="â³" title={"Abattements â€” " + calc.ans + " ans"} />
+              <SectionHeader icon="⏳" title={"Abattements — " + calc.ans + " ans"} />
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
-                <BarAb label="Abattement IR (exo Ã  22 ans)" value={calc.abattIR} color="#6366f1" />
-                <BarAb label="Abattement PS (exo Ã  30 ans)" value={Math.round(calc.abattPS)} color="#0ea5e9" />
+                <BarAb label="Abattement IR (exo à 22 ans)" value={calc.abattIR} color="#6366f1" />
+                <BarAb label="Abattement PS (exo à 30 ans)" value={Math.round(calc.abattPS)} color="#0ea5e9" />
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {[{ ans: 6, label: "DÃ©but abattements" }, { ans: 22, label: "Exo IR" }, { ans: 30, label: "Exo totale" }].map(function(j) {
+                {[{ ans: 6, label: "Début abattements" }, { ans: 22, label: "Exo IR" }, { ans: 30, label: "Exo totale" }].map(function(j) {
                   const atteint = calc.ans >= j.ans;
                   return (
                     <div key={j.ans} style={{ flex: 1, minWidth: 80, padding: "6px 8px", borderRadius: 8, textAlign: "center", background: atteint ? "rgba(99,102,241,0.1)" : "rgba(148,163,184,0.08)", border: "1px solid " + (atteint ? "rgba(99,102,241,0.3)" : "rgba(148,163,184,0.2)") }}>
                       <div style={{ fontSize: 13, fontWeight: 800, color: atteint ? "#4338ca" : "#94a3b8" }}>{j.ans} ans</div>
                       <div style={{ fontSize: 10, color: atteint ? "#6366f1" : "#94a3b8" }}>{j.label}</div>
-                      {atteint && <div style={{ fontSize: 10, color: "#16a34a", fontWeight: 700 }}>âœ“ Atteint</div>}
+                      {atteint && <div style={{ fontSize: 10, color: "#16a34a", fontWeight: 700 }}>✓ Atteint</div>}
                     </div>
                   );
                 })}
@@ -2021,44 +2347,44 @@ function CalculateurPlusValue() {
             </div>
           )}
 
-          {/* SCI IS â€” avertissement + calcul */}
+          {/* SCI IS — avertissement + calcul */}
           {typeBien !== "resid-principale" && regime === "sci-is" && calc.pvBrute > 0 && calc.isSCI && (
             <div style={SECTION}>
-              <SectionHeader icon="ðŸ¢" title="FiscalitÃ© SCI IS" />
+              <SectionHeader icon="🏢" title="Fiscalité SCI IS" />
               <div style={{ marginBottom: 10, background: "rgba(254,243,199,0.7)", borderRadius: 10, padding: "8px 12px", fontSize: 11, color: "#92400e", border: "1px solid rgba(251,191,36,0.3)" }}>
-                âš  En SCI IS, <strong>aucun abattement</strong> pour durÃ©e de dÃ©tention. La base imposable = prix vente âˆ’ valeur nette comptable (les amortissements sont rÃ©intÃ©grÃ©s).
+                ⚠ En SCI IS, <strong>aucun abattement</strong> pour durée de détention. La base imposable = prix vente − valeur nette comptable (les amortissements sont réintégrés).
               </div>
               <StatRow label="Prix d'achat (base amortissable)" value={fmtEur(pf(vals.prixAchat))} />
-              <StatRow label={"Amortissements cumulÃ©s (" + calc.ans + " ans Ã— " + vals.coefAmortissement + "%/an)"} value={"â€“ " + fmtEur(calc.amortissementCumul)} color="#d97706" />
+              <StatRow label={"Amortissements cumulés (" + calc.ans + " ans × " + vals.coefAmortissement + "%/an)"} value={"– " + fmtEur(calc.amortissementCumul)} color="#d97706" />
               <StatRow label="Valeur nette comptable (VNC)" value={fmtEur(calc.valeurNetteCom)} bold color="#0f172a" border={false} />
               <div style={{ margin: "8px 0", height: 1, background: "rgba(148,163,184,0.2)" }} />
               <StatRow label="Prix de vente net" value={fmtEur(pf(vals.prixVente) - pf(vals.fraisVente))} color="#16a34a" />
-              <StatRow label="â€“ Valeur nette comptable" value={"â€“ " + fmtEur(calc.valeurNetteCom)} color="#64748b" />
+              <StatRow label="– Valeur nette comptable" value={"– " + fmtEur(calc.valeurNetteCom)} color="#64748b" />
               <StatRow label="= PV fiscale SCI (base IS)" value={fmtEur(calc.pvFiscaleSCI)} bold color="#dc2626" border={false} />
               <div style={{ margin: "8px 0", height: 1, background: "rgba(148,163,184,0.2)" }} />
-              <StatRow label={"IS Ã  " + (calc.tIS * 100).toFixed(0) + "%"} value={"â€“ " + fmtEur(calc.impotTotal)} color="#dc2626" bold border={false} />
+              <StatRow label={"IS à " + (calc.tIS * 100).toFixed(0) + "%"} value={"– " + fmtEur(calc.impotTotal)} color="#dc2626" bold border={false} />
             </div>
           )}
 
-          {/* FiscalitÃ© particulier */}
+          {/* Fiscalité particulier */}
           {typeBien !== "resid-principale" && regime === "particulier" && calc.pvBrute > 0 && (
             <div style={SECTION}>
-              <SectionHeader icon="ðŸ§¾" title="FiscalitÃ©" />
+              <SectionHeader icon="🧾" title="Fiscalité" />
               {calc.exonere ? (
                 <div style={{ background: "rgba(220,252,231,0.8)", borderRadius: 12, padding: "14px", textAlign: "center", border: "1px solid rgba(22,163,74,0.3)" }}>
-                  <div style={{ fontSize: 24 }}>ðŸŽ‰</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#15803d", marginTop: 4 }}>Totalement exonÃ©rÃ© d'impÃ´t !</div>
-                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>IR et prÃ©lÃ¨vements sociaux = 0 â‚¬</div>
+                  <div style={{ fontSize: 24 }}>🎉</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#15803d", marginTop: 4 }}>Totalement exonéré d'impôt !</div>
+                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>IR et prélèvements sociaux = 0 €</div>
                 </div>
               ) : (
                 <>
                   <StatRow label={"Base IR (abatt. " + calc.abattIR + "%)"} value={fmtEur(calc.baseIR)} />
-                  <StatRow label="IR Ã  19%" value={"â€“ " + fmtEur(calc.impotIR - calc.surtaxe)} color="#dc2626" />
-                  {calc.surtaxe > 0 && <StatRow label="Surtaxe (PV > 50 000 â‚¬)" value={"â€“ " + fmtEur(calc.surtaxe)} color="#f97316" />}
+                  <StatRow label="IR à 19%" value={"– " + fmtEur(calc.impotIR - calc.surtaxe)} color="#dc2626" />
+                  {calc.surtaxe > 0 && <StatRow label="Surtaxe (PV > 50 000 €)" value={"– " + fmtEur(calc.surtaxe)} color="#f97316" />}
                   <StatRow label={"Base PS (abatt. " + Math.round(calc.abattPS) + "%)"} value={fmtEur(calc.basePS)} />
-                  <StatRow label="PrÃ©lÃ¨vements sociaux 17.2%" value={"â€“ " + fmtEur(calc.impotPS)} color="#d97706" />
+                  <StatRow label="Prélèvements sociaux 17.2%" value={"– " + fmtEur(calc.impotPS)} color="#d97706" />
                   <div style={{ margin: "8px 0", height: 1, background: "rgba(148,163,184,0.2)" }} />
-                  <StatRow label="ImpÃ´t total" value={"â€“ " + fmtEur(calc.impotTotal)} color="#dc2626" bold border={false} />
+                  <StatRow label="Impôt total" value={"– " + fmtEur(calc.impotTotal)} color="#dc2626" bold border={false} />
                 </>
               )}
             </div>
@@ -2067,13 +2393,13 @@ function CalculateurPlusValue() {
           {/* Bilan final */}
           {calc.pvBrute > 0 && (
             <div style={Object.assign({}, SECTION, { background: "linear-gradient(135deg,rgba(99,102,241,0.07),rgba(56,189,248,0.07))", border: "1.5px solid rgba(99,102,241,0.2)" })}>
-              <SectionHeader icon="ðŸ’°" title="Bilan net encaissÃ©" />
+              <SectionHeader icon="💰" title="Bilan net encaissé" />
               <StatRow label="Prix de vente net" value={fmtEur(pf(vals.prixVente) - pf(vals.fraisVente))} color="#16a34a" />
-              {pf(vals.montantCredit) > 0 && <StatRow label="â€“ Capital restant dÃ»" value={"â€“ " + fmtEur(calc.creditRestant)} color="#dc2626" />}
-              {!calc.exonere && <StatRow label={"â€“ ImpÃ´t (" + (calc.isSCI ? "IS" : "IR+PS") + ")"} value={"â€“ " + fmtEur(calc.impotTotal)} color="#dc2626" />}
-              {calc.exonere && <StatRow label="â€“ ImpÃ´t" value="0 â‚¬ (exonÃ©rÃ© âœ…)" color="#16a34a" />}
+              {pf(vals.montantCredit) > 0 && <StatRow label="– Capital restant dû" value={"– " + fmtEur(calc.creditRestant)} color="#dc2626" />}
+              {!calc.exonere && <StatRow label={"– Impôt (" + (calc.isSCI ? "IS" : "IR+PS") + ")"} value={"– " + fmtEur(calc.impotTotal)} color="#dc2626" />}
+              {calc.exonere && <StatRow label="– Impôt" value="0 € (exonéré ✅)" color="#16a34a" />}
               <div style={{ marginTop: 10, background: calc.pvNette > 0 ? "rgba(220,252,231,0.8)" : "rgba(254,226,226,0.8)", borderRadius: 12, padding: "12px 14px", border: "1px solid " + (calc.pvNette > 0 ? "rgba(22,163,74,0.3)" : "rgba(220,38,38,0.3)") }}>
-                <div style={{ fontSize: 11, color: "#64748b" }}>Net encaissÃ© aprÃ¨s crÃ©dit + impÃ´t</div>
+                <div style={{ fontSize: 11, color: "#64748b" }}>Net encaissé après crédit + impôt</div>
                 <div style={{ fontSize: 28, fontWeight: 900, color: calc.pvNette > 0 ? "#15803d" : "#dc2626" }}>
                   {calc.pvNette > 0 ? "+" : ""}{fmtEur(calc.pvNette)}
                 </div>
@@ -2085,7 +2411,7 @@ function CalculateurPlusValue() {
       </div>
 
       <div style={{ background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 14px", fontSize: 11, color: "#64748b", border: "1px solid rgba(148,163,184,0.2)" }}>
-        â„¹ï¸ Particulier : IR 19% + PS 17.2%, abattements Ã  partir de 6 ans, exo IR 22 ans, exo totale 30 ans, surtaxe si PV &gt; 50 000 â‚¬. â€” SCI IS : aucun abattement, base = prix vente âˆ’ VNC, IS 15% ou 25%. â€” IRA crÃ©dit non incluses.
+        ℹ️ Particulier : IR 19% + PS 17.2%, abattements à partir de 6 ans, exo IR 22 ans, exo totale 30 ans, surtaxe si PV &gt; 50 000 €. — SCI IS : aucun abattement, base = prix vente − VNC, IS 15% ou 25%. — IRA crédit non incluses.
       </div>
     </div>
   );
@@ -2109,12 +2435,14 @@ function SCIField({ sciVals, onChange, field, label, unit, step, hint }) {
 }
 
 
-// â”€â”€â”€ SCI MULTI-BIENS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SCI MULTI-BIENS ────────────────────────────────────────────────────────
 
 const SEUIL_IS_BAS = 42500;
-const TAUX_CCA_LEGAL = 2.5; // taux lÃ©gal CCA 2024
+const TAUX_CCA_LEGAL = 2.5; // taux légal CCA 2024
 
 const DEFAULT_BIEN = function(id) {
+  var now = new Date();
+  var mm = String(now.getMonth() + 1).padStart(2, "0");
   return {
     id: id,
     nom: "Bien " + id,
@@ -2124,8 +2452,10 @@ const DEFAULT_BIEN = function(id) {
     montantCredit: "196000",
     tauxCredit: "4.20",
     dureeCredit: "20",
+    dateAchat: now.getFullYear() + "-" + mm,
     loyerMensuel: "900",
     tauxOccupation: "11",
+    tauxRevalorisation: "1.5",
     chargesAn: "1200",
     taxeFonciereAn: "1200",
     assurancePNOAn: "0",
@@ -2140,6 +2470,7 @@ const DEFAULT_BIEN = function(id) {
     fraisDossierCredit: "1500",
     dureeFraisDossier: "20",
     provisionGrosTravauxAn: "500",
+    gliAn: "0",
   };
 };
 
@@ -2152,8 +2483,8 @@ const DEFAULT_SCI_PARAMS = {
   distribuerOuRembourser: "rembourser",
 };
 
-// Calcule le rÃ©sultat fiscal d'UN bien pour l'annÃ©e Y
-function calcBienAnnee(bien, y) {
+// Calcule le résultat fiscal d'UN bien pour l'année Y
+function calcBienAnnee(bien, anneeReelle) {
   const pa = pf(bien.prixAchat);
   const fa = pf(bien.fraisAchat);
   const tv = pf(bien.travaux);
@@ -2162,122 +2493,133 @@ function calcBienAnnee(bien, y) {
   const tMensuel = pf(bien.tauxCredit) / 100 / 12;
   const nMois = duree * 12;
   const mensualite = tMensuel === 0 ? M / nMois : (M * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
-  const loyersAn = pf(bien.loyerMensuel) * pf(bien.tauxOccupation) * Math.pow(1.01, y - 1);
-  const gestionAn = loyersAn * pf(bien.gestionPct) / 100;
-  const assurancePNO = pf(bien.assurancePNOAn) > 0 ? pf(bien.assurancePNOAn) : (pa + tv) * 0.0012;
-  const chargesTotal = pf(bien.chargesAn) + pf(bien.taxeFonciereAn) + assurancePNO + gestionAn
-    + pf(bien.provisionTravauxAn) + pf(bien.expertComptableAn) + pf(bien.fraisBancairesAn);
-  const provisionGros = pf(bien.provisionGrosTravauxAn);
 
-  // IntÃ©rÃªts annÃ©e y
-  var interetsAn = 0;
-  var capitalAn = 0;
-  var remboursementAn = 0;
-  if (y <= duree && tMensuel > 0) {
-    // Simuler le solde au dÃ©but de l'annÃ©e y
-    var solde = M;
-    for (var yy = 1; yy < y; yy++) {
-      for (var mm = 0; mm < 12; mm++) {
-        var intM2 = solde * tMensuel;
-        solde = Math.max(0, solde - (mensualite - intM2));
-      }
-    }
-    for (var m = 0; m < 12; m++) {
-      var intM = solde * tMensuel;
-      interetsAn += intM;
-      var capM = mensualite - intM;
-      capitalAn += capM;
-      solde = Math.max(0, solde - capM);
-    }
-    remboursementAn = mensualite * 12;
-  } else if (y <= duree && tMensuel === 0) {
-    capitalAn = M / duree;
-    remboursementAn = capitalAn;
+  const dateAchat = bien.dateAchat || (new Date().getFullYear() + "-01");
+  const anneeAchat = parseInt(dateAchat.split("-")[0], 10);
+  const moisAchat = parseInt(dateAchat.split("-")[1] || "1", 10) - 1;
+  const anneesDepuisAchat = anneeReelle - anneeAchat;
+
+  if (anneesDepuisAchat < 0) {
+    return {
+      loyersAn: 0, chargesTotal: 0, interetsAn: 0, totalAmort: 0,
+      provisionGros: 0, resultatBrut: 0, remboursementAn: 0,
+      amortBat: 0, amortTrav: 0, amortFraisAcquis: 0, amortFraisDossier: 0,
+      actif: false,
+    };
   }
 
-  // Amortissements
+  const tauxReval = pf(bien.tauxRevalorisation) / 100;
+  const moisDansAnnee = (anneesDepuisAchat === 0) ? Math.max(0, 12 - moisAchat) : 12;
+  const tauxOccupationEffectif = Math.min(pf(bien.tauxOccupation), moisDansAnnee);
+  const loyersAn = pf(bien.loyerMensuel) * tauxOccupationEffectif
+    * Math.pow(1 + tauxReval, anneesDepuisAchat);
+
+  const gestionAn = loyersAn * pf(bien.gestionPct) / 100;
+  const assurancePNO = pf(bien.assurancePNOAn) > 0 ? pf(bien.assurancePNOAn) : (pa + tv) * 0.0012;
+  const gliAn = pf(bien.gliAn) > 0 ? pf(bien.gliAn) : 0;
+  const chargesTotal = pf(bien.chargesAn) + pf(bien.taxeFonciereAn) + assurancePNO
+    + gestionAn + pf(bien.provisionTravauxAn) + pf(bien.expertComptableAn) + pf(bien.fraisBancairesAn) + gliAn;
+  const provisionGros = pf(bien.provisionGrosTravauxAn);
+
+  const moisDebutAnnee = (anneeReelle - anneeAchat) * 12 - moisAchat;
+  const moisFinAnnee = moisDebutAnnee + 12;
+  var interetsAn = 0, remboursementAn = 0;
+
+  if (anneesDepuisAchat < duree && M > 0) {
+    var solde = M;
+    var debut = Math.max(0, moisDebutAnnee);
+    for (var mm = 0; mm < debut && solde > 0 && mm < nMois; mm++) {
+      var intM2 = solde * tMensuel;
+      solde = Math.max(0, solde - (mensualite - intM2));
+    }
+    for (var m = debut; m < moisFinAnnee && solde > 0 && m < nMois; m++) {
+      var intM = solde * tMensuel;
+      interetsAn += intM;
+      solde = Math.max(0, solde - (mensualite - intM));
+    }
+    var moisActifs = Math.min(moisFinAnnee, nMois) - debut;
+    remboursementAn = moisActifs > 0 ? mensualite * moisActifs : 0;
+  }
+
+  var y = anneesDepuisAchat + 1;
   const amortBat = pa * (1 - pf(bien.partTerrain) / 100) * pf(bien.coefAmortBatiment) / 100;
   const amortTrav = tv * pf(bien.coefAmortTravaux) / 100;
   const amortFraisAcquis = bien.fraisNotaireAmort === "1" && y <= 5 ? fa / 5 : 0;
   const fraisAcquisAn1 = bien.fraisNotaireAmort === "0" && y === 1 ? fa : 0;
   const amortFraisDossier = y <= duree ? pf(bien.fraisDossierCredit) / Math.max(1, pf(bien.dureeFraisDossier)) : 0;
   const totalAmort = amortBat + amortTrav + amortFraisAcquis + amortFraisDossier;
-
   const resultatBrut = loyersAn - chargesTotal - interetsAn - totalAmort - fraisAcquisAn1 - provisionGros;
 
   return {
     loyersAn, chargesTotal, interetsAn, totalAmort, provisionGros,
     resultatBrut, remboursementAn,
     amortBat, amortTrav, amortFraisAcquis, amortFraisDossier,
+    actif: true,
   };
 }
-
-// Projection SCI consolidÃ©e sur N annÃ©es
+// Projection SCI consolidée sur N années
 function projeterSCI(biens, sciParams, ccaAssocies) {
-  const dureeMax = Math.max(...biens.map(function(b) { return Math.round(pf(b.dureeCredit)); })) + 5;
-  const totalYears = Math.min(dureeMax, 30);
+  const anneeActuelle = new Date().getFullYear();
+  const dureeMax = Math.max(...biens.map(function(b) {
+    var anneeAchat = parseInt((b.dateAchat || anneeActuelle + "-01").split("-")[0], 10);
+    return (anneeAchat - anneeActuelle) + Math.round(pf(b.dureeCredit));
+  })) + 5;
+  const totalYears = Math.min(Math.max(dureeMax, 10), 35);
   const tIS = pf(sciParams.tauxIS) / 100;
   const tauxCCA = pf(sciParams.tauxCCA) / 100;
   const tDiv = pf(sciParams.tauxDividendes) / 100;
 
-  // Solde CCA initial par associÃ©
   var soldeCCA = ccaAssocies.reduce(function(acc, a) { return acc + pf(a.montant); }, 0);
 
   var rows = [];
-  for (var y = 1; y <= totalYears; y++) {
-    var loyersTotal = 0, chargesTotal = 0, amortTotal = 0, interetsTotal = 0, remboursementTotal = 0, provisionGrosTotal = 0;
+  for (var i = 0; i < totalYears; i++) {
+    var anneeReelle = anneeActuelle + i;
+    var loyersTotal = 0, chargesTotal = 0, amortTotal = 0, interetsTotal = 0,
+        remboursementTotal = 0, provisionGrosTotal = 0;
     var bienDetails = [];
+
     biens.forEach(function(bien) {
-      var r = calcBienAnnee(bien, y);
+      var r = calcBienAnnee(bien, anneeReelle);
       loyersTotal += r.loyersAn;
       chargesTotal += r.chargesTotal;
       amortTotal += r.totalAmort;
       interetsTotal += r.interetsAn;
       remboursementTotal += r.remboursementAn;
       provisionGrosTotal += r.provisionGros;
-      bienDetails.push({ nom: bien.nom, resultat: r.resultatBrut, loyers: r.loyersAn });
+      bienDetails.push({ nom: bien.nom, resultat: r.resultatBrut, loyers: r.loyersAn, actif: r.actif !== false });
     });
 
-    // IntÃ©rÃªts CCA dÃ©ductibles
-    const interetsCCA = soldeCCA * tauxCCA;
+    var interetsCCA = soldeCCA * tauxCCA;
+    var resultatFiscal = Math.max(0, loyersTotal - chargesTotal - interetsTotal - amortTotal - provisionGrosTotal - interetsCCA);
+    var isPartBas = Math.min(resultatFiscal, SEUIL_IS_BAS) * Math.min(tIS, 0.15);
+    var isPartHaut = Math.max(0, resultatFiscal - SEUIL_IS_BAS) * 0.25;
+    var isTotal = isPartBas + isPartHaut;
+    var margeAvantBasculement = Math.max(0, SEUIL_IS_BAS - resultatFiscal);
+    var alertePalier = resultatFiscal > SEUIL_IS_BAS * 0.8;
+    var resultatNetApresIS = Math.max(0, resultatFiscal) - isTotal;
+    var tresoConsolidee = loyersTotal - chargesTotal - remboursementTotal - isTotal - provisionGrosTotal;
 
-    // RÃ©sultat fiscal consolidÃ©
-    const resultatFiscal = Math.max(0, loyersTotal - chargesTotal - interetsTotal - amortTotal - provisionGrosTotal - interetsCCA);
-    const isPartBas = Math.min(resultatFiscal, SEUIL_IS_BAS) * Math.min(tIS, 0.15);
-    const isPartHaut = Math.max(0, resultatFiscal - SEUIL_IS_BAS) * 0.25;
-    const isTotal = isPartBas + isPartHaut;
-    const margeAvantBasculement = Math.max(0, SEUIL_IS_BAS - resultatFiscal);
-    const alertePalier = resultatFiscal > SEUIL_IS_BAS * 0.8;
-
-    const resultatNetApresIS = Math.max(0, resultatFiscal) - isTotal;
-    const tresoConsolidee = loyersTotal - chargesTotal - remboursementTotal - isTotal - provisionGrosTotal;
-
-    // Remboursement CCA ou dividendes
-    var remboursementCCA = 0;
-    var dividendesDistribues = 0;
+    var remboursementCCA = 0, dividendesDistribues = 0;
     if (sciParams.distribuerOuRembourser === "rembourser" && soldeCCA > 0) {
       remboursementCCA = Math.min(soldeCCA, Math.max(0, tresoConsolidee));
     } else {
       dividendesDistribues = resultatNetApresIS;
     }
     soldeCCA = Math.max(0, soldeCCA - remboursementCCA);
-    const dividendesNets = dividendesDistribues * (1 - tDiv);
+    var dividendesNets = dividendesDistribues * (1 - tDiv);
 
     rows.push({
-      year: y,
-      loyersTotal, chargesTotal, amortTotal, interetsTotal, interetsCCA, provisionGrosTotal,
-      resultatFiscal, isPartBas, isPartHaut, isTotal,
-      margeAvantBasculement, alertePalier,
-      remboursementTotal, tresoConsolidee,
-      soldeCCA, remboursementCCA,
-      resultatNetApresIS, dividendesDistribues, dividendesNets,
-      bienDetails,
+      year: anneeReelle,
+      loyersTotal, chargesTotal, amortTotal, interetsTotal, interetsCCA,
+      provisionGrosTotal, resultatFiscal, isPartBas, isPartHaut, isTotal,
+      margeAvantBasculement, alertePalier, remboursementTotal, tresoConsolidee,
+      soldeCCA, remboursementCCA, resultatNetApresIS,
+      dividendesDistribues, dividendesNets, bienDetails,
     });
   }
   return rows;
 }
-
-// â”€â”€â”€ CHAMP INPUT GENERIQUE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── CHAMP INPUT GENERIQUE ────────────────────────────────────────────────────
 function BienField({ vals, onChange, field, label, unit, step, hint }) {
   const inputS = { width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" };
   const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 3 };
@@ -2294,7 +2636,7 @@ function BienField({ vals, onChange, field, label, unit, step, hint }) {
   );
 }
 
-// â”€â”€â”€ GRAPHIQUE CONSOLIDE SCI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── GRAPHIQUE CONSOLIDE SCI ──────────────────────────────────────────────────
 function SCIConsolideChart({ rows }) {
   const [hovered, setHovered] = React.useState(null);
   if (!rows || rows.length === 0) return null;
@@ -2314,9 +2656,9 @@ function SCIConsolideChart({ rows }) {
 
   return (
     <div style={Object.assign({}, SECTION, { marginTop: 0 })}>
-      <SectionHeader icon="ðŸ“Š" title="Ã‰volution fiscale consolidÃ©e SCI" />
+      <SectionHeader icon="📊" title="Évolution fiscale consolidée SCI" />
       <div style={{ fontSize: 11, color: "#64748b", marginBottom: 10 }}>
-        IS Ã  15% (violet) + IS Ã  25% (rouge) â€” Ligne pointillÃ©e : seuil 42 500 â‚¬ â€” Courbe : base IS consolidÃ©e
+        IS à 15% (violet) + IS à 25% (rouge) — Ligne pointillée : seuil 42 500 € — Courbe : base IS consolidée
       </div>
       <div style={{ overflowX: "auto" }}>
         <svg viewBox={"0 0 " + W + " " + H} style={{ width: "100%", minWidth: 500, fontFamily: "system-ui,sans-serif" }}
@@ -2336,7 +2678,7 @@ function SCIConsolideChart({ rows }) {
           })}
           {/* Seuil 42 500 */}
           <line x1={padL} y1={seuilY} x2={padL + chartW} y2={seuilY} stroke="#16a34a" strokeWidth={1.5} strokeDasharray="6 3" />
-          <text x={padL + chartW + 4} y={seuilY + 4} fontSize={9} fill="#16a34a" fontWeight="600">42 500 â‚¬</text>
+          <text x={padL + chartW + 4} y={seuilY + 4} fontSize={9} fill="#16a34a" fontWeight="600">42 500 €</text>
           {/* Hover col */}
           {hovered !== null && (
             <rect x={padL + hovered * (chartW / rows.length)} y={padT} width={chartW / rows.length} height={chartH} fill="rgba(99,102,241,0.06)" rx={3} />
@@ -2372,14 +2714,14 @@ function SCIConsolideChart({ rows }) {
             const show = rows.length <= 20 || i === 0 || (i + 1) % 5 === 0;
             return show ? <text key={i} x={cx(i)} y={H - padB + 14} textAnchor="middle" fontSize={9} fill="#94a3b8">{r.year}</text> : null;
           })}
-          <text x={padL + chartW / 2} y={H - 4} textAnchor="middle" fontSize={9} fill="#94a3b8">AnnÃ©e</text>
-          {/* LÃ©gende */}
+          <text x={padL + chartW / 2} y={H - 4} textAnchor="middle" fontSize={9} fill="#94a3b8">Année</text>
+          {/* Légende */}
           {[
             { color: "#818cf8", label: "IS 15%" },
             { color: "#ef4444", label: "IS 25%" },
             { color: "#fbbf24", label: "Base IS" },
             { color: "#38bdf8", label: "CCA restant" },
-            { color: "#16a34a", label: "Seuil 42 500 â‚¬" },
+            { color: "#16a34a", label: "Seuil 42 500 €" },
           ].map(function(l, i) {
             return (
               <g key={l.label} transform={"translate(" + (W - padR + 12) + "," + (padT + 4 + i * 20) + ")"}>
@@ -2392,13 +2734,13 @@ function SCIConsolideChart({ rows }) {
           {h !== null && (
             <g>
               <rect x={ttX} y={2} width={ttW} height={ttH} rx={8} fill="rgba(255,255,255,0.97)" stroke="rgba(148,163,184,0.35)" strokeWidth={1} />
-              <text x={ttX + 8} y={17} fontSize={11} fontWeight="700" fill="#0f172a">AnnÃ©e {h.year}</text>
+              <text x={ttX + 8} y={17} fontSize={11} fontWeight="700" fill="#0f172a">Année {h.year}</text>
               {[
                 { label: "Base IS", value: h.resultatFiscal, color: "#fbbf24" },
                 { label: "IS 15%", value: h.isPartBas, color: "#818cf8" },
                 { label: "IS 25%", value: h.isPartHaut, color: "#ef4444" },
                 { label: "IS total", value: h.isTotal, color: "#dc2626" },
-                { label: "TrÃ©so / mois", value: h.tresoConsolidee / 12, color: h.tresoConsolidee >= 0 ? "#16a34a" : "#dc2626" },
+                { label: "Tréso / mois", value: h.tresoConsolidee / 12, color: h.tresoConsolidee >= 0 ? "#16a34a" : "#dc2626" },
                 { label: "CCA restant", value: h.soldeCCA, color: "#38bdf8" },
               ].map(function(row, idx) {
                 return (
@@ -2416,8 +2758,8 @@ function SCIConsolideChart({ rows }) {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
         {[
           { color: "#818cf8", label: "IS 15%" }, { color: "#ef4444", label: "IS 25%" },
-          { color: "#fbbf24", label: "Base IS consolidÃ©e" }, { color: "#38bdf8", label: "CCA restant" },
-          { color: "#16a34a", label: "Seuil 42 500 â‚¬" },
+          { color: "#fbbf24", label: "Base IS consolidée" }, { color: "#38bdf8", label: "CCA restant" },
+          { color: "#16a34a", label: "Seuil 42 500 €" },
         ].map(function(l) {
           return (
             <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "#64748b" }}>
@@ -2431,19 +2773,19 @@ function SCIConsolideChart({ rows }) {
   );
 }
 
-// â”€â”€â”€ TABLEAU ANNUEL CONSOLIDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── TABLEAU ANNUEL CONSOLIDE ─────────────────────────────────────────────────
 function SCITableauAnnuel({ rows, sciParams }) {
   const [expanded, setExpanded] = React.useState(null);
   if (!rows || rows.length === 0) return null;
 
   return (
     <div style={Object.assign({}, SECTION, { marginTop: 0 })}>
-      <SectionHeader icon="ðŸ“‹" title="Tableau de bord annuel consolidÃ©" />
+      <SectionHeader icon="📋" title="Tableau de bord annuel consolidé" />
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
           <thead>
             <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
-              {["An", "Loyers", "Charges+Amort", "Int. CCA", "Base IS", "IS dÃ»", "Palier", "TrÃ©so/mois", "CCA restant", "Dividendes nets"].map(function(h) {
+              {["An", "Loyers", "Charges+Amort", "Int. CCA", "Base IS", "IS dû", "Palier", "Tréso/mois", "CCA restant", "Dividendes nets"].map(function(h) {
                 return <th key={h} style={{ padding: "7px 8px", textAlign: h === "An" ? "left" : "right", fontSize: 10, fontWeight: 600, color: "#64748b", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>;
               })}
             </tr>
@@ -2488,13 +2830,13 @@ function SCITableauAnnuel({ rows, sciParams }) {
                               <div key={bd.nom} style={{ background: "rgba(255,255,255,0.9)", borderRadius: 8, padding: "6px 10px", fontSize: 10, border: "1px solid rgba(148,163,184,0.2)", minWidth: 140 }}>
                                 <div style={{ fontWeight: 700, color: "#334155", marginBottom: 2 }}>{bd.nom}</div>
                                 <div style={{ color: "#16a34a" }}>Loyers : {fmtEur(bd.loyers)}</div>
-                                <div style={{ color: bd.resultat >= 0 ? "#6366f1" : "#dc2626" }}>RÃ©sultat : {fmtEur(bd.resultat)}</div>
+                                <div style={{ color: bd.resultat >= 0 ? "#6366f1" : "#dc2626" }}>Résultat : {fmtEur(bd.resultat)}</div>
                               </div>
                             );
                           })}
                           <div style={{ background: "rgba(255,255,255,0.9)", borderRadius: 8, padding: "6px 10px", fontSize: 10, border: "1px solid rgba(99,102,241,0.2)", minWidth: 140 }}>
                             <div style={{ fontWeight: 700, color: "#4338ca", marginBottom: 2 }}>Marge avant 25%</div>
-                            <div style={{ color: "#334155" }}>{r.resultatFiscal > SEUIL_IS_BAS ? "âš ï¸ Seuil dÃ©passÃ© !" : fmtEur(r.margeAvantBasculement) + " restants"}</div>
+                            <div style={{ color: "#334155" }}>{r.resultatFiscal > SEUIL_IS_BAS ? "⚠️ Seuil dépassé !" : fmtEur(r.margeAvantBasculement) + " restants"}</div>
                             {r.remboursementCCA > 0 && <div style={{ color: "#38bdf8" }}>Remb. CCA : {fmtEur(r.remboursementCCA)}</div>}
                           </div>
                         </div>
@@ -2507,12 +2849,12 @@ function SCITableauAnnuel({ rows, sciParams }) {
           </tbody>
         </table>
       </div>
-      <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 6 }}>ðŸ’¡ Cliquer sur une ligne pour voir le dÃ©tail par bien</div>
+      <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 6 }}>💡 Cliquer sur une ligne pour voir le détail par bien</div>
     </div>
   );
 }
 
-// â”€â”€â”€ FORMULAIRE BIEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── FORMULAIRE BIEN ──────────────────────────────────────────────────────────
 function FormulaireBien({ bien, onChange }) {
   const sepS = { fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 8 };
   const inputS = { width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" };
@@ -2522,30 +2864,61 @@ function FormulaireBien({ bien, onChange }) {
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={sepS}>Acquisition</div>
-        <BienField vals={bien} onChange={onChange} field="prixAchat" label="Prix d'achat" unit="â‚¬" step="5000" />
-        <BienField vals={bien} onChange={onChange} field="fraisAchat" label="Frais notaire + agence" unit="â‚¬" step="500" />
-        <BienField vals={bien} onChange={onChange} field="travaux" label="Travaux" unit="â‚¬" step="1000" />
+        <BienField vals={bien} onChange={onChange} field="prixAchat" label="Prix d'achat" unit="€" step="5000" />
+        <BienField vals={bien} onChange={onChange} field="fraisAchat" label="Frais notaire + agence" unit="€" step="500" />
+        <BienField vals={bien} onChange={onChange} field="travaux" label="Travaux" unit="€" step="1000" />
         <div style={sepS}>Financement</div>
-        <BienField vals={bien} onChange={onChange} field="montantCredit" label="Montant empruntÃ©" unit="â‚¬" step="5000" />
+        <BienField vals={bien} onChange={onChange} field="montantCredit" label="Montant emprunté" unit="€" step="5000" />
         <BienField vals={bien} onChange={onChange} field="tauxCredit" label="Taux hors assurance" unit="%" step="0.05" />
-        <BienField vals={bien} onChange={onChange} field="dureeCredit" label="DurÃ©e du crÃ©dit" unit="ans" step="1" />
+        <BienField vals={bien} onChange={onChange} field="dureeCredit" label="Durée du crédit" unit="ans" step="1" />
         <div style={sepS}>Frais notaire</div>
         <div>
           <label style={labelS}>Frais notaire/agence ({fmtEur(pf(bien.fraisAchat))})</label>
           <div style={{ display: "flex", gap: 6 }}>
-            {[{ val: "1", label: "Ã·5 ans" }, { val: "0", label: "An 1" }].map(function(t) {
+            {[{ val: "1", label: "÷5 ans" }, { val: "0", label: "An 1" }].map(function(t) {
               const isA = bien.fraisNotaireAmort === t.val;
               return <button key={t.val} onClick={function() { onChange("fraisNotaireAmort", t.val); }}
                 style={{ flex: 1, padding: "6px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "rgba(99,102,241,0.9)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#64748b" }}>{t.label}</button>;
             })}
           </div>
         </div>
-        <BienField vals={bien} onChange={onChange} field="fraisDossierCredit" label="Frais dossier crÃ©dit" unit="â‚¬" step="100" />
+        <BienField vals={bien} onChange={onChange} field="fraisDossierCredit" label="Frais dossier crédit" unit="€" step="100" />
         <BienField vals={bien} onChange={onChange} field="dureeFraisDossier" label="Amortis sur" unit="ans" step="1" />
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={sepS}>Revenus</div>
-        <BienField vals={bien} onChange={onChange} field="loyerMensuel" label="Loyer mensuel HC" unit="â‚¬" step="50" />
+        <BienField vals={bien} onChange={onChange} field="loyerMensuel" label="Loyer mensuel HC" unit="€" step="50" />
+        <BienField vals={bien} onChange={onChange} field="tauxRevalorisation" label="Reval. loyer/an" unit="%" step="0.5" hint="Indexation annuelle depuis la date d'achat" />
+        <div>
+          <label style={labelS}>Date d'achat</label>
+          <div style={{ display: "flex", gap: 6 }}>
+            <select
+              value={(bien.dateAchat || "").split("-")[1] || "01"}
+              onChange={function(e) {
+                var parts = (bien.dateAchat || (new Date().getFullYear() + "-01")).split("-");
+                onChange("dateAchat", parts[0] + "-" + e.target.value);
+              }}
+              style={{ flex: 1, minWidth: 0, background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 6px", color: "#0f172a", fontSize: 12, outline: "none" }}>
+              {["01","02","03","04","05","06","07","08","09","10","11","12"].map(function(m) {
+                var labels = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
+                return <option key={m} value={m}>{labels[parseInt(m,10)-1]}</option>;
+              })}
+            </select>
+            <select
+              value={(bien.dateAchat || "").split("-")[0] || new Date().getFullYear()}
+              onChange={function(e) {
+                var parts = (bien.dateAchat || (new Date().getFullYear() + "-01")).split("-");
+                onChange("dateAchat", e.target.value + "-" + (parts[1] || "01"));
+              }}
+              style={{ flex: 1, minWidth: 0, background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 6px", color: "#0f172a", fontSize: 12, outline: "none" }}>
+              {(function() {
+                var opts = []; var now = new Date().getFullYear();
+                for (var yr = now - 10; yr <= now + 15; yr++) opts.push(yr);
+                return opts.map(function(yr) { return <option key={yr} value={yr}>{yr}</option>; });
+              })()}
+            </select>
+          </div>
+        </div>
         <div>
           <label style={labelS}>Taux d'occupation</label>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -2556,32 +2929,100 @@ function FormulaireBien({ bien, onChange }) {
           </div>
         </div>
         <div style={sepS}>Charges annuelles</div>
-        <BienField vals={bien} onChange={onChange} field="chargesAn" label="Charges immeuble" unit="â‚¬/an" />
-        <BienField vals={bien} onChange={onChange} field="taxeFonciereAn" label="Taxe fonciÃ¨re" unit="â‚¬/an" />
-        <BienField vals={bien} onChange={onChange} field="assurancePNOAn" label="Assurance PNO" unit="â‚¬/an" hint="0 = auto" />
+        <BienField vals={bien} onChange={onChange} field="chargesAn" label="Charges immeuble" unit="€/an" />
+        <BienField vals={bien} onChange={onChange} field="taxeFonciereAn" label="Taxe foncière" unit="€/an" />
+        <BienField vals={bien} onChange={onChange} field="assurancePNOAn" label="Assurance PNO" unit="€/an" hint="0 = auto" />
+        <BienField vals={bien} onChange={onChange} field="gliAn" label="GLI loyers impayés" unit="€/an" step="50" hint="≈ 2-3% des loyers — déductible IS" />
         <BienField vals={bien} onChange={onChange} field="gestionPct" label="Gestion locative" unit="%/an" step="0.5" />
-        <BienField vals={bien} onChange={onChange} field="provisionTravauxAn" label="Provision entretien" unit="â‚¬/an" />
-        <BienField vals={bien} onChange={onChange} field="expertComptableAn" label="Expert-comptable" unit="â‚¬/an" />
-        <BienField vals={bien} onChange={onChange} field="fraisBancairesAn" label="Frais bancaires" unit="â‚¬/an" step="50" />
+        <BienField vals={bien} onChange={onChange} field="provisionTravauxAn" label="Provision entretien" unit="€/an" />
+        <BienField vals={bien} onChange={onChange} field="expertComptableAn" label="Expert-comptable" unit="€/an" />
+        <BienField vals={bien} onChange={onChange} field="fraisBancairesAn" label="Frais bancaires" unit="€/an" step="50" />
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={sepS}>Amortissements</div>
-        <BienField vals={bien} onChange={onChange} field="coefAmortBatiment" label="Taux amort. bÃ¢timent" unit="%/an" step="0.25" hint="2.5% standard" />
+        <BienField vals={bien} onChange={onChange} field="coefAmortBatiment" label="Taux amort. bâtiment" unit="%/an" step="0.25" hint="2.5% standard" />
         <BienField vals={bien} onChange={onChange} field="coefAmortTravaux" label="Taux amort. travaux" unit="%/an" step="1" hint="10% standard" />
         <BienField vals={bien} onChange={onChange} field="partTerrain" label="Part terrain" unit="%" step="1" hint="15-20% non amortissable" />
-        <BienField vals={bien} onChange={onChange} field="provisionGrosTravauxAn" label="Provision gros travaux" unit="â‚¬/an" step="100" />
+        <BienField vals={bien} onChange={onChange} field="provisionGrosTravauxAn" label="Provision gros travaux" unit="€/an" step="100" />
       </div>
     </div>
   );
 }
 
-// â”€â”€â”€ SIMULATEUR SCI PRINCIPAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SIMULATEUR SCI PRINCIPAL ─────────────────────────────────────────────────
 function SimulateurSCI() {
   const [biens, setBiens] = React.useState([DEFAULT_BIEN(1)]);
   const [activeBien, setActiveBien] = React.useState(1);
   const [activeTab, setActiveTab] = React.useState("dashboard");
   const [sciParams, setSciParams] = React.useState(DEFAULT_SCI_PARAMS);
-  const [ccaAssocies, setCcaAssocies] = React.useState([{ id: 1, nom: "AssociÃ© 1", montant: "10000" }]);
+  const [ccaAssocies, setCcaAssocies] = React.useState([{ id: 1, nom: "Associé 1", montant: "10000" }]);
+
+  // ── Sauvegarde SCI ──────────────────────────────────────────────────────────
+  var SCI_KEY = "radar-immo-sci-v2";
+  const [nomProjet, setNomProjet] = React.useState("");
+  const [saveStatus, setSaveStatus] = React.useState("idle");
+  const [projets, setProjets] = React.useState(function() {
+    try { return JSON.parse(localStorage.getItem("radar-immo-sci-v2")) || []; }
+    catch(e) { return []; }
+  });
+  const saveTimer = React.useRef(null);
+
+  useEffect(function() {
+    if (!nomProjet.trim()) return;
+    setSaveStatus("pending");
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(function() { sauvegarderSCI(true); }, 1500);
+    return function() { clearTimeout(saveTimer.current); };
+  }, [biens, sciParams, ccaAssocies, nomProjet]);
+
+  function sauvegarderSCI(silent) {
+    if (!nomProjet.trim()) {
+      if (!silent) alert("Donne un nom à ta simulation SCI");
+      return;
+    }
+    var entry = {
+      id: Date.now(),
+      nom: nomProjet.trim(),
+      biens: biens, sciParams: sciParams, ccaAssocies: ccaAssocies,
+      savedAt: new Date().toLocaleDateString("fr-FR"),
+    };
+    setProjets(function(prev) {
+      var liste = [entry].concat(prev.filter(function(p) { return p.nom !== nomProjet.trim(); }));
+      localStorage.setItem("radar-immo-sci-v2", JSON.stringify(liste));
+      return liste;
+    });
+    setSaveStatus("saved");
+    setTimeout(function() { setSaveStatus("idle"); }, 3000);
+  }
+
+  function chargerProjetSCI(p) {
+    setBiens(p.biens);
+    setSciParams(p.sciParams);
+    setCcaAssocies(p.ccaAssocies);
+    setNomProjet(p.nom);
+    setSaveStatus("idle");
+  }
+
+  function supprimerProjetSCI(id) {
+    setProjets(function(prev) {
+      var liste = prev.filter(function(p) { return p.id !== id; });
+      localStorage.setItem("radar-immo-sci-v2", JSON.stringify(liste));
+      return liste;
+    });
+  }
+
+  function exportJSONSCI() {
+    var blob = new Blob(
+      [JSON.stringify({ nom: nomProjet, biens: biens, sciParams: sciParams, ccaAssocies: ccaAssocies }, null, 2)],
+      { type: "application/json" }
+    );
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "sci-" + (nomProjet || "simulation") + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   const updateBien = useCallback(function(id, field, value) {
     setBiens(function(prev) {
@@ -2611,7 +3052,7 @@ function SimulateurSCI() {
 
   const addCCA = useCallback(function() {
     const newId = Math.max(...ccaAssocies.map(function(a) { return a.id; })) + 1;
-    setCcaAssocies(function(prev) { return prev.concat({ id: newId, nom: "AssociÃ© " + newId, montant: "0" }); });
+    setCcaAssocies(function(prev) { return prev.concat({ id: newId, nom: "Associé " + newId, montant: "0" }); });
   }, [ccaAssocies]);
 
   const projectionRows = useMemo(function() {
@@ -2629,27 +3070,69 @@ function SimulateurSCI() {
   const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 3 };
 
   // Tabs
-  const tabs = [{ id: "dashboard", label: "ðŸ“Š Tableau de bord" }]
-    .concat(biens.map(function(b) { return { id: "bien_" + b.id, label: "ðŸ  " + b.nom, bienId: b.id }; }))
-    .concat([{ id: "sci_params", label: "âš™ï¸ ParamÃ¨tres SCI" }]);
+  const tabs = [{ id: "dashboard", label: "📊 Tableau de bord" }]
+    .concat(biens.map(function(b) { return { id: "bien_" + b.id, label: "🏠 " + b.nom, bienId: b.id }; }))
+    .concat([{ id: "sci_params", label: "⚙️ Paramètres SCI" }]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-      {/* Info banner */}
-      <div style={{ background: "linear-gradient(135deg,rgba(99,102,241,0.08),rgba(56,189,248,0.08))", borderRadius: 14, padding: "12px 16px", border: "1px solid rgba(99,102,241,0.2)", fontSize: 12, color: "#334155" }}>
-        <strong>SCI IS â€” Pilotage multi-biens</strong> â€” Consolidez plusieurs biens dans une mÃªme SCI. IS calculÃ© sur le rÃ©sultat global. CCA remboursables sans fiscalitÃ©. Seuil 15% / 25% suivi chaque annÃ©e.
+      {/* ── Barre de sauvegarde SCI ── */}
+      <div style={Object.assign({}, SECTION, { padding: "12px 20px" })}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <input
+              value={nomProjet}
+              onChange={function(e) { setNomProjet(e.target.value); }}
+              placeholder="Nom de la simulation SCI"
+              style={{ background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "6px 14px", fontSize: 13, color: "#0f172a", width: 220, outline: "none" }}
+            />
+            <button onClick={function() { sauvegarderSCI(false); }}
+              style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 10, padding: "7px 16px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+              💾 Sauver
+            </button>
+            <button onClick={exportJSONSCI}
+              style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 10, padding: "7px 14px", color: "#4338ca", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>
+              ⬇️ Export JSON
+            </button>
+            <span style={{ fontSize: 11, color: saveStatus === "saved" ? "#16a34a" : saveStatus === "pending" ? "#d97706" : "transparent" }}>
+              {saveStatus === "saved" ? "✅ Sauvegardé" : "💾 Modifications en cours..."}
+            </span>
+          </div>
+        </div>
+        {projets.length > 0 && (
+          <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {projets.map(function(p) {
+              return (
+                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: 8, padding: "3px 10px" }}>
+                  <button onClick={function() { chargerProjetSCI(p); }}
+                    style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: "#4338ca", cursor: "pointer" }}>
+                    {p.nom}
+                  </button>
+                  <span style={{ fontSize: 10, color: "#94a3b8" }}>{p.savedAt}</span>
+                  <button onClick={function() { supprimerProjetSCI(p.id); }}
+                    style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 11 }}>✕</button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* KPIs consolidÃ©s */}
+      {/* Info banner */}
+      <div style={{ background: "linear-gradient(135deg,rgba(99,102,241,0.08),rgba(56,189,248,0.08))", borderRadius: 14, padding: "12px 16px", border: "1px solid rgba(99,102,241,0.2)", fontSize: 12, color: "#334155" }}>
+        <strong>SCI IS — Pilotage multi-biens</strong> — Consolidez plusieurs biens dans une même SCI. IS calculé sur le résultat global. CCA remboursables sans fiscalité. Seuil 15% / 25% suivi chaque année.
+      </div>
+
+      {/* KPIs consolidés */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
         {[
-          { label: "Biens dans la SCI", value: biens.length, icon: "ðŸ ", color: "#4338ca" },
-          { label: "Loyers consolidÃ©s/an", value: fmtEur(an1.loyersTotal || 0), icon: "ðŸ’¶", color: "#16a34a" },
-          { label: "IS an 1", value: fmtEur(an1.isTotal || 0), icon: "ðŸ›ï¸", color: "#dc2626" },
-          { label: "TrÃ©so/mois an 1", value: fmt(an1.tresoConsolidee / 12 || 0, 0) + " â‚¬", icon: "ðŸ’°", color: couleurTreso },
-          { label: "CCA total (remboursable)", value: fmtEur(totalCCA), icon: "ðŸ”", color: "#38bdf8" },
-          { label: alertePalier ? "âš ï¸ Proche seuil 25%" : "Marge avant 25%", value: fmtEur(an1.margeAvantBasculement || 0), icon: "ðŸ“", color: alertePalier ? "#f97316" : "#16a34a" },
+          { label: "Biens dans la SCI", value: biens.length, icon: "🏠", color: "#4338ca" },
+          { label: "Loyers consolidés/an", value: fmtEur(an1.loyersTotal || 0), icon: "💶", color: "#16a34a" },
+          { label: "IS an 1", value: fmtEur(an1.isTotal || 0), icon: "🏛️", color: "#dc2626" },
+          { label: "Tréso/mois an 1", value: fmt(an1.tresoConsolidee / 12 || 0, 0) + " €", icon: "💰", color: couleurTreso },
+          { label: "CCA total (remboursable)", value: fmtEur(totalCCA), icon: "🔁", color: "#38bdf8" },
+          { label: alertePalier ? "⚠️ Proche seuil 25%" : "Marge avant 25%", value: fmtEur(an1.margeAvantBasculement || 0), icon: "📏", color: alertePalier ? "#f97316" : "#16a34a" },
         ].map(function(kpi) {
           return (
             <div key={kpi.label} style={{ background: "rgba(255,255,255,0.8)", borderRadius: 14, padding: "12px", border: "1px solid rgba(148,163,184,0.2)", textAlign: "center", backdropFilter: "blur(12px)" }}>
@@ -2695,7 +3178,7 @@ function SimulateurSCI() {
             <div style={Object.assign({}, SECTION)}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>ðŸ </span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>🏠</span>
                   <input value={bien.nom} onChange={function(e) { updateBien(bien.id, "nom", e.target.value); }}
                     style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", background: "transparent", border: "none", outline: "none", borderBottom: "2px dashed rgba(99,102,241,0.3)" }} />
                 </div>
@@ -2708,16 +3191,16 @@ function SimulateurSCI() {
               </div>
               <FormulaireBien bien={bien} onChange={function(field, val) { updateBien(bien.id, field, val); }} />
             </div>
-            {/* AperÃ§u rapide an 1 pour ce bien */}
+            {/* Aperçu rapide an 1 pour ce bien */}
             {(function() {
-              var r = calcBienAnnee(bien, 1);
+              var r = calcBienAnnee(bien, new Date().getFullYear());
               return (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px,1fr))", gap: 10 }}>
                   {[
                     { label: "Loyers an 1", value: fmtEur(r.loyersAn), color: "#16a34a" },
                     { label: "Charges totales", value: fmtEur(r.chargesTotal), color: "#64748b" },
                     { label: "Amortissements", value: fmtEur(r.totalAmort), color: "#6366f1" },
-                    { label: "RÃ©sultat fiscal", value: fmtEur(Math.max(0, r.resultatBrut)), color: r.resultatBrut <= 0 ? "#16a34a" : "#d97706" },
+                    { label: "Résultat fiscal", value: fmtEur(Math.max(0, r.resultatBrut)), color: r.resultatBrut <= 0 ? "#16a34a" : "#d97706" },
                   ].map(function(kpi) {
                     return (
                       <div key={kpi.label} style={{ background: "rgba(255,255,255,0.8)", borderRadius: 12, padding: "10px 12px", border: "1px solid rgba(148,163,184,0.2)", textAlign: "center" }}>
@@ -2733,17 +3216,17 @@ function SimulateurSCI() {
         );
       })}
 
-      {/* Onglet ParamÃ¨tres SCI */}
+      {/* Onglet Paramètres SCI */}
       {activeTab === "sci_params" && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
 
           <div style={SECTION}>
-            <SectionHeader icon="ðŸ›ï¸" title="FiscalitÃ© SCI" />
+            <SectionHeader icon="🏛️" title="Fiscalité SCI" />
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div>
                 <label style={labelS}>Taux IS</label>
                 <div style={{ display: "flex", gap: 6 }}>
-                  {[{ val: "15", label: "15% (â‰¤ 42 500 â‚¬)" }, { val: "25", label: "25% (normal)" }].map(function(t) {
+                  {[{ val: "15", label: "15% (≤ 42 500 €)" }, { val: "25", label: "25% (normal)" }].map(function(t) {
                     const isA = sciParams.tauxIS === t.val;
                     return <button key={t.val} onClick={function() { setSciParams(function(p) { return Object.assign({}, p, { tauxIS: t.val }); }); }}
                       style={{ flex: 1, padding: "7px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "rgba(99,102,241,0.9)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#64748b" }}>{t.label}</button>;
@@ -2766,7 +3249,7 @@ function SimulateurSCI() {
                   onChange={function(e) { setSciParams(function(p) { return Object.assign({}, p, { nbParts: e.target.value }); }); }} style={inputS} />
               </div>
               <div>
-                <label style={labelS}>Capital social (â‚¬)</label>
+                <label style={labelS}>Capital social (€)</label>
                 <input type="number" value={sciParams.capitalSocial} min="0" step="100"
                   onChange={function(e) { setSciParams(function(p) { return Object.assign({}, p, { capitalSocial: e.target.value }); }); }} style={inputS} />
               </div>
@@ -2774,31 +3257,31 @@ function SimulateurSCI() {
           </div>
 
           <div style={SECTION}>
-            <SectionHeader icon="ðŸ”" title="Comptes Courants d'AssociÃ©s (CCA)" />
+            <SectionHeader icon="🔁" title="Comptes Courants d'Associés (CCA)" />
             <div style={{ fontSize: 11, color: "#64748b", marginBottom: 10 }}>
-              Les apports CCA sont remboursables sans fiscalitÃ©. Les intÃ©rÃªts versÃ©s aux associÃ©s ({sciParams.tauxCCA}%/an) sont dÃ©ductibles du rÃ©sultat fiscal SCI.
+              Les apports CCA sont remboursables sans fiscalité. Les intérêts versés aux associés ({sciParams.tauxCCA}%/an) sont déductibles du résultat fiscal SCI.
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div>
-                <label style={labelS}>Taux intÃ©rÃªts CCA (%/an)</label>
+                <label style={labelS}>Taux intérêts CCA (%/an)</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                   <input type="number" value={sciParams.tauxCCA} min="0" step="0.1"
                     onChange={function(e) { setSciParams(function(p) { return Object.assign({}, p, { tauxCCA: e.target.value }); }); }} style={inputS} />
                   <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 28 }}>%</span>
                 </div>
-                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>Taux lÃ©gal 2024 : {TAUX_CCA_LEGAL}% â€” dÃ©ductible du rÃ©sultat fiscal</div>
+                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>Taux légal 2024 : {TAUX_CCA_LEGAL}% — déductible du résultat fiscal</div>
               </div>
               <div>
-                <label style={labelS}>StratÃ©gie de distribution</label>
+                <label style={labelS}>Stratégie de distribution</label>
                 <div style={{ display: "flex", gap: 6 }}>
-                  {[{ val: "rembourser", label: "ðŸ” Rembourser CCA d'abord" }, { val: "distribuer", label: "ðŸ’¸ Distribuer dividendes" }].map(function(t) {
+                  {[{ val: "rembourser", label: "🔁 Rembourser CCA d'abord" }, { val: "distribuer", label: "💸 Distribuer dividendes" }].map(function(t) {
                     const isA = sciParams.distribuerOuRembourser === t.val;
                     return <button key={t.val} onClick={function() { setSciParams(function(p) { return Object.assign({}, p, { distribuerOuRembourser: t.val }); }); }}
                       style={{ flex: 1, padding: "7px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "rgba(99,102,241,0.9)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#64748b" }}>{t.label}</button>;
                   })}
                 </div>
               </div>
-              <div style={sepS}>AssociÃ©s & apports CCA</div>
+              <div style={sepS}>Associés & apports CCA</div>
               {ccaAssocies.map(function(assoc) {
                 return (
                   <div key={assoc.id} style={{ background: "rgba(56,189,248,0.07)", borderRadius: 10, padding: "10px 12px", border: "1px solid rgba(56,189,248,0.2)" }}>
@@ -2808,31 +3291,31 @@ function SimulateurSCI() {
                         style={{ flex: 1, background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed rgba(56,189,248,0.4)", fontSize: 13, fontWeight: 600, color: "#0f172a" }} />
                       {ccaAssocies.length > 1 && (
                         <button onClick={function() { setCcaAssocies(function(prev) { return prev.filter(function(a) { return a.id !== assoc.id; }); }); }}
-                          style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 13 }}>âœ•</button>
+                          style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 13 }}>✕</button>
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <input type="number" value={assoc.montant} min="0" step="1000"
                         onChange={function(e) { updateCCA(assoc.id, "montant", e.target.value); }}
                         style={Object.assign({}, inputS, { flex: 1 })} />
-                      <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 16 }}>â‚¬</span>
+                      <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 16 }}>€</span>
                     </div>
                     <div style={{ fontSize: 10, color: "#38bdf8", marginTop: 4 }}>
-                      IntÃ©rÃªts/an : {fmtEur(pf(assoc.montant) * pf(sciParams.tauxCCA) / 100)} (dÃ©ductibles)
+                      Intérêts/an : {fmtEur(pf(assoc.montant) * pf(sciParams.tauxCCA) / 100)} (déductibles)
                     </div>
                   </div>
                 );
               })}
               <button onClick={addCCA}
                 style={{ padding: "7px", borderRadius: 9, border: "1.5px dashed rgba(56,189,248,0.4)", cursor: "pointer", fontSize: 12, fontWeight: 600, background: "transparent", color: "#0ea5e9" }}>
-                + Ajouter un associÃ©
+                + Ajouter un associé
               </button>
               <div style={{ background: "rgba(56,189,248,0.08)", borderRadius: 10, padding: "10px 12px", border: "1px solid rgba(56,189,248,0.2)" }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#0369a1", marginBottom: 4 }}>RÃ©capitulatif CCA</div>
-                <StatRow label="Total CCA apportÃ©" value={fmtEur(totalCCA)} color="#38bdf8" bold />
-                <StatRow label={"IntÃ©rÃªts/an (" + sciParams.tauxCCA + "%)"} value={fmtEur(totalCCA * pf(sciParams.tauxCCA) / 100)} color="#0ea5e9" border={false} />
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#0369a1", marginBottom: 4 }}>Récapitulatif CCA</div>
+                <StatRow label="Total CCA apporté" value={fmtEur(totalCCA)} color="#38bdf8" bold />
+                <StatRow label={"Intérêts/an (" + sciParams.tauxCCA + "%)"} value={fmtEur(totalCCA * pf(sciParams.tauxCCA) / 100)} color="#0ea5e9" border={false} />
                 <div style={{ fontSize: 10, color: "#64748b", marginTop: 6 }}>
-                  âœ… Remboursement non imposable â€” sortie d'argent sans PFU ni IR
+                  ✅ Remboursement non imposable — sortie d'argent sans PFU ni IR
                 </div>
               </div>
             </div>
@@ -2841,7 +3324,7 @@ function SimulateurSCI() {
       )}
 
       <div style={{ background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 14px", fontSize: 11, color: "#64748b", border: "1px solid rgba(148,163,184,0.2)" }}>
-        â„¹ï¸ IS calculÃ© sur le rÃ©sultat <strong>consolidÃ©</strong> de la SCI (Î£ tous biens). Seuil taux rÃ©duit 15% : 42 500 â‚¬/an. Les loyers sont indexÃ©s +1%/an. Les CCA sont remboursables sans imposition et les intÃ©rÃªts versÃ©s sont dÃ©ductibles (taux lÃ©gal {TAUX_CCA_LEGAL}%). Attention Ã  la plus-value Ã  la revente (amortissements rÃ©intÃ©grÃ©s).
+        ℹ️ IS calculé sur le résultat <strong>consolidé</strong> de la SCI (Σ tous biens). Seuil taux réduit 15% : 42 500 €/an. Les loyers sont indexés +1%/an. Les CCA sont remboursables sans imposition et les intérêts versés sont déductibles (taux légal {TAUX_CCA_LEGAL}%). Attention à la plus-value à la revente (amortissements réintégrés).
       </div>
     </div>
   );
@@ -2852,24 +3335,42 @@ export default function App() {
   const [onglet, setOnglet] = useState("analyse");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Photos et projets remontés ici pour survivre aux changements d'onglet
+  const [simPhotos, setSimPhotos] = useState(function() {
+    try { return JSON.parse(localStorage.getItem("radar-immo-photos-v1")) || []; }
+    catch(e) { return []; }
+  });
+  const [simProjets, setSimProjets] = useState(function() {
+    try { return JSON.parse(localStorage.getItem("radar-immo-projets-v1")) || []; }
+    catch(e) { return []; }
+  });
+  const [simProjetACharger, setSimProjetACharger] = useState(null);
+
+  const ouvrirProjet = function(p) {
+    setSimProjetACharger(p);
+    setOnglet("simulation");
+  };
+
   const navItems = [
-    { id: "analyse",    label: "Analyse communes",        icon: "ðŸ—ºï¸" },
-    { id: "simulation", label: "Simulation projet",       icon: "ðŸ“Š" },
-    { id: "credit",     label: "Simulation de crÃ©dit",    icon: "ðŸ¦" },
-    { id: "offres",     label: "Comparateur offres",      icon: "âš–ï¸" },
-    { id: "travaux",    label: "Simulateur travaux",      icon: "ðŸ”¨" },
-    { id: "plusvalue",  label: "Plus-value immo",         icon: "ðŸ“ˆ" },
-    { id: "sci",       label: "Simulateur SCI IS",          icon: "ðŸ¢" },
+    { id: "analyse",    label: "Analyse communes",        icon: "🗺️" },
+    { id: "simulation", label: "Simulation projet",       icon: "📊" },
+    { id: "credit",     label: "Simulation de crédit",    icon: "🏦" },
+    { id: "offres",     label: "Comparateur offres",      icon: "⚖️" },
+    { id: "travaux",    label: "Simulateur travaux",      icon: "🔨" },
+    { id: "plusvalue",  label: "Plus-value immo",         icon: "📈" },
+    { id: "sci",       label: "Simulateur SCI IS",          icon: "🏢" },
+    { id: "favoris",   label: "Mes projets",                  icon: "⭐" },
   ];
 
   const titres = {
-    analyse:    { h: "Analyse investissement â€” Seine-Maritime", sub: "TOP 10 des communes selon tes filtres Â· Clic = dÃ©tail Â· Clic sur une jauge = dÃ©tail du score Â· Clic droit = comparer" },
-    simulation: { h: "Simulation de rentabilitÃ©", sub: "ParamÃ¨tre ton projet, sauvegarde-le et visualise l'Ã©volution du cash-flow par rÃ©gime fiscal." },
-    credit:     { h: "Simulation de crÃ©dit", sub: "Calcule mensualitÃ©s, coÃ»t total et tableau d'amortissement de ton prÃªt." },
-    offres:     { h: "Comparateur d'offres de financement", sub: "Compare plusieurs propositions de banques sur une base homogÃ¨ne avec score pondÃ©rÃ©." },
-    travaux:    { h: "Simulateur de coÃ»t des travaux", sub: "Estime le budget travaux poste par poste et son impact sur la rentabilitÃ©." },
-    plusvalue:  { h: "Calculateur de plus-value immobiliÃ¨re", sub: "Estime l'impÃ´t sur la plus-value selon la durÃ©e de dÃ©tention et les abattements lÃ©gaux." },
-    sci:       { h: "Simulateur SCI Ã  l'IS", sub: "Analyse rentabilitÃ©, fiscalitÃ© IS, amortissements et dividendes de ta SCI." },
+    analyse:    { h: "Analyse investissement — Seine-Maritime", sub: "TOP 10 des communes selon tes filtres · Clic = détail · Clic sur une jauge = détail du score · Clic droit = comparer" },
+    simulation: { h: "Simulation de rentabilité", sub: "Paramètre ton projet, sauvegarde-le et visualise l'évolution du cash-flow par régime fiscal." },
+    credit:     { h: "Simulation de crédit", sub: "Calcule mensualités, coût total et tableau d'amortissement de ton prêt." },
+    offres:     { h: "Comparateur d'offres de financement", sub: "Compare plusieurs propositions de banques sur une base homogène avec score pondéré." },
+    travaux:    { h: "Simulateur de coût des travaux", sub: "Estime le budget travaux poste par poste et son impact sur la rentabilité." },
+    plusvalue:  { h: "Calculateur de plus-value immobilière", sub: "Estime l'impôt sur la plus-value selon la durée de détention et les abattements légaux." },
+    sci:       { h: "Simulateur SCI à l'IS", sub: "Analyse rentabilité, fiscalité IS, amortissements et dividendes de ta SCI." },
+    favoris:   { h: "Mes projets sauvegardés", sub: "Retrouve et charge toutes tes simulations d'investissement." },
   };
 
   const handleNav = function(id) { setOnglet(id); setSidebarOpen(false); };
@@ -2919,8 +3420,8 @@ export default function App() {
         {/* Toggle */}
         <button onClick={function() { setSidebarOpen(!sidebarOpen); }}
           style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: sidebarOpen ? "flex-end" : "center", gap: 6, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", background: "rgba(148,163,184,0.1)", color: "#94a3b8", fontSize: 11, fontWeight: 500, width: "100%", transition: "all 0.15s" }}>
-          <span style={{ fontSize: 14, transition: "transform 0.22s", transform: sidebarOpen ? "rotate(180deg)" : "rotate(0deg)", display: "inline-block" }}>â€º</span>
-          {sidebarOpen && <span>RÃ©duire</span>}
+          <span style={{ fontSize: 14, transition: "transform 0.22s", transform: sidebarOpen ? "rotate(180deg)" : "rotate(0deg)", display: "inline-block" }}>›</span>
+          {sidebarOpen && <span>Réduire</span>}
         </button>
         {!sidebarOpen && <div style={{ fontSize: 9, color: "#cbd5e1", textAlign: "center", marginTop: 4, letterSpacing: "1px", fontWeight: 700 }}>76</div>}
       </aside>
@@ -2932,12 +3433,100 @@ export default function App() {
           <p style={{ fontSize: 12, color: "#64748b", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
         </div>
         {onglet === "analyse"    && <AnalyseCommunes />}
-        {onglet === "simulation" && <SimulationProjet />}
+        {onglet === "simulation" && <SimulationProjet photos={simPhotos} setPhotos={setSimPhotos} projets={simProjets} setProjets={setSimProjets} projetACharger={simProjetACharger} onProjetCharge={function() { setSimProjetACharger(null); }} />}
         {onglet === "credit"     && <SimulateurCredit />}
         {onglet === "offres"     && <ComparateurOffres />}
         {onglet === "travaux"    && <SimulateurTravaux />}
         {onglet === "plusvalue"  && <CalculateurPlusValue />}
         {onglet === "sci"       && <SimulateurSCI />}
+        {onglet === "favoris"   && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {simProjets.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 20px", color: "#94a3b8" }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>⭐</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: "#64748b" }}>Aucun projet sauvegardé</div>
+                <div style={{ fontSize: 13, marginTop: 6 }}>Crée une simulation et clique sur "💾 Sauver" pour la retrouver ici.</div>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                {simProjets.map(function(p) {
+                  var note = (function() {
+                    try {
+                      var r = calculerSimulation(p.inputs);
+                      return calculerNote(r, p.regimeActif);
+                    } catch(e) { return null; }
+                  })();
+                  var noteColor = note != null ? getNoteColor(note) : "#94a3b8";
+                  var noteLabel = note != null ? getNoteLabel(note) : "—";
+                  return (
+                    <div key={p.id} style={{ background: "rgba(255,255,255,0.85)", borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 24px rgba(99,102,241,0.10)", border: "1px solid rgba(148,163,184,0.2)", backdropFilter: "blur(18px)", cursor: "pointer", transition: "transform 0.15s, box-shadow 0.15s" }}
+                      onClick={function() { ouvrirProjet(p); }}
+                      onMouseEnter={function(e) { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(99,102,241,0.18)"; }}
+                      onMouseLeave={function(e) { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 24px rgba(99,102,241,0.10)"; }}>
+                      {/* Photo de couverture */}
+                      <div style={{ height: 160, background: p.coverPhoto ? "transparent" : "linear-gradient(135deg,rgba(99,102,241,0.15),rgba(56,189,248,0.15))", position: "relative", overflow: "hidden" }}>
+                        {p.coverPhoto
+                          ? <img src={p.coverPhoto} alt={p.nom} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 48 }}>🏠</div>
+                        }
+                        {/* Badge note */}
+                        {note != null && (
+                          <div style={{ position: "absolute", top: 10, right: 10, background: "rgba(255,255,255,0.92)", borderRadius: 12, padding: "6px 12px", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", textAlign: "center", minWidth: 56 }}>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: noteColor, lineHeight: 1 }}>{note}</div>
+                            <div style={{ fontSize: 9, fontWeight: 700, color: noteColor, marginTop: 1 }}>{noteLabel}</div>
+                          </div>
+                        )}
+                        {/* Badge régime */}
+                        <div style={{ position: "absolute", bottom: 8, left: 8, background: "rgba(99,102,241,0.88)", color: "#fff", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 8 }}>
+                          {p.regimeActif}
+                        </div>
+                      </div>
+                      {/* Infos */}
+                      <div style={{ padding: "14px 16px" }}>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nom}</div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                          <span style={{ fontSize: 11, color: "#94a3b8" }}>📅 {p.savedAt}</span>
+                          {p.inputs && p.inputs.prixVente && (
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "#4338ca" }}>{fmtEur(pf(p.inputs.prixVente))}</span>
+                          )}
+                        </div>
+                        {/* KPIs rapides */}
+                        {p.inputs && (function() {
+                          try {
+                            var r = calculerSimulation(p.inputs);
+                            var reg = r.regimes[p.regimeActif];
+                            var cfMois = reg ? Math.round(reg.tresorerie / 12) : null;
+                            return (
+                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 12 }}>
+                                {[
+                                  { label: "Rdt brut", value: fmtPct(r.rendBrut), color: "#16a34a" },
+                                  { label: "CF/mois", value: cfMois != null ? (cfMois >= 0 ? "+" : "") + fmt(cfMois, 0) + " €" : "—", color: cfMois != null && cfMois >= 0 ? "#16a34a" : "#dc2626" },
+                                  { label: "Loyer/mois", value: fmtEur(pf(p.inputs.loyerMensuelHC)), color: "#0ea5e9" },
+                                ].map(function(k) {
+                                  return (
+                                    <div key={k.label} style={{ background: "rgba(241,245,249,0.8)", borderRadius: 10, padding: "6px 8px", textAlign: "center" }}>
+                                      <div style={{ fontSize: 13, fontWeight: 700, color: k.color }}>{k.value}</div>
+                                      <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 1 }}>{k.label}</div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          } catch(e) { return null; }
+                        })()}
+                        <button
+                          onClick={function(e) { e.stopPropagation(); ouvrirProjet(p); }}
+                          style={{ width: "100%", background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 10, padding: "8px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+                          📂 Ouvrir la simulation
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
