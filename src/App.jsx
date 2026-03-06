@@ -545,7 +545,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
     const W = 210; const H = 297;
     const BLEU = [30, 58, 138]; const BLEU_CLAIR = [99, 102, 241]; const GRIS = [100, 116, 139];
     const VERT = [22, 163, 74]; const ROUGE = [220, 38, 38]; const ORANGE = [217, 119, 6];
-    const BG = [248, 250, 252];
+    const BG_PDF = [248, 250, 252];
 
     var pv = pf(inputs.prixVente);
     var surf = pf(inputs.surfaceGlobale);
