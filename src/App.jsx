@@ -3037,7 +3037,7 @@ function SimulateurSCI() {
             </div>
             {/* Aperçu rapide an 1 pour ce bien */}
             {(function() {
-              var r = calcBienAnnee(bien, 1);
+              var r = calcBienAnnee(bien, new Date().getFullYear());
               return (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px,1fr))", gap: 10 }}>
                   {[
