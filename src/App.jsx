@@ -537,7 +537,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
     const W = 210; const H = 297;
     const BLEU = [30, 58, 138]; const BLEU_CLAIR = [99, 102, 241]; const GRIS = [100, 116, 139];
     const VERT = [22, 163, 74]; const ROUGE = [220, 38, 38]; const ORANGE = [217, 119, 6];
-    const BG = [248, 250, 252];
+    const BG_PDF = [248, 250, 252];
     function cleanTitle(title) {
       return title.replace(/[\W_]/g, " ").trim().substring(0, 25).replace(/\s+/g, " ");
     }
@@ -589,7 +589,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
       var colW = (W - 28) / items.length;
       items.forEach(function(item, i) {
         var x = 14 + i * colW;
-        doc.setFillColor(BG[0], BG[1], BG[2]);
+        doc.setFillColor(BG_PDF[0], BG_PDF[1], BG_PDF[2]);
         doc.roundedRect(x, y, colW - 3, 18, 2, 2, "F");
         doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
         doc.text(item.label, x + (colW - 3) / 2, y + 5, { align: "center" });
@@ -611,7 +611,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
       return y + 7;
     }
     function col3block(x, y, w, title, rows) {
-      doc.setFillColor(BG[0], BG[1], BG[2]);
+      doc.setFillColor(BG_PDF[0], BG_PDF[1], BG_PDF[2]);
       doc.roundedRect(x, y, w, 6 + rows.length * 7, 2, 2, "F");
       doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(BLEU[0], BLEU[1], BLEU[2]);
       doc.text(title, x + 3, y + 4.5);
@@ -699,7 +699,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
     ], photoY);
 
     if (inputs.noteDPE) {
-      doc.setFillColor(BG[0], BG[1], BG[2]);
+      doc.setFillColor(BG_PDF[0], BG_PDF[1], BG_PDF[2]);
       doc.roundedRect(14, photoY, 40, 14, 2, 2, "F");
       doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
       doc.text("DPE", 34, photoY + 5, { align: "center" });
@@ -831,7 +831,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
       if (prixM2 && pri.appartement_m2) {
         var diff = (prixM2 - Number(pri.appartement_m2)) / Number(pri.appartement_m2) * 100;
         var diffColor = diff > 10 ? ROUGE : diff > 0 ? ORANGE : VERT;
-        doc.setFillColor(BG[0], BG[1], BG[2]);
+        doc.setFillColor(BG_PDF[0], BG_PDF[1], BG_PDF[2]);
         doc.roundedRect(14, y, W - 28, 14, 2, 2, "F");
         doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
         doc.text("Votre prix/m² (" + fmt(prixM2, 0) + " €/m²) vs marché (" + fmt(Number(pri.appartement_m2), 0) + " €/m²) :", 18, y + 6);
