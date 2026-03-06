@@ -3528,10 +3528,6 @@ function SimulateurSCI() {
   );
 }
 
-export default function App() {
-  const [onglet, setOnglet] = useState("analyse");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   // TON JSX existant ici - il sera injecté automatiquement
 
   return (
