@@ -2758,12 +2758,12 @@ function FormulaireBien({ bien, onChange }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={sepS}>Revenus</div>
         <BienField vals={bien} onChange={onChange} field="loyerMensuel" label="Loyer mensuel HC" unit="€" step="50" />
-        <BienField vals={b} onChange={function(f, v) { updateBien(b.id, f, v); }} field="tauxRevalorisation" label="Reval. loyer/an" unit="%" step="0.5" hint="Indexation annuelle depuis la date d'achat" />
-        <div>
-          <label style={labelS}>Date d'achat</label>
-          <input type="month" value={b.dateAchat || ""} onChange={function(e) { updateBien(b.id, "dateAchat", e.target.value); }}
-            style={{ width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" }} />
-        </div>
+        <BienField vals={bien} onChange={onChange} field="tauxRevalorisation" label="Reval. loyer/an" unit="%" step="0.5" hint="Indexation annuelle depuis la date d'achat" />
+<div>
+  <label style={labelS}>Date d'achat</label>
+  <input type="month" value={bien.dateAchat || ""} onChange={function(e) { onChange("dateAchat", e.target.value); }}
+    style={{ width: "100%", background: "rgba(248,250,252,0.9)", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, padding: "7px 10px", color: "#0f172a", fontSize: 13, outline: "none" }} />
+</div>
         <div>
           <label style={labelS}>Taux d'occupation</label>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
