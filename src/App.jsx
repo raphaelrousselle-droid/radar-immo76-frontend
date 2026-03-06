@@ -3327,7 +3327,6 @@ function SimulateurSCI() {
         â„¹ï¸ IS calculÃ© sur le rÃ©sultat <strong>consolidÃ©</strong> de la SCI (Î£ tous biens). Seuil taux rÃ©duit 15% : 42 500 â‚¬/an. Les loyers sont indexÃ©s +1%/an. Les CCA sont remboursables sans imposition et les intÃ©rÃªts versÃ©s sont dÃ©ductibles (taux lÃ©gal {TAUX_CCA_LEGAL}%). Attention Ã  la plus-value Ã  la revente (amortissements rÃ©intÃ©grÃ©s).
       </div>
     </div>
-export default function App() {
   const [onglet, setOnglet] = useState("analyse");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
