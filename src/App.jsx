@@ -1,14 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-
-const API_BASE = "https://radar-immo76-1.onrender.com";
-const CACHE_KEY = "radar-immo-communes-v2";
-const PROJETS_KEY = "radar-immo-projets-v1";
-
-const nc = (v) => { if (v == null) return "#94a3b8"; if (v >= 7) return "#16a34a"; if (v >= 5) return "#d97706"; return "#dc2626"; };
-const nLabel = (v) => { if (v == null) return "—"; if (v >= 7) return "Bon"; if (v >= 5) return "Moyen"; return "Faible"; };
-const sn = (v) => (v != null && !isNaN(Number(v)) ? Number(v) : null);
-const pf = (v) => { const n = parseFloat(v); return isNaNimport React, { useState, useEffect, useCallback, useMemo } from "react";
-
+import React
 const API_BASE = "https://radar-immo76-1.onrender.com";
 const CACHE_KEY = "radar-immo-communes-v2";
 const PROJETS_KEY = "radar-immo-projets-v1";
