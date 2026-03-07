@@ -2895,12 +2895,9 @@ function calcBienAnnee(bien, anneeReelle) {
   const moisAchat = parseInt(dateAchat.split("-")[1] || "1", 10) - 1;
   const anneesDepuisAchat = anneeReelle - anneeAchat;
 
-  if (anneesDepuisAchat < 0) {
-    return {
-      loyersAn: 0, chargesTotal: 0, interetsAn: 0, totalAmort: 0,
-      provisionGros: 0, resultatBrut: 0, remboursementAn: 0,
-      amortBat: 0, amortTrav: 0, amortFraisAcquis: 0, amortFraisDossier: 0,
-      actif: false,
+  const moisDansAnnee = anneesDepuisAchat === 0 
+  ? Math.max(0, 12 - moisAchat) 
+  : 12;
     };
   }
 
