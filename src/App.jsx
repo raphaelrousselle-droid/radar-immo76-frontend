@@ -1,19 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 
-
-// Helper localStorage protégé contre QuotaExceededError
-function safeLS(key, value) {
-  try {
-    // Si les photos sont trop lourdes, on les vide d'abord
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch(e) {
-    if (e && e.name === 'QuotaExceededError') {
-      try { localStorage.removeItem('radar-immo-photos-v1'); } catch(_) {}
-      try { localStorage.setItem(key, JSON.stringify(value)); } catch(_) {}
-    }
-  }
-}
-
 const SUPABASE_URL = "https://iudxpwmbwcaspihtvhay.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Ab3inJlUcsRG-p6fU4y4pQ_0ncHppba";
 
@@ -45,14 +31,16 @@ function getCommunesCache() {
   if (_communesCache) return Promise.resolve(_communesCache);
   if (_communesCachePromise) return _communesCachePromise;
   // Essayer localStorage d'abord
-  // Lecture cache localStorage désactivée
-  try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
+  try {
+    var stored = localStorage.getItem(CACHE_KEY);
+    if (stored) { _communesCache = JSON.parse(stored); return Promise.resolve(_communesCache); }
+  } catch(e) {}
   // Sinon charger depuis l'API
   _communesCachePromise = fetch(API_BASE + "/communes")
     .then(function(r) { return r.json(); })
     .then(function(d) {
       _communesCache = d.communes || [];
-      // Cache communes désactivé (trop lourd pour localStorage Safari)
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(_communesCache)); } catch(e) {}
       _communesCachePromise = null;
       return _communesCache;
     })
@@ -683,7 +671,8 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
   // projets et photos reçus en props depuis App (persistent lors des changements d'onglet)
   // Sync photos dans localStorage à chaque modif
   useEffect(function() {
-    // Photos NON sauvegardées en localStorage (trop lourd) — Supabase uniquement
+    try { localStorage.setItem("radar-immo-photos-v1", JSON.stringify(photos)); }
+    catch(e) {}
   }, [photos]);
 
   // Commune + donnees marche
@@ -746,7 +735,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
       setCommuneSearch(mergedInputs.commune);
       fetchDonneesCommune(mergedInputs.commune);
     }
-    // Photos non écrites en localStorage
+    try { localStorage.setItem("radar-immo-photos-v1", JSON.stringify(restoredPhotos)); } catch(e) {}
     if (onProjetCharge) onProjetCharge();
   }, [projetACharger]);
 
@@ -798,7 +787,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
     };
     const liste = [entry].concat(projets.filter(function(p) { return p.nom !== nomProjet.trim(); }));
     setProjets(liste);
-    try { localStorage.setItem(PROJETS_KEY, JSON.stringify(liste)); } catch(e) { console.warn("localStorage plein:", e); }
+    localStorage.setItem(PROJETS_KEY, JSON.stringify(liste));
     // Ne PAS vider nomProjet ici pour permettre de ré-enregistrer
   };
   const charger = function(p) {
@@ -808,9 +797,9 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
     setNomProjet(p.nom);
     var restoredPhotos = p.photos || [];
     setPhotos(restoredPhotos);
-    // Photos non écrites en localStorage
+    try { localStorage.setItem("radar-immo-photos-v1", JSON.stringify(restoredPhotos)); } catch(e) {}
   };
-  const supprimer = function(id) { const liste = projets.filter(function(p) { return p.id !== id; }); setProjets(liste); try { localStorage.setItem(PROJETS_KEY, JSON.stringify(liste)); } catch(e) {} };
+  const supprimer = function(id) { const liste = projets.filter(function(p) { return p.id !== id; }); setProjets(liste); localStorage.setItem(PROJETS_KEY, JSON.stringify(liste)); };
 
   const exportJSON = function() {
     var data = { nom: nomProjet, inputs: inputs, lots: lots, regimeActif: regimeActif };
@@ -1450,7 +1439,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
   const dash = (Math.min(100, Math.max(0, note)) / 100) * circumference;
   const tresoPMois = regime.tresorerie / 12;
 
-  const tabs = [{ id: "params", label: "Paramètres" }, { id: "bilan", label: "Bilan" }, { id: "projection", label: "Projection" }, { id: "comparatif", label: "Comparatif" }, { id: "revente", label: "Revente" }, { id: "dvf", label: "📊 Marché DVF" }];
+  const tabs = [{ id: "params", label: "Paramètres" }, { id: "bilan", label: "Bilan" }, { id: "projection", label: "Projection" }, { id: "comparatif", label: "Comparatif" }, { id: "revente", label: "Revente" }];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -1862,218 +1851,9 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
           <ReventeSimulator inputs={inputs} result={result} regime={regime} regimeActif={regimeActif} cashFlowData={cashFlowData} />
         </div>
       )}
-
-      {activeTab === "dvf" && (
-        <DVFErrorBoundary>
-          <DVFPanel commune={inputs.commune} inputs={inputs} active={true} />
-        </DVFErrorBoundary>
-      )}
     </div>
   );
 }
-
-// ─── DVF PANEL ────────────────────────────────────────────────────────────────
-// ─── ERROR BOUNDARY pour DVFPanel ────────────────────────────────────────────
-class DVFErrorBoundary extends React.Component {
-  constructor(props) { super(props); this.state = { hasError: false, error: null }; }
-  static getDerivedStateFromError(error) { return { hasError: true, error }; }
-  componentDidCatch(error, info) { console.error("DVFPanel crash:", error, info); }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{ background: "rgba(255,255,255,0.7)", borderRadius: 20, padding: 20, border: "1px solid rgba(220,38,38,0.2)" }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#dc2626", marginBottom: 6 }}>⚠️ Le panel DVF a rencontré une erreur</div>
-          <div style={{ fontSize: 12, color: "#64748b", marginBottom: 10 }}>{this.state.error && this.state.error.message}</div>
-          <button onClick={function() { window.location.reload(); }}
-            style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 12 }}>
-            🔄 Recharger la page
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-
-function DVFPanel({ commune, inputs, active }) {
-  var _s = React.useState("idle"); var dvfStatus = _s[0]; var setDvfStatus = _s[1];
-  var _d = React.useState(null); var dvfData = _d[0]; var setDvfData = _d[1];
-  var _e = React.useState(null); var dvfError = _e[0]; var setDvfError = _e[1];
-
-  var COMMUNES_76 = [
-    { nom: "Rouen", code: "76540" }, { nom: "Le Havre", code: "76351" },
-    { nom: "Dieppe", code: "76217" }, { nom: "Saint-Étienne-du-Rouvray", code: "76575" },
-    { nom: "Sotteville-lès-Rouen", code: "76681" }, { nom: "Grand-Quevilly", code: "76322" },
-    { nom: "Petit-Quevilly", code: "76498" }, { nom: "Mont-Saint-Aignan", code: "76447" },
-    { nom: "Fécamp", code: "76259" }, { nom: "Maromme", code: "76415" },
-    { nom: "Yvetot", code: "76757" }, { nom: "Déville-lès-Rouen", code: "76220" },
-    { nom: "Harfleur", code: "76340" }, { nom: "Gonfreville-l'Orcher", code: "76305" },
-    { nom: "Elbeuf", code: "76231" }, { nom: "Caudebec-lès-Elbeuf", code: "76168" },
-    { nom: "Barentin", code: "76057" }, { nom: "Bolbec", code: "76108" },
-    { nom: "Lillebonne", code: "76384" }, { nom: "Duclair", code: "76225" },
-    { nom: "Bacqueville-en-Caux", code: "76049" }, { nom: "Envermeu", code: "76242" },
-    { nom: "Neufchâtel-en-Bray", code: "76461" }, { nom: "Gournay-en-Bray", code: "76307" },
-    { nom: "Étretat", code: "76255" }, { nom: "Saint-Valery-en-Caux", code: "76651" },
-    { nom: "Eu", code: "76258" }, { nom: "Le Tréport", code: "76717" },
-    { nom: "Offranville", code: "76472" }, { nom: "Arques-la-Bataille", code: "76036" },
-    { nom: "Pavilly", code: "76495" }, { nom: "Tôtes", code: "76710" },
-    { nom: "Luneray", code: "76397" }, { nom: "Clères", code: "76176" },
-    { nom: "Montivilliers", code: "76437" }, { nom: "Octeville-sur-Mer", code: "76471" },
-    { nom: "Criquetot-l'Esneval", code: "76197" }, { nom: "Saint-Nicolas-d'Aliermont", code: "76601" },
-    { nom: "Cany-Barville", code: "76157" },
-  ];
-
-  function fmtD(n) { if (n == null || isNaN(n) || n === 0) return "—"; return Math.round(n).toLocaleString("fr-FR"); }
-
-  var found = commune ? COMMUNES_76.find(function(c) {
-    return c.nom.toLowerCase() === commune.toLowerCase() || c.nom.toLowerCase().includes(commune.toLowerCase());
-  }) : null;
-
-  async function lancerRecherche(codeInsee) {
-    setDvfStatus("loading"); setDvfData(null); setDvfError(null);
-    try {
-      var url = "/api/dvf?code_commune=" + codeInsee;
-      var resp = await fetch(url);
-      if (!resp.ok) throw new Error("Erreur API (" + resp.status + ")");
-      var data = await resp.json();
-      if (!data.found) { setDvfStatus("empty"); return; }
-      setDvfData(data);
-      setDvfStatus("done");
-    } catch(e) {
-      setDvfError(e.message); setDvfStatus("error");
-    }
-  }
-
-  React.useEffect(function() {
-    if (found && active) lancerRecherche(found.code);
-  }, [commune, active]);
-
-  var cardS = { background: "rgba(255,255,255,0.85)", borderRadius: 14, padding: "12px 16px", border: "1px solid rgba(148,163,184,0.18)", boxShadow: "0 2px 8px rgba(99,102,241,0.05)" };
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={SECTION}>
-        <SectionHeader icon="📊" title="Données de marché DVF" badge="Open Data DGFiP" />
-
-        {/* Info commune + bouton */}
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 14 }}>
-          {!commune && (
-            <div style={{ fontSize: 13, color: "#94a3b8", fontStyle: "italic" }}>
-              💡 Renseigne d'abord la commune dans l'onglet <strong>Paramètres</strong>.
-            </div>
-          )}
-          {commune && !found && (
-            <div style={{ fontSize: 13, color: "#f97316" }}>
-              ⚠️ Commune « {commune} » absente de la liste. Vérifie l'orthographe dans Paramètres.
-            </div>
-          )}
-          {found && (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <div style={{ fontSize: 13, color: "#64748b" }}>
-                Commune : <strong style={{ color: "#0f172a" }}>{found.nom}</strong>
-                <span style={{ fontSize: 11, color: "#94a3b8", marginLeft: 6, fontFamily: "monospace" }}>INSEE {found.code}</span>
-              </div>
-              <button onClick={function(){ lancerRecherche(found.code); }}
-                style={{ background: "linear-gradient(135deg,#6366f1,#38bdf8)", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
-                {dvfStatus === "loading" ? "⏳ Chargement…" : "🔄 Actualiser"}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {dvfStatus === "loading" && (
-          <div style={{ textAlign: "center", padding: "40px 20px", color: "#94a3b8" }}>
-            <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
-            <div style={{ fontSize: 13 }}>Chargement des données DVF…</div>
-          </div>
-        )}
-
-        {dvfStatus === "error" && (
-          <div style={{ background: "rgba(220,38,38,0.07)", border: "1px solid rgba(220,38,38,0.2)", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#dc2626" }}>
-            ⚠️ {dvfError}
-          </div>
-        )}
-
-        {dvfStatus === "empty" && (
-          <div style={{ textAlign: "center", padding: "30px 20px", color: "#94a3b8", fontSize: 13 }}>
-            🔍 Aucune donnée DVF disponible pour cette commune.
-          </div>
-        )}
-
-        {dvfStatus === "done" && dvfData && (function() {
-          var d = dvfData;
-          var surf = pf(d.prix_appt_m2) > 0 ? pf(d.prix_appt_m2) : null;
-          var surfMai = pf(d.prix_maison_m2) > 0 ? pf(d.prix_maison_m2) : null;
-          var prixProjetM2 = inputs && pf(inputs.prixVente) > 0 && pf(inputs.surfaceGlobale) > 0
-            ? Math.round(pf(inputs.prixVente) / pf(inputs.surfaceGlobale)) : null;
-
-          // Indicateur d'écart vs marché appartement
-          var ecartAppt = (prixProjetM2 && surf) ? Math.round((prixProjetM2 - surf) / surf * 100) : null;
-          var ecartMai  = (prixProjetM2 && surfMai) ? Math.round((prixProjetM2 - surfMai) / surfMai * 100) : null;
-          var ecartColor = function(e) { return e == null ? "#6366f1" : e > 10 ? "#dc2626" : e > 0 ? "#d97706" : "#16a34a"; };
-          var ecartLabel = function(e) { return e == null ? "—" : (e > 0 ? "+" : "") + e + "% vs votre projet"; };
-
-          var kpis = [
-            { label: "Prix marché appart.", value: surf ? fmtD(surf) + " €/m²" : "—", sub: fmtD(d.nb_ventes_apt) + " ventes", color: "#6366f1", icon: "🏢",
-              ecart: ecartAppt },
-            { label: "Prix marché maison", value: surfMai ? fmtD(surfMai) + " €/m²" : "—", sub: fmtD(d.nb_ventes_mai) + " ventes", color: "#d97706", icon: "🏡",
-              ecart: ecartMai },
-            { label: "Volume total ventes", value: fmtD((d.nb_ventes_apt||0) + (d.nb_ventes_mai||0)), sub: "appartements + maisons", color: "#16a34a", icon: "📋", ecart: null },
-          ];
-
-          if (prixProjetM2) {
-            kpis.push({ label: "Votre prix /m²", value: fmtD(prixProjetM2) + " €/m²", sub: "prix FAI ÷ surface", color: "#0ea5e9", icon: "🎯", ecart: null });
-          }
-
-          return (
-            <div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 10, marginBottom: 16 }}>
-                {kpis.map(function(k) {
-                  return (
-                    <div key={k.label} style={Object.assign({}, cardS, { borderTop: "3px solid " + k.color })}>
-                      <div style={{ fontSize: 16, marginBottom: 4 }}>{k.icon}</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: k.color }}>{k.value}</div>
-                      <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>{k.sub}</div>
-                      {k.ecart != null && (
-                        <div style={{ marginTop: 6, fontSize: 11, fontWeight: 600, color: ecartColor(k.ecart),
-                          background: ecartColor(k.ecart) + "15", padding: "2px 7px", borderRadius: 6, display: "inline-block" }}>
-                          {ecartLabel(k.ecart)}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Analyse positionnement prix */}
-              {prixProjetM2 && (surf || surfMai) && (
-                <div style={Object.assign({}, cardS, { marginBottom: 12 })}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 10 }}>📍 Positionnement de votre projet vs le marché</div>
-                  {surf && (
-                    <StatRow label={"Écart vs prix appt. (" + fmtD(surf) + " €/m²)"}
-                      value={(ecartAppt > 0 ? "+" : "") + ecartAppt + "%"}
-                      color={ecartColor(ecartAppt)} bold={Math.abs(ecartAppt) > 5} />
-                  )}
-                  {surfMai && (
-                    <StatRow label={"Écart vs prix maison (" + fmtD(surfMai) + " €/m²)"}
-                      value={(ecartMai > 0 ? "+" : "") + ecartMai + "%"}
-                      color={ecartColor(ecartMai)} bold={Math.abs(ecartMai) > 5} border={false} />
-                  )}
-                </div>
-              )}
-
-              <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center" }}>
-                Source : DVF DGFiP — données agrégées Seine-Maritime · Mis à jour 2025
-              </div>
-            </div>
-          );
-        })()}
-      </div>
-    </div>
-  );
-}
-
 
 // ─── SIMULATEUR DE REVENTE ────────────────────────────────────────────────────
 function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData }) {
@@ -5963,20 +5743,6 @@ function AuthScreen({ onAuth }) {
 
 // ─── APP WRAPPER (Auth + Sync) ───────────────────────────────────────────────
 export default function App() {
-  // Nettoyage automatique si localStorage plein
-  React.useEffect(function() {
-    try {
-      var test = '__quota_test__';
-      localStorage.setItem(test, '1');
-      localStorage.removeItem(test);
-    } catch(e) {
-      // localStorage plein : vider les photos (le plus gros consommateur)
-      try { localStorage.removeItem('radar-immo-photos-v1'); } catch(_) {}
-      try { localStorage.removeItem('radar-immo-communes-v3'); } catch(_) {}
-      console.warn('localStorage plein — photos vidées automatiquement');
-    }
-  }, []);
-
   var _auth = useState(null); var user = _auth[0]; var setUser = _auth[1];
   var _loading = useState(true); var authLoading = _loading[0]; var setAuthLoading = _loading[1];
   var _authSub = React.useRef(null);
@@ -6051,7 +5817,7 @@ function AppMain({ user, onLogout }) {
       }
       if (cloudPhotos && cloudPhotos.length > 0) {
         setSimPhotos(cloudPhotos);
-        // localStorage.setItem("radar-immo-photos-v1", ...) — désactivé
+        localStorage.setItem("radar-immo-photos-v1", JSON.stringify(cloudPhotos));
       }
       setCloudReady(true);
     }).catch(function() { setCloudReady(true); });
@@ -6066,7 +5832,7 @@ function AppMain({ user, onLogout }) {
 
   useEffect(function() {
     if (!cloudReady) return;
-    // localStorage.setItem photos désactivé — trop lourd
+    localStorage.setItem("radar-immo-photos-v1", JSON.stringify(simPhotos));
     debouncedCloudSave("photos", simPhotos, 3000);
   }, [simPhotos, cloudReady]);
 
