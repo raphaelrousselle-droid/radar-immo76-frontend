@@ -45,16 +45,14 @@ function getCommunesCache() {
   if (_communesCache) return Promise.resolve(_communesCache);
   if (_communesCachePromise) return _communesCachePromise;
   // Essayer localStorage d'abord
-  try {
-    var stored = localStorage.getItem(CACHE_KEY);
-    if (stored) { _communesCache = JSON.parse(stored); return Promise.resolve(_communesCache); }
-  } catch(e) {}
+  // Lecture cache localStorage désactivée
+  try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
   // Sinon charger depuis l'API
   _communesCachePromise = fetch(API_BASE + "/communes")
     .then(function(r) { return r.json(); })
     .then(function(d) {
       _communesCache = d.communes || [];
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify(_communesCache)); } catch(e) {}
+      // Cache communes désactivé (trop lourd pour localStorage Safari)
       _communesCachePromise = null;
       return _communesCache;
     })
