@@ -3031,34 +3031,46 @@ function ComparateurOffres() {
 
   // Score global pondéré /100
   const meilleurApport = Math.min.apply(null, resultats.map(function(r) { return pf(r.offre.apportDemande); }));
+  const meilleureDuree = Math.max.apply(null, resultats.map(function(r) { return pf(r.offre.duree); }));
   const calculerScore = function(r) {
     var score = 0;
-    // Mensualité : 15 pts (réduit car apport prioritaire)
-    const ecartMens = meilleurMensualite > 0 ? (r.calc.mensualiteTotale - meilleurMensualite) / meilleurMensualite : 0;
-    score += Math.max(0, 15 - ecartMens * 200);
-    // Coût total : 30 pts
-    const ecartCout = meilleurCoutTotal > 0 ? (r.calc.coutTotal - meilleurCoutTotal) / meilleurCoutTotal : 0;
-    score += Math.max(0, 30 - ecartCout * 200);
-    // TAEG : 20 pts
-    const ecartTaeg = meilleurTaeg > 0 ? (r.calc.taeg - meilleurTaeg) / meilleurTaeg : 0;
-    score += Math.max(0, 20 - ecartTaeg * 200);
-    // Apport demandé : 15 pts (moins d apport = meilleur score)
+
+    // 1. Durée du prêt : 25 pts — plus long = mieux (moins d effort mensuel, garde la trésorerie)
+    var duree = pf(r.offre.duree);
+    score += meilleureDuree > 0 ? (duree / meilleureDuree) * 25 : 25;
+
+    // 2. Taux global (crédit + assurance) : 20 pts — plus bas = mieux
+    var tauxGlobal = pf(r.offre.taux) + pf(r.offre.assurance);
+    var meilleurTauxGlobal = Math.min.apply(null, resultats.map(function(x) { return pf(x.offre.taux) + pf(x.offre.assurance); }));
+    var ecartTaux = meilleurTauxGlobal > 0 ? (tauxGlobal - meilleurTauxGlobal) / meilleurTauxGlobal : 0;
+    score += Math.max(0, 20 - ecartTaux * 300);
+
+    // 3. Apport demandé : 20 pts — moins d apport = mieux
     var apport = pf(r.offre.apportDemande);
     var maxApport = Math.max.apply(null, resultats.map(function(x) { return pf(x.offre.apportDemande); }));
     if (maxApport > 0) {
-      score += Math.max(0, 15 - (apport / maxApport) * 15);
+      score += (1 - apport / maxApport) * 20;
     } else {
-      score += 15; // Tous à 0 apport = tout le monde gagne les 15 pts
+      score += 20;
     }
-    // Différé : 10 pts
-    const maxDiff = meilleurDiffere > 0 ? meilleurDiffere : 1;
-    const diffVal = r.offre.differe ? pf(r.offre.dureeDiffere) : 0;
-    score += meilleurDiffere > 0 ? (diffVal / maxDiff) * 10 : 10;
-    // Garantie : 6 pts
-    score += r.offre.typeGarantie === "caution" ? 6 : 2;
-    if (r.offre.modulation) score += 2;
-    if (r.offre.remboursementAnticipe) score += 2;
-    if (!r.offre.domiciliation) score += 1; // Pas de domiciliation obligatoire = bonus
+
+    // 4. Différé : 15 pts — plus long = mieux
+    var diffVal = r.offre.differe ? pf(r.offre.dureeDiffere) : 0;
+    var maxDiff = meilleurDiffere > 0 ? meilleurDiffere : 1;
+    score += meilleurDiffere > 0 ? (diffVal / maxDiff) * 15 : 15;
+
+    // 5. Type de garantie : 10 pts — cautionnement préféré
+    score += r.offre.typeGarantie === "caution" ? 10 : 3;
+
+    // 6. Domiciliation : 5 pts — non obligatoire = mieux
+    score += !r.offre.domiciliation ? 5 : 0;
+
+    // 7. Modulation des mensualités : 3 pts
+    score += r.offre.modulation ? 3 : 0;
+
+    // 8. Remboursement anticipé sans pénalité : 2 pts
+    score += r.offre.remboursementAnticipe ? 2 : 0;
+
     return Math.min(100, Math.max(0, Math.round(score)));
   };
 
@@ -3214,7 +3226,7 @@ function ComparateurOffres() {
               <div style={{ marginTop: 8, background: scoreColor + "10", borderRadius: 10, padding: "8px 12px", border: "1px solid " + scoreColor + "33", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Score global</div>
-                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>Apport · Coût · TAEG · Mensualité · Différé</div>
+                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>Durée · Taux · Apport · Différé · Garantie</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div style={{ fontSize: 26, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{s}<span style={{ fontSize: 13, fontWeight: 500 }}>/100</span></div>
@@ -3291,6 +3303,7 @@ function ComparateurOffres() {
             { label: "Mensualité la plus basse", best: meilleurMensualite,                          fn: function(r) { return r.calc.mensualiteTotale; },                           format: function(v) { return fmt(v, 0) + " €/mois"; } },
             { label: "Coût total le plus bas",   best: meilleurCoutTotal,                           fn: function(r) { return r.calc.coutTotal; },                                  format: function(v) { return fmtEur(v); } },
             { label: "TAEG le plus bas",         best: meilleurTaeg,                                fn: function(r) { return r.calc.taeg; },                                       format: function(v) { return v.toFixed(2) + " %"; } },
+            { label: "Durée la plus longue",     best: meilleureDuree, fn: function(r) { return pf(r.offre.duree); }, format: function(v) { return v + " ans"; } },
             { label: "Apport le plus bas",       best: meilleurApport, fn: function(r) { return pf(r.offre.apportDemande); }, format: function(v) { return fmtEur(v); } },
             { label: "Différé le plus long",     best: meilleurDiffere > 0 ? meilleurDiffere : null, fn: function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }, format: function(v) { return v + " mois"; } },
             { label: "Meilleure garantie",       best: "caution",                                   fn: function(r) { return r.offre.typeGarantie; },                              format: function() { return "🤝 Cautionnement"; } },
