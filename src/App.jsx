@@ -2972,7 +2972,7 @@ function SimulateurTravaux() {
 const OFFRES_KEY = "radar-immo-offres-v1";
 
 const OFFRE_DEFAULT = function(id) {
-  return { id: id, banque: "Banque " + id, montant: "200000", duree: "25", taux: "4.20", assurance: "0.30", fraisDossier: "1000", fraisGarantie: "2000", fraisCourtier: "0", modulation: false, remboursementAnticipe: false, domiciliation: false, differe: false, dureeDiffere: "0", typeGarantie: "caution" };
+  return { id: id, banque: "Banque " + id, montant: "200000", montantAFinancer: "200000", apportDemande: "0", duree: "25", taux: "4.20", assurance: "0.30", fraisDossier: "1000", fraisGarantie: "2000", fraisCourtier: "0", modulation: false, remboursementAnticipe: false, domiciliation: false, differe: false, dureeDiffere: "0", typeGarantie: "caution" };
 };
 
 function ComparateurOffres() {
@@ -3105,6 +3105,8 @@ function ComparateurOffres() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[
+                  { label: "Montant à financer", field: "montantAFinancer", unit: "€", step: "5000" },
+                  { label: "Apport demandé", field: "apportDemande", unit: "€", step: "1000" },
                   { label: "Montant emprunté", field: "montant", unit: "€", step: "5000" },
                   { label: "Durée", field: "duree", unit: "ans", step: "1" },
                   { label: "Taux hors assurance", field: "taux", unit: "%", step: "0.05" },
@@ -3226,7 +3228,9 @@ function ComparateurOffres() {
             <tbody>
               {[
                 { label: "⭐ Score global /100",              fn: function(r) { return getScore(r.id) + " / 100"; }, bestVal: meilleurScore, bestFn: function(r) { return getScore(r.id); }, highlight: true },
-                { label: "Montant",                           fn: function(r) { return fmtEur(pf(r.offre.montant)); } },
+                { label: "Montant à financer",               fn: function(r) { return fmtEur(pf(r.offre.montantAFinancer)); } },
+                { label: "Apport demandé",                    fn: function(r) { return fmtEur(pf(r.offre.apportDemande)); } },
+                { label: "Montant emprunté",                   fn: function(r) { return fmtEur(pf(r.offre.montant)); } },
                 { label: "Durée",                             fn: function(r) { return fmt(pf(r.offre.duree), 0) + " ans"; } },
                 { label: "Taux crédit",                       fn: function(r) { return pf(r.offre.taux).toFixed(2) + " %"; } },
                 { label: "Taux assurance",                    fn: function(r) { return pf(r.offre.assurance).toFixed(2) + " %"; } },
