@@ -3030,21 +3030,35 @@ function ComparateurOffres() {
   };
 
   // Score global pondéré /100
+  const meilleurApport = Math.min.apply(null, resultats.map(function(r) { return pf(r.offre.apportDemande); }));
   const calculerScore = function(r) {
     var score = 0;
+    // Mensualité : 15 pts (réduit car apport prioritaire)
     const ecartMens = meilleurMensualite > 0 ? (r.calc.mensualiteTotale - meilleurMensualite) / meilleurMensualite : 0;
-    score += Math.max(0, 25 - ecartMens * 200);
+    score += Math.max(0, 15 - ecartMens * 200);
+    // Coût total : 30 pts
     const ecartCout = meilleurCoutTotal > 0 ? (r.calc.coutTotal - meilleurCoutTotal) / meilleurCoutTotal : 0;
     score += Math.max(0, 30 - ecartCout * 200);
+    // TAEG : 20 pts
     const ecartTaeg = meilleurTaeg > 0 ? (r.calc.taeg - meilleurTaeg) / meilleurTaeg : 0;
     score += Math.max(0, 20 - ecartTaeg * 200);
+    // Apport demandé : 15 pts (moins d apport = meilleur score)
+    var apport = pf(r.offre.apportDemande);
+    var maxApport = Math.max.apply(null, resultats.map(function(x) { return pf(x.offre.apportDemande); }));
+    if (maxApport > 0) {
+      score += Math.max(0, 15 - (apport / maxApport) * 15);
+    } else {
+      score += 15; // Tous à 0 apport = tout le monde gagne les 15 pts
+    }
+    // Différé : 10 pts
     const maxDiff = meilleurDiffere > 0 ? meilleurDiffere : 1;
     const diffVal = r.offre.differe ? pf(r.offre.dureeDiffere) : 0;
     score += meilleurDiffere > 0 ? (diffVal / maxDiff) * 10 : 10;
-    score += r.offre.typeGarantie === "caution" ? 10 : 4;
+    // Garantie : 6 pts
+    score += r.offre.typeGarantie === "caution" ? 6 : 2;
     if (r.offre.modulation) score += 2;
     if (r.offre.remboursementAnticipe) score += 2;
-    if (!r.offre.domiciliation) score += 1;
+    if (!r.offre.domiciliation) score += 1; // Pas de domiciliation obligatoire = bonus
     return Math.min(100, Math.max(0, Math.round(score)));
   };
 
@@ -3200,7 +3214,7 @@ function ComparateurOffres() {
               <div style={{ marginTop: 8, background: scoreColor + "10", borderRadius: 10, padding: "8px 12px", border: "1px solid " + scoreColor + "33", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Score global</div>
-                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>Mensualité · Coût · TAEG · Différé · Garantie</div>
+                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>Apport · Coût · TAEG · Mensualité · Différé</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div style={{ fontSize: 26, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{s}<span style={{ fontSize: 13, fontWeight: 500 }}>/100</span></div>
@@ -3277,6 +3291,7 @@ function ComparateurOffres() {
             { label: "Mensualité la plus basse", best: meilleurMensualite,                          fn: function(r) { return r.calc.mensualiteTotale; },                           format: function(v) { return fmt(v, 0) + " €/mois"; } },
             { label: "Coût total le plus bas",   best: meilleurCoutTotal,                           fn: function(r) { return r.calc.coutTotal; },                                  format: function(v) { return fmtEur(v); } },
             { label: "TAEG le plus bas",         best: meilleurTaeg,                                fn: function(r) { return r.calc.taeg; },                                       format: function(v) { return v.toFixed(2) + " %"; } },
+            { label: "Apport le plus bas",       best: meilleurApport, fn: function(r) { return pf(r.offre.apportDemande); }, format: function(v) { return fmtEur(v); } },
             { label: "Différé le plus long",     best: meilleurDiffere > 0 ? meilleurDiffere : null, fn: function(r) { return r.offre.differe ? pf(r.offre.dureeDiffere) : 0; }, format: function(v) { return v + " mois"; } },
             { label: "Meilleure garantie",       best: "caution",                                   fn: function(r) { return r.offre.typeGarantie; },                              format: function() { return "🤝 Cautionnement"; } },
           ].filter(function(c) { return c.best !== null; }).map(function(critere) {
