@@ -44,6 +44,7 @@ const ICONS = {
   "ti-refresh": "M20 11A8 8 0 1 0 12 20m8-9v5h-5",
   "ti-user": "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
   "ti-chevron-right": "M9 18l6-6-6-6",
+  "ti-copy": "M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-2M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2M10 4h4v4h-4V4z",
 };
 
 function Icon({ name, size, color, style }) {
@@ -59,6 +60,27 @@ function Icon({ name, size, color, style }) {
   );
 }
 
+
+// Styles globaux animations
+if (!document.getElementById("radar-global-styles")) {
+  var styleEl = document.createElement("style");
+  styleEl.id = "radar-global-styles";
+  styleEl.textContent = `
+    * { box-sizing: border-box; }
+    button { transition: opacity 0.15s, transform 0.1s, background 0.15s, box-shadow 0.15s !important; }
+    button:hover:not(:disabled) { opacity: 0.9; }
+    button:active:not(:disabled) { transform: scale(0.97) !important; }
+    input, select, textarea { transition: border-color 0.15s, box-shadow 0.15s !important; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #F97316 !important; box-shadow: 0 0 0 3px rgba(249,115,22,0.12) !important; }
+    .card-hover { transition: transform 0.18s, box-shadow 0.18s !important; }
+    .card-hover:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 32px rgba(249,115,22,0.12) !important; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse-orange { 0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.3); } 50% { box-shadow: 0 0 0 6px rgba(249,115,22,0); } }
+    .fade-in { animation: fadeInUp 0.25s ease forwards; }
+    .kpi-card { animation: fadeInUp 0.3s ease forwards; }
+  `;
+  document.head.appendChild(styleEl);
+}
 const SUPABASE_URL = "https://iudxpwmbwcaspihtvhay.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Ab3inJlUcsRG-p6fU4y4pQ_0ncHppba";
 
@@ -6056,7 +6078,7 @@ function AppMain({ user, onLogout }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {simProjets.length === 0 ? (
               <div style={{ textAlign: "center", padding: "60px 20px", color: "#A8A29E" }}>
-                <div style={{ fontSize: 50, marginBottom: 12 }}>⭐</div>
+                <div style={{ marginBottom: 12 }}><Icon name="ti-star" size={48} color="#FFE8D9" /></div>
                 <div style={{ fontSize: 17, fontWeight: 600, color: "#78716C" }}>Aucun projet sauvegardé</div>
                 <div style={{ fontSize: 14, marginTop: 6 }}>Crée une simulation et clique sur "💾 Sauver" pour la retrouver ici.</div>
               </div>
@@ -6072,7 +6094,7 @@ function AppMain({ user, onLogout }) {
                   var noteColor = note != null ? getNoteColor(note) : "#A8A29E";
                   var noteLabel = note != null ? getNoteLabel(note) : "—";
                   return (
-                    <div key={p.id} style={{ background: "rgba(255,255,255,0.85)", borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 24px #FFF3EC", border: "1.5px solid #FFE8D9", backdropFilter: "blur(18px)", cursor: "pointer", transition: "transform 0.15s, box-shadow 0.15s" }}
+                    <div key={p.id} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(249,115,22,0.08)", border: "1.5px solid #FFE8D9", cursor: "pointer", transition: "transform 0.18s, box-shadow 0.18s" }}
                       onClick={function() { ouvrirProjet(p); }}
                       onMouseEnter={function(e) { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 32px #FFF3EC"; }}
                       onMouseLeave={function(e) { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 24px #FFF3EC"; }}>
@@ -6080,7 +6102,7 @@ function AppMain({ user, onLogout }) {
                       <div style={{ height: 160, background: p.coverPhoto ? "transparent" : "linear-gradient(135deg,#FFF3EC,rgba(56,189,248,0.15))", position: "relative", overflow: "hidden" }}>
                         {p.coverPhoto
                           ? <img src={p.coverPhoto} alt={p.nom} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 50 }}>🏠</div>
+                          : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", background: "linear-gradient(135deg,#FFF3EC,#FFE8D9)" }}><Icon name="ti-home" size={56} color="#F97316" /></div>
                         }
                         {/* Badge note */}
                         {note != null && (
@@ -6090,7 +6112,7 @@ function AppMain({ user, onLogout }) {
                           </div>
                         )}
                         {/* Badge régime */}
-                        <div style={{ position: "absolute", bottom: 8, left: 8, background: "#FFF3EC", color: "#fff", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 8 }}>
+                        <div style={{ position: "absolute", bottom: 8, left: 8, background: "rgba(28,25,23,0.75)", color: "#fff", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 8, backdropFilter: "blur(4px)" }}>
                           {p.regimeActif}
                         </div>
                       </div>
@@ -6098,7 +6120,7 @@ function AppMain({ user, onLogout }) {
                       <div style={{ padding: "14px 16px" }}>
                         <div style={{ fontSize: 16, fontWeight: 700, color: "#1C1917", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nom}</div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                          <span style={{ fontSize: 12, color: "#A8A29E" }}>📅 {p.savedAt}</span>
+                          <span style={{ fontSize: 12, color: "#A8A29E" }}>{p.savedAt}</span>
                           {p.inputs && p.inputs.prixVente && (
                             <span style={{ fontSize: 13, fontWeight: 600, color: "#F97316" }}>{fmtEur(pf(p.inputs.prixVente))}</span>
                           )}
@@ -6117,7 +6139,7 @@ function AppMain({ user, onLogout }) {
                                   { label: "Loyer/mois", value: fmtEur(pf(p.inputs.loyerMensuelHC)), color: "#0ea5e9" },
                                 ].map(function(k) {
                                   return (
-                                    <div key={k.label} style={{ background: "rgba(241,245,249,0.8)", borderRadius: 10, padding: "6px 8px", textAlign: "center" }}>
+                                    <div key={k.label} style={{ background: "#FFF8F3", borderRadius: 10, padding: "6px 8px", textAlign: "center", border: "1px solid #FFE8D9" }}>
                                       <div style={{ fontSize: 14, fontWeight: 700, color: k.color }}>{k.value}</div>
                                       <div style={{ fontSize: 9, color: "#A8A29E", marginTop: 1 }}>{k.label}</div>
                                     </div>
@@ -6127,11 +6149,28 @@ function AppMain({ user, onLogout }) {
                             );
                           } catch(e) { return null; }
                         })()}
-                        <button
-                          onClick={function(e) { e.stopPropagation(); ouvrirProjet(p); }}
-                          style={{ width: "100%", background: "#F97316", border: "none", borderRadius: 10, padding: "8px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
-                          📂 Ouvrir la simulation
-                        </button>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            onClick={function(e) { e.stopPropagation(); ouvrirProjet(p); }}
+                            style={{ flex: 1, background: "#F97316", border: "none", borderRadius: 10, padding: "8px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                            <Icon name="ti-folder-open" size={15} color="#fff" /> Ouvrir
+                          </button>
+                          <button
+                            onClick={function(e) {
+                              e.stopPropagation();
+                              var copie = JSON.parse(JSON.stringify(p));
+                              copie.id = Date.now();
+                              copie.nom = p.nom + " (copie)";
+                              copie.savedAt = new Date().toLocaleDateString("fr-FR");
+                              var liste = [copie].concat(simProjets);
+                              setSimProjets(liste);
+                              try { localStorage.setItem("radar-immo-projets-v1", JSON.stringify(liste)); } catch(err) {}
+                              debouncedCloudSave("projets", liste, 1000);
+                            }}
+                            style={{ background: "#FFF3EC", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "8px 12px", color: "#F97316", cursor: "pointer", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}>
+                            <Icon name="ti-copy" size={15} color="#F97316" /> Dupliquer
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
