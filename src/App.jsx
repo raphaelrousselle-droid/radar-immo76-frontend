@@ -6195,9 +6195,16 @@ function AppMain({ user, onLogout }) {
   );
 }
 
+var DPE_COLORS_GLOBAL = { A:"#1a7f37", B:"#4caf50", C:"#8bc34a", D:"#ffc107", E:"#ff9800", F:"#f44336", G:"#b71c1c" };
+function DPEBadge(props) {
+  return (
+    <span style={{ fontWeight:800, color:"#fff", background:DPE_COLORS_GLOBAL[props.dpe]||"#ccc", display:"inline-flex", alignItems:"center", justifyContent:"center", width:props.lg?52:36, height:props.lg?52:36, borderRadius:props.lg?14:10, fontSize:props.lg?24:16, flexShrink:0 }}>{props.dpe}</span>
+  );
+}
+
 // ─── COMPARATEUR DPE & TRAVAUX (API ADEME) ────────────────────────────────────
 function ComparateurDPE() {
-  var DPE_COLORS  = { A:"#1a7f37", B:"#4caf50", C:"#8bc34a", D:"#ffc107", E:"#ff9800", F:"#f44336", G:"#b71c1c" };
+  var DPE_COLORS = DPE_COLORS_GLOBAL;
   var DPE_ILLEGAL = ["F","G"];
   var DPE_ORDER   = ["A","B","C","D","E","F","G"];
 
@@ -6343,12 +6350,6 @@ function ComparateurDPE() {
 
   // ── UI helpers ──────────────────────────────────────────────────────────────
   var inputS = { background:"#FFF8F3", border:"1.5px solid #FFE8D9", borderRadius:10, padding:"8px 12px", fontSize:14, color:"#1C1917", outline:"none", width:"100%" };
-
-  var DPEBadge = function(props) {
-    return (
-      <span style={{ fontWeight:800, color:"#fff", background:DPE_COLORS[props.dpe]||"#ccc", display:"inline-flex", alignItems:"center", justifyContent:"center", width:props.lg?52:36, height:props.lg?52:36, borderRadius:props.lg?14:10, fontSize:props.lg?24:16, flexShrink:0 }}>{props.dpe}</span>
-    );
-  };
 
   var updatePoste = function(id, field, val) {
     setPostesState(function(prev) { var n=Object.assign({},prev); n[id]=Object.assign({},n[id],{[field]:val}); return n; });
