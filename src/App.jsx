@@ -6195,399 +6195,515 @@ function AppMain({ user, onLogout }) {
   );
 }
 
-// ─── COMPARATEUR DPE & TRAVAUX ────────────────────────────────────────────────
+// ─── COMPARATEUR DPE & TRAVAUX (API ADEME) ────────────────────────────────────
 function ComparateurDPE() {
-  // ── Données de référence ──────────────────────────────────────────────────
-  var DPE_LABELS = { A: "A", B: "B", C: "C", D: "D", E: "E", F: "F", G: "G" };
-  var DPE_COLORS = { A: "#1a7f37", B: "#4caf50", C: "#8bc34a", D: "#ffc107", E: "#ff9800", F: "#f44336", G: "#b71c1c" };
-  var DPE_LOYER_BONUS = { A: 0.15, B: 0.10, C: 0.05, D: 0, E: -0.05, F: -0.10, G: -0.15 };
-  var DPE_VALEUR_BONUS = { A: 0.10, B: 0.07, C: 0.03, D: 0, E: -0.04, F: -0.10, G: -0.15 };
-  var DPE_ILLEGAL = ["F", "G"]; // passoires illégales à la location dès 2025
+  var DPE_COLORS  = { A:"#1a7f37", B:"#4caf50", C:"#8bc34a", D:"#ffc107", E:"#ff9800", F:"#f44336", G:"#b71c1c" };
+  var DPE_ILLEGAL = ["F","G"];
+  var DPE_ORDER   = ["A","B","C","D","E","F","G"];
 
-  // Coûts travaux estimés par poste et par DPE de départ (€/m²)
+  // Impact loyer et valeur par classe (écart vs D = référence neutre)
+  var DPE_LOYER   = { A:0.15, B:0.10, C:0.05, D:0, E:-0.05, F:-0.10, G:-0.15 };
+  var DPE_VALEUR  = { A:0.10, B:0.07, C:0.03, D:0, E:-0.04, F:-0.10, G:-0.15 };
+
+  // Postes de travaux avec coûts réels (€/m² ou €/logement)
   var POSTES = [
-    {
-      id: "isolation_combles", label: "Isolation combles/toiture",
-      icon: "ti-home", unite: "m²",
-      couts: { G: 45, F: 40, E: 35, D: 25, C: 15, B: 0, A: 0 },
-      gain_dpe: { G: 2, F: 1.5, E: 1, D: 0.5, C: 0, B: 0, A: 0 },
-      desc: "Laine de verre ou souflée, pare-vapeur"
-    },
-    {
-      id: "isolation_murs", label: "Isolation murs (ITE/ITI)",
-      icon: "ti-wind", unite: "m²",
-      couts: { G: 150, F: 130, E: 110, D: 80, C: 40, B: 0, A: 0 },
-      gain_dpe: { G: 1.5, F: 1.2, E: 0.8, D: 0.3, C: 0, B: 0, A: 0 },
-      desc: "Isolation thermique extérieure ou intérieure"
-    },
-    {
-      id: "isolation_plancher", label: "Isolation plancher bas",
-      icon: "ti-droplet", unite: "m²",
-      couts: { G: 35, F: 30, E: 25, D: 18, C: 10, B: 0, A: 0 },
-      gain_dpe: { G: 0.8, F: 0.6, E: 0.4, D: 0.2, C: 0, B: 0, A: 0 },
-      desc: "Isolation sous le plancher bas"
-    },
-    {
-      id: "fenetres", label: "Remplacement fenêtres (double vitrage)",
-      icon: "ti-sun", unite: "unité",
-      couts: { G: 1200, F: 1000, E: 800, D: 600, C: 0, B: 0, A: 0 },
-      gain_dpe: { G: 0.8, F: 0.6, E: 0.4, D: 0.2, C: 0, B: 0, A: 0 },
-      desc: "Double ou triple vitrage, menuiseries PVC/alu"
-    },
-    {
-      id: "chauffage", label: "Remplacement système de chauffage",
-      icon: "ti-flame", unite: "logement",
-      couts: { G: 8000, F: 7000, E: 5000, D: 3000, C: 0, B: 0, A: 0 },
-      gain_dpe: { G: 2, F: 1.5, E: 1, D: 0.5, C: 0, B: 0, A: 0 },
-      desc: "Pompe à chaleur, chaudière à condensation, poêle à granulés"
-    },
-    {
-      id: "eau_chaude", label: "Chauffe-eau thermodynamique",
-      icon: "ti-thermometer", unite: "logement",
-      couts: { G: 3000, F: 2500, E: 2000, D: 1200, C: 0, B: 0, A: 0 },
-      gain_dpe: { G: 0.8, F: 0.6, E: 0.4, D: 0.2, C: 0, B: 0, A: 0 },
-      desc: "Chauffe-eau thermodynamique ou solaire"
-    },
-    {
-      id: "ventilation", label: "VMC double flux",
-      icon: "ti-plug", unite: "logement",
-      couts: { G: 4000, F: 3500, E: 3000, D: 2000, C: 0, B: 0, A: 0 },
-      gain_dpe: { G: 0.5, F: 0.4, E: 0.3, D: 0.2, C: 0, B: 0, A: 0 },
-      desc: "VMC double flux à récupération de chaleur"
-    },
+    { id:"iso_combles",  label:"Isolation combles perdus",        icon:"ti-home",             unite:"m²",      cout:{ G:25, F:22, E:18, D:12, C:0, B:0, A:0 }, desc:"Soufflage laine minérale — éligible MaPrimeRénov" },
+    { id:"iso_murs_ext", label:"Isolation thermique extérieure",  icon:"ti-wind",             unite:"m²",      cout:{ G:200, F:180, E:150, D:100, C:0, B:0, A:0 }, desc:"ITE bardage ou enduit — subventionnable CEE" },
+    { id:"iso_murs_int", label:"Isolation thermique intérieure",  icon:"ti-wind",             unite:"m²",      cout:{ G:80, F:70, E:55, D:35, C:0, B:0, A:0 }, desc:"ITI laine de verre — moins de surface habitable" },
+    { id:"iso_plancher", label:"Isolation plancher bas",          icon:"ti-droplet",          unite:"m²",      cout:{ G:30, F:26, E:20, D:13, C:0, B:0, A:0 }, desc:"Sous-sol ou vide sanitaire" },
+    { id:"fenetres",     label:"Remplacement fenêtres DV/TV",     icon:"ti-sun",              unite:"unité",   cout:{ G:1100, F:950, E:750, D:0, C:0, B:0, A:0 }, desc:"Double ou triple vitrage PVC/alu — NON éligible MaPrimeRénov seul" },
+    { id:"pac_air_eau",  label:"Pompe à chaleur air/eau",         icon:"ti-thermometer",      unite:"logement",cout:{ G:14000, F:12000, E:10000, D:7000, C:0, B:0, A:0 }, desc:"Éligible MaPrimeRénov — jusqu'à 5000€ de prime" },
+    { id:"pac_air_air",  label:"PAC air/air (climatisation réversible)", icon:"ti-thermometer", unite:"logement", cout:{ G:4000, F:3500, E:2800, D:0, C:0, B:0, A:0 }, desc:"Non éligible MaPrimeRénov" },
+    { id:"chaudiere_gaz",label:"Chaudière gaz à condensation",   icon:"ti-flame",            unite:"logement",cout:{ G:5000, F:4500, E:3500, D:0, C:0, B:0, A:0 }, desc:"NON éligible MaPrimeRénov depuis 2024" },
+    { id:"poele_granule",label:"Poêle ou insert granulés",        icon:"ti-flame",            unite:"logement",cout:{ G:5500, F:5000, E:4200, D:0, C:0, B:0, A:0 }, desc:"Éligible MaPrimeRénov — jusqu'à 2500€" },
+    { id:"chauffe_eau",  label:"Chauffe-eau thermodynamique",     icon:"ti-thermometer",      unite:"logement",cout:{ G:3200, F:2800, E:2200, D:0, C:0, B:0, A:0 }, desc:"Éligible MaPrimeRénov — jusqu'à 1200€" },
+    { id:"vmc_df",       label:"VMC double flux",                 icon:"ti-plug",             unite:"logement",cout:{ G:5000, F:4500, E:3500, D:0, C:0, B:0, A:0 }, desc:"Éligible CEE — améliore qualité air et DPE" },
   ];
 
+  // Aides MaPrimeRénov par poste (taux modeste/intermédiaire/supérieur, hors ressources)
+  var AIDES = {
+    iso_combles:  { taux: 0.75, plafond: 75*70 },
+    iso_murs_ext: { taux: 0.75, plafond: 150*70 },
+    iso_murs_int: { taux: 0.75, plafond: 150*70 },
+    iso_plancher: { taux: 0.75, plafond: 75*70 },
+    fenetres:     { taux: 0,    plafond: 0 },      // non éligible
+    pac_air_eau:  { taux: 0.50, plafond: 5000 },
+    pac_air_air:  { taux: 0,    plafond: 0 },      // non éligible
+    chaudiere_gaz:{ taux: 0,    plafond: 0 },      // non éligible depuis 2024
+    poele_granule:{ taux: 0.50, plafond: 2500 },
+    chauffe_eau:  { taux: 0.50, plafond: 1200 },
+    vmc_df:       { taux: 0.35, plafond: 2000 },
+  };
+
   // ── State ──────────────────────────────────────────────────────────────────
-  var _dpeD = React.useState("F"); var dpeDepart = _dpeD[0]; var setDpeDepart = _dpeD[1];
-  var _dpeC = React.useState("D"); var dpeCible = _dpeC[0]; var setDpeCible = _dpeC[1];
-  var _surf = React.useState("70"); var surface = _surf[0]; var setSurface = _surf[1];
-  var _loyer = React.useState("700"); var loyerActuel = _loyer[0]; var setLoyerActuel = _loyer[1];
-  var _valeur = React.useState("150000"); var valeurBien = _valeur[0]; var setValeurBien = _valeur[1];
-  var _nb = React.useState("1"); var nbLogements = _nb[0]; var setNbLogements = _nb[1];
+  var _addr   = React.useState(""); var adresse = _addr[0]; var setAdresse = _addr[1];
+  var _sugg   = React.useState([]); var suggestions = _sugg[0]; var setSuggestions = _sugg[1];
+  var _search = React.useState("idle"); var searchStatus = _search[0]; var setSearchStatus = _search[1];
+  var _dpeData= React.useState(null); var dpeData = _dpeData[0]; var setDpeData = _dpeData[1];
+  var _selDpe = React.useState(null); var selectedDpe = _selDpe[0]; var setSelectedDpe = _selDpe[1];
+  var _manuel = React.useState(false); var modeManuel = _manuel[0]; var setModeManuel = _manuel[1];
+  var _dpeM   = React.useState("F"); var dpeManuel = _dpeM[0]; var setDpeManuel = _dpeM[1];
+  var _dpeCible= React.useState("D"); var dpeCible = _dpeCible[0]; var setDpeCible = _dpeCible[1];
+  var _surf   = React.useState("70"); var surface = _surf[0]; var setSurface = _surf[1];
+  var _loyer  = React.useState("700"); var loyer = _loyer[0]; var setLoyer = _loyer[1];
+  var _valeur = React.useState("150000"); var valeur = _valeur[0]; var setValeur = _valeur[1];
+  var _nb     = React.useState("1"); var nbLog = _nb[0]; var setNbLog = _nb[1];
+  var _postesS= React.useState(function() {
+    var s = {}; POSTES.forEach(function(p) { s[p.id] = { actif: false, qte: "" }; }); return s;
+  }); var postesState = _postesS[0]; var setPostesState = _postesS[1];
 
-  // Postes actifs avec quantités
-  var initPostes = function() {
-    var s = {};
-    POSTES.forEach(function(p) { s[p.id] = { actif: false, quantite: "" }; });
-    return s;
+  var pf = function(v) { var n = parseFloat(String(v).replace(",",".")); return isNaN(n)?0:n; };
+  var fmtEur = function(v) { return Math.round(v).toLocaleString("fr-FR")+" €"; };
+
+  var dpeActuel = modeManuel ? dpeManuel : (selectedDpe ? selectedDpe.etiquette_dpe : null);
+
+  // ── Recherche adresse ──────────────────────────────────────────────────────
+  var timerRef = React.useRef(null);
+  var handleAdresseChange = function(val) {
+    setAdresse(val);
+    clearTimeout(timerRef.current);
+    if (val.length < 4) { setSuggestions([]); return; }
+    timerRef.current = setTimeout(async function() {
+      try {
+        var r = await fetch("/api/dpe?action=geocode&q=" + encodeURIComponent(val + " Seine-Maritime"));
+        var data = await r.json();
+        setSuggestions(data.features || []);
+      } catch(e) { setSuggestions([]); }
+    }, 350);
   };
-  var _postes = React.useState(initPostes); var postesState = _postes[0]; var setPostesState = _postes[1];
 
-  var updatePoste = function(id, field, val) {
-    setPostesState(function(prev) {
-      var n = Object.assign({}, prev);
-      n[id] = Object.assign({}, n[id], { [field]: val });
-      return n;
-    });
+  var choisirAdresse = async function(feat) {
+    setAdresse(feat.properties.label);
+    setSuggestions([]);
+    setSearchStatus("loading");
+    setDpeData(null); setSelectedDpe(null);
+    var [lon, lat] = feat.geometry.coordinates;
+    try {
+      // 1. Chercher par coordonnées GPS (plus fiable)
+      var r = await fetch("/api/dpe?action=dpe_coords&lat=" + lat + "&lon=" + lon);
+      var data = await r.json();
+      if (data.results && data.results.length > 0) {
+        setDpeData(data.results);
+        setSelectedDpe(data.results[0]);
+        var surf = pf(data.results[0].surface_habitable_logement);
+        if (surf > 0) setSurface(String(Math.round(surf)));
+        setSearchStatus("found");
+      } else {
+        // 2. Essayer par adresse texte
+        var r2 = await fetch("/api/dpe?action=dpe_adresse&adresse_brut=" + encodeURIComponent(feat.properties.label));
+        var data2 = await r2.json();
+        if (data2.results && data2.results.length > 0) {
+          setDpeData(data2.results);
+          setSelectedDpe(data2.results[0]);
+          var surf2 = pf(data2.results[0].surface_habitable_logement);
+          if (surf2 > 0) setSurface(String(Math.round(surf2)));
+          setSearchStatus("found");
+        } else {
+          setSearchStatus("notfound");
+        }
+      }
+    } catch(e) {
+      setSearchStatus("error");
+    }
   };
 
-  // ── Calculs ───────────────────────────────────────────────────────────────
-  var pf = function(v) { var n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? 0 : n; };
-  var fmtEur = function(v) { return Math.round(v).toLocaleString("fr-FR") + " €"; };
-  var surf = pf(surface); var loyer = pf(loyerActuel); var valeur = pf(valeurBien); var nb = Math.max(1, pf(nbLogements));
+  // ── Calculs ────────────────────────────────────────────────────────────────
+  var surf = pf(surface); var loyerN = pf(loyer); var valeurN = pf(valeur); var nb = Math.max(1,pf(nbLog));
 
-  // Coût total des travaux sélectionnés
-  var coutTravaux = POSTES.reduce(function(acc, p) {
+  var coutBrut = POSTES.reduce(function(acc,p) {
     var ps = postesState[p.id];
-    if (!ps.actif) return acc;
-    var qte = pf(ps.quantite) || (p.unite === "logement" ? nb : surf);
-    return acc + (p.couts[dpeDepart] || 0) * qte;
+    if (!ps.actif || !dpeActuel) return acc;
+    var qte = pf(ps.qte) || (p.unite==="logement" ? nb : surf);
+    return acc + (p.cout[dpeActuel]||0) * qte;
   }, 0);
 
-  // Gain DPE estimé
-  var gainDPE = POSTES.reduce(function(acc, p) {
+  var aideTotal = POSTES.reduce(function(acc,p) {
     var ps = postesState[p.id];
-    if (!ps.actif) return acc;
-    return acc + (p.gain_dpe[dpeDepart] || 0);
+    if (!ps.actif || !dpeActuel) return acc;
+    var aide = AIDES[p.id];
+    if (!aide || aide.taux===0) return acc;
+    var qte = pf(ps.qte) || (p.unite==="logement" ? nb : surf);
+    var coutPoste = (p.cout[dpeActuel]||0)*qte;
+    return acc + Math.min(coutPoste*aide.taux, aide.plafond*nb);
   }, 0);
 
-  // Impact loyer
-  var bonusLoyerDepart = DPE_LOYER_BONUS[dpeDepart] || 0;
-  var bonusLoyerCible = DPE_LOYER_BONUS[dpeCible] || 0;
-  var nouveauLoyer = loyer * (1 + bonusLoyerCible - bonusLoyerDepart);
-  var gainLoyerMois = nouveauLoyer - loyer;
-  var gainLoyerAn = gainLoyerMois * 12;
-
-  // Impact valeur
-  var bonusValeurDepart = DPE_VALEUR_BONUS[dpeDepart] || 0;
-  var bonusValeurCible = DPE_VALEUR_BONUS[dpeCible] || 0;
-  var nouvelleValeur = valeur * (1 + bonusValeurCible - bonusValeurDepart);
-  var gainValeur = nouvelleValeur - valeur;
-
-  // Rentabilité des travaux
-  var gainTotalAn = gainLoyerAn * nb;
-  var retourInvestissement = coutTravaux > 0 && gainTotalAn > 0 ? coutTravaux / gainTotalAn : null;
-  var gainNetTotal = gainValeur + (gainTotalAn * 10) - coutTravaux; // horizon 10 ans
-
-  // Aides disponibles (MaPrimeRénov estimée)
-  var aideEstimee = coutTravaux * (dpeDepart === "G" || dpeDepart === "F" ? 0.50 : dpeDepart === "E" ? 0.35 : 0.25);
-  var coutNet = coutTravaux - aideEstimee;
-
-  // Passoire thermique
-  var estPassoire = DPE_ILLEGAL.includes(dpeDepart);
+  var coutNet = coutBrut - aideTotal;
+  var bonusLoyerA = DPE_LOYER[dpeActuel]||0;
+  var bonusLoyerC = DPE_LOYER[dpeCible]||0;
+  var nouveauLoyer = loyerN*(1+bonusLoyerC-bonusLoyerA);
+  var gainLoyerMois = nouveauLoyer-loyerN;
+  var gainLoyerAn = gainLoyerMois*12*nb;
+  var bonusValA = DPE_VALEUR[dpeActuel]||0;
+  var bonusValC = DPE_VALEUR[dpeCible]||0;
+  var gainValeur = valeurN*(bonusValC-bonusValA);
+  var retourInvest = coutNet>0 && gainLoyerAn>0 ? coutNet/gainLoyerAn : null;
+  var gainNet10ans = gainValeur + gainLoyerAn*10 - coutNet;
+  var estPassoire = dpeActuel && DPE_ILLEGAL.includes(dpeActuel);
   var seraLegal = !DPE_ILLEGAL.includes(dpeCible);
 
-  // ── Styles ────────────────────────────────────────────────────────────────
-  var S = SECTION;
-  var inputS = { background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "8px 12px", fontSize: 14, color: "#1C1917", outline: "none", width: "100%" };
-  var selectS = Object.assign({}, inputS, { cursor: "pointer" });
+  // ── UI helpers ──────────────────────────────────────────────────────────────
+  var inputS = { background:"#FFF8F3", border:"1.5px solid #FFE8D9", borderRadius:10, padding:"8px 12px", fontSize:14, color:"#1C1917", outline:"none", width:"100%" };
 
   var DPEBadge = function(props) {
-    var dpe = props.dpe; var size = props.size || "normal";
-    var sz = size === "large" ? { fontSize: 22, padding: "8px 18px", borderRadius: 12 } : { fontSize: 14, padding: "4px 12px", borderRadius: 8 };
     return (
-      <span style={Object.assign({ fontWeight: 800, color: "#fff", background: DPE_COLORS[dpe], display: "inline-block" }, sz)}>{dpe}</span>
+      <span style={{ fontWeight:800, color:"#fff", background:DPE_COLORS[props.dpe]||"#ccc", display:"inline-flex", alignItems:"center", justifyContent:"center", width:props.lg?52:36, height:props.lg?52:36, borderRadius:props.lg?14:10, fontSize:props.lg?24:16, flexShrink:0 }}>{props.dpe}</span>
     );
   };
 
+  var updatePoste = function(id, field, val) {
+    setPostesState(function(prev) { var n=Object.assign({},prev); n[id]=Object.assign({},n[id],{[field]:val}); return n; });
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
 
-      {/* Alerte passoire */}
-      {estPassoire && (
-        <div style={{ background: "rgba(220,38,38,0.07)", border: "1.5px solid rgba(220,38,38,0.25)", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "flex-start", gap: 10 }}>
-          <Icon name="ti-flame" size={20} color="#dc2626" />
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#dc2626" }}>Passoire thermique — Location interdite</div>
-            <div style={{ fontSize: 13, color: "#78716C", marginTop: 3 }}>Les logements classés F et G ne peuvent plus être mis en location depuis 2025. Une rénovation est obligatoire pour louer légalement.</div>
-          </div>
-        </div>
-      )}
-
-      {/* Paramètres */}
-      <div style={S}>
-        <SectionHeader icon="ti-leaf" title="Paramètres du bien" />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
-          {[
-            { label: "Surface habitable (m²)", val: surface, set: setSurface, type: "number" },
-            { label: "Loyer mensuel actuel (€)", val: loyerActuel, set: setLoyerActuel, type: "number" },
-            { label: "Valeur du bien (€)", val: valeurBien, set: setValeurBien, type: "number" },
-            { label: "Nombre de logements", val: nbLogements, set: setNbLogements, type: "number" },
-          ].map(function(f) {
-            return (
-              <div key={f.label}>
-                <div style={{ fontSize: 12, color: "#A8A29E", marginBottom: 5, fontWeight: 600 }}>{f.label}</div>
-                <input type={f.type} value={f.val} onChange={function(e) { f.set(e.target.value); }} style={inputS} min="0" />
+      {/* ── Recherche adresse ── */}
+      <div style={SECTION}>
+        <SectionHeader icon="ti-map-pin" title="Rechercher un bien par adresse" />
+        <div style={{ position:"relative" }}>
+          <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+            <div style={{ flex:1, position:"relative" }}>
+              <input value={adresse} onChange={function(e){handleAdresseChange(e.target.value);}}
+                placeholder="Ex : 12 rue de la République, Dieppe"
+                style={Object.assign({},inputS,{paddingLeft:36})} />
+              <div style={{ position:"absolute", left:10, top:"50%", transform:"translateY(-50%)" }}>
+                <Icon name="ti-map-pin" size={16} color="#A8A29E" />
               </div>
-            );
-          })}
+            </div>
+            <button onClick={function(){setModeManuel(!modeManuel);}}
+              style={{ background:modeManuel?"#1C1917":"#FFF3EC", border:"1.5px solid "+(modeManuel?"#1C1917":"#FFE8D9"), borderRadius:10, padding:"8px 14px", color:modeManuel?"#fff":"#F97316", fontSize:13, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }}>
+              {modeManuel ? "← Retour recherche" : "Saisie manuelle"}
+            </button>
+          </div>
+          {/* Suggestions */}
+          {suggestions.length > 0 && (
+            <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, right:0, background:"#fff", border:"1.5px solid #FFE8D9", borderRadius:12, overflow:"hidden", zIndex:50, boxShadow:"0 4px 20px rgba(249,115,22,0.1)" }}>
+              {suggestions.map(function(f,i) {
+                return (
+                  <div key={i} onClick={function(){choisirAdresse(f);}}
+                    style={{ padding:"10px 14px", cursor:"pointer", fontSize:13, borderBottom:i<suggestions.length-1?"1px solid #FFE8D9":"none", display:"flex", alignItems:"center", gap:8 }}
+                    onMouseEnter={function(e){e.currentTarget.style.background="#FFF8F3";}}
+                    onMouseLeave={function(e){e.currentTarget.style.background="#fff";}}>
+                    <Icon name="ti-map-pin" size={14} color="#F97316" />
+                    <span style={{ flex:1 }}>{f.properties.label}</span>
+                    <span style={{ fontSize:11, color:"#A8A29E" }}>{f.properties.postcode}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Sélection DPE */}
-        <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-          <div>
-            <div style={{ fontSize: 12, color: "#A8A29E", marginBottom: 8, fontWeight: 600 }}>DPE ACTUEL</div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {Object.keys(DPE_LABELS).map(function(d) {
-                var isSelected = dpeDepart === d;
+        {/* Statuts de recherche */}
+        {searchStatus === "loading" && (
+          <div style={{ marginTop:12, display:"flex", alignItems:"center", gap:8, color:"#A8A29E", fontSize:13 }}>
+            <div style={{ width:16, height:16, border:"2px solid #FFE8D9", borderTopColor:"#F97316", borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
+            Interrogation de la base ADEME…
+          </div>
+        )}
+
+        {searchStatus === "found" && dpeData && (
+          <div style={{ marginTop:12 }}>
+            <div style={{ fontSize:13, fontWeight:600, color:"#16a34a", marginBottom:8 }}>
+              ✓ {dpeData.length} DPE trouvé{dpeData.length>1?"s":""} dans la base ADEME
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+              {dpeData.map(function(d,i) {
+                var isSelected = selectedDpe && selectedDpe.numero_dpe === d.numero_dpe;
                 return (
-                  <button key={d} onClick={function() { setDpeDepart(d); }}
-                    style={{ width: 40, height: 40, borderRadius: 10, border: isSelected ? "2.5px solid #1C1917" : "2px solid transparent", background: DPE_COLORS[d], color: "#fff", fontWeight: 800, fontSize: 16, cursor: "pointer", opacity: isSelected ? 1 : 0.65, transform: isSelected ? "scale(1.1)" : "scale(1)", transition: "all 0.15s" }}>
-                    {d}
-                  </button>
+                  <div key={i} onClick={function(){setSelectedDpe(d); if(pf(d.surface_habitable_logement)>0) setSurface(String(Math.round(pf(d.surface_habitable_logement))));}}
+                    style={{ background:isSelected?"#FFF3EC":"#FFF8F3", border:"1.5px solid "+(isSelected?"#F97316":"#FFE8D9"), borderRadius:10, padding:"10px 14px", cursor:"pointer", display:"flex", alignItems:"center", gap:12, transition:"all 0.15s" }}>
+                    <DPEBadge dpe={d.etiquette_dpe} />
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:"#1C1917" }}>
+                        DPE du {d.date_etablissement_dpe ? d.date_etablissement_dpe.split("T")[0] : "—"}
+                      </div>
+                      <div style={{ fontSize:11, color:"#A8A29E", marginTop:1 }}>
+                        {d.surface_habitable_logement ? Math.round(pf(d.surface_habitable_logement))+" m²" : ""} · {d.type_batiment||""} · {d.consommation_energie ? Math.round(pf(d.consommation_energie))+" kWh/m²/an" : ""}
+                      </div>
+                      <div style={{ fontSize:11, color:"#A8A29E" }}>
+                        {d.type_energie_principale_chauffage||""} · {d.type_vitrage||""}
+                      </div>
+                    </div>
+                    <div style={{ textAlign:"right" }}>
+                      <div style={{ fontSize:12, color:"#A8A29E" }}>GES</div>
+                      <DPEBadge dpe={d.etiquette_ges||"—"} />
+                    </div>
+                  </div>
                 );
               })}
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: 12, color: "#A8A29E", marginBottom: 8, fontWeight: 600 }}>DPE CIBLE</div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {Object.keys(DPE_LABELS).map(function(d) {
-                var isSelected = dpeCible === d;
-                var isBetter = ["A","B","C","D","E","F","G"].indexOf(d) < ["A","B","C","D","E","F","G"].indexOf(dpeDepart);
-                return (
-                  <button key={d} onClick={function() { setDpeCible(d); }}
-                    style={{ width: 40, height: 40, borderRadius: 10, border: isSelected ? "2.5px solid #1C1917" : "2px solid transparent", background: DPE_COLORS[d], color: "#fff", fontWeight: 800, fontSize: 16, cursor: "pointer", opacity: isSelected ? 1 : isBetter ? 0.75 : 0.35, transform: isSelected ? "scale(1.1)" : "scale(1)", transition: "all 0.15s" }}>
-                    {d}
-                  </button>
-                );
-              })}
-            </div>
+        )}
+
+        {searchStatus === "notfound" && (
+          <div style={{ marginTop:12, background:"rgba(245,158,11,0.07)", border:"1.5px solid rgba(245,158,11,0.25)", borderRadius:10, padding:"10px 14px", fontSize:13, color:"#92400e" }}>
+            ⚠ Aucun DPE trouvé dans la base ADEME pour cette adresse (diagnostic antérieur à juillet 2021 ou non enregistré). Utilise la saisie manuelle pour continuer.
           </div>
-        </div>
+        )}
+
+        {searchStatus === "error" && (
+          <div style={{ marginTop:12, background:"rgba(220,38,38,0.07)", border:"1.5px solid rgba(220,38,38,0.25)", borderRadius:10, padding:"10px 14px", fontSize:13, color:"#dc2626" }}>
+            Erreur de connexion à l'API ADEME. Réessaie ou utilise la saisie manuelle.
+          </div>
+        )}
       </div>
 
-      {/* Postes de travaux */}
-      <div style={S}>
-        <SectionHeader icon="ti-hammer" title="Postes de travaux" badge={POSTES.filter(function(p) { return postesState[p.id].actif; }).length + " sélectionné(s)"} />
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {POSTES.map(function(p) {
-            var ps = postesState[p.id];
-            var cout = p.couts[dpeDepart] || 0;
-            var qteDefaut = p.unite === "logement" ? nb : surf;
-            var qte = pf(ps.quantite) || qteDefaut;
-            var coutPoste = ps.actif ? cout * qte : 0;
-            return (
-              <div key={p.id} style={{ background: ps.actif ? "#FFF3EC" : "#FFF8F3", border: "1.5px solid " + (ps.actif ? "#FFE8D9" : "#F5F0EB"), borderRadius: 12, padding: "12px 14px", transition: "all 0.15s" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                  <button onClick={function() { updatePoste(p.id, "actif", !ps.actif); }}
-                    style={{ width: 24, height: 24, borderRadius: 6, border: "2px solid " + (ps.actif ? "#F97316" : "#D6D3D1"), background: ps.actif ? "#F97316" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
-                    {ps.actif && <Icon name="ti-check-circle" size={14} color="#fff" />}
-                  </button>
-                  <Icon name={p.icon} size={18} color={ps.actif ? "#F97316" : "#A8A29E"} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "#1C1917" }}>{p.label}</div>
-                    <div style={{ fontSize: 12, color: "#A8A29E", marginTop: 1 }}>{p.desc}</div>
-                  </div>
-                  {cout > 0 && (
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontSize: 12, color: "#A8A29E" }}>{cout.toLocaleString("fr-FR")} €/{p.unite}</div>
-                      {ps.actif && <div style={{ fontSize: 13, fontWeight: 700, color: "#F97316" }}>{fmtEur(coutPoste)}</div>}
-                    </div>
-                  )}
-                  {cout === 0 && <div style={{ fontSize: 12, color: "#16a34a", fontWeight: 600 }}>Déjà optimal</div>}
-                  {ps.actif && p.unite !== "logement" && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                      <input type="number" value={ps.quantite} placeholder={String(Math.round(qteDefaut))}
-                        onChange={function(e) { updatePoste(p.id, "quantite", e.target.value); }}
-                        style={{ width: 70, background: "#fff", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "4px 8px", fontSize: 13, textAlign: "center", outline: "none" }} />
-                      <span style={{ fontSize: 12, color: "#A8A29E" }}>{p.unite}</span>
-                    </div>
-                  )}
+      {/* ── Saisie manuelle ou sélection DPE cible ── */}
+      {(modeManuel || searchStatus==="notfound" || (searchStatus==="found" && selectedDpe)) && (
+        <div style={SECTION}>
+          <SectionHeader icon="ti-leaf" title="Paramètres" />
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(150px,1fr))", gap:12, marginBottom:16 }}>
+            {[
+              { label:"Surface (m²)", val:surface, set:setSurface },
+              { label:"Loyer mensuel (€)", val:loyer, set:setLoyer },
+              { label:"Valeur du bien (€)", val:valeur, set:setValeur },
+              { label:"Nb de logements", val:nbLog, set:setNbLog },
+            ].map(function(f) {
+              return (
+                <div key={f.label}>
+                  <div style={{ fontSize:12, color:"#A8A29E", marginBottom:5, fontWeight:600 }}>{f.label}</div>
+                  <input type="number" value={f.val} min="0" onChange={function(e){f.set(e.target.value);}} style={inputS} />
                 </div>
-                {ps.actif && (p.gain_dpe[dpeDepart] || 0) > 0 && (
-                  <div style={{ marginTop: 8, fontSize: 12, color: "#16a34a", fontWeight: 600 }}>
-                    ↑ Gain estimé : +{p.gain_dpe[dpeDepart]} classe(s) DPE
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              );
+            })}
+          </div>
 
-      {/* Résultats */}
-      {coutTravaux > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-
-          {/* Colonne gauche : coûts */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={S}>
-              <SectionHeader icon="ti-coin" title="Investissement travaux" />
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid #FFE8D9" }}>
-                <span style={{ fontSize: 14, color: "#78716C" }}>Coût brut estimé</span>
-                <span style={{ fontSize: 16, fontWeight: 700, color: "#1C1917" }}>{fmtEur(coutTravaux)}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid #FFE8D9" }}>
-                <div>
-                  <div style={{ fontSize: 14, color: "#78716C" }}>Aides estimées (MaPrimeRénov)</div>
-                  <div style={{ fontSize: 11, color: "#A8A29E" }}>{dpeDepart === "G" || dpeDepart === "F" ? "50%" : dpeDepart === "E" ? "35%" : "25%"} selon DPE de départ</div>
-                </div>
-                <span style={{ fontSize: 16, fontWeight: 700, color: "#16a34a" }}>−{fmtEur(aideEstimee)}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0" }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#1C1917" }}>Coût net après aides</span>
-                <span style={{ fontSize: 20, fontWeight: 800, color: "#F97316" }}>{fmtEur(coutNet)}</span>
-              </div>
-              <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "10px 12px", marginTop: 8 }}>
-                <div style={{ fontSize: 12, color: "#16a34a", fontWeight: 600 }}>Gain DPE estimé : +{gainDPE.toFixed(1)} classe(s)</div>
-                <div style={{ fontSize: 12, color: "#78716C", marginTop: 2 }}>DPE estimé après travaux : autour du {dpeCible}</div>
-              </div>
-            </div>
-
-            {/* DPE avant/après */}
-            <div style={S}>
-              <SectionHeader icon="ti-leaf" title="Transition énergétique" />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, padding: "12px 0" }}>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 12, color: "#A8A29E", marginBottom: 6 }}>AVANT</div>
-                  <DPEBadge dpe={dpeDepart} size="large" />
-                  {estPassoire && <div style={{ fontSize: 10, color: "#dc2626", fontWeight: 700, marginTop: 4 }}>INTERDIT</div>}
-                </div>
-                <div style={{ fontSize: 24, color: "#A8A29E" }}>→</div>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 12, color: "#A8A29E", marginBottom: 6 }}>APRÈS</div>
-                  <DPEBadge dpe={dpeCible} size="large" />
-                  {seraLegal && <div style={{ fontSize: 10, color: "#16a34a", fontWeight: 700, marginTop: 4 }}>LÉGAL</div>}
-                </div>
-              </div>
-
-              {/* Barre DPE visuelle */}
-              <div style={{ display: "flex", gap: 3, marginTop: 12, height: 12, borderRadius: 8, overflow: "hidden" }}>
-                {["A","B","C","D","E","F","G"].map(function(d) {
-                  var isDep = d === dpeDepart;
-                  var isCib = d === dpeCible;
+          {/* DPE actuel (manuel) */}
+          {(modeManuel || searchStatus==="notfound") && (
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:12, color:"#A8A29E", marginBottom:8, fontWeight:600 }}>DPE ACTUEL (saisie manuelle)</div>
+              <div style={{ display:"flex", gap:6 }}>
+                {DPE_ORDER.map(function(d) {
                   return (
-                    <div key={d} style={{ flex: 1, background: DPE_COLORS[d], position: "relative", opacity: (isDep || isCib) ? 1 : 0.35, border: isDep || isCib ? "2px solid #1C1917" : "none", borderRadius: 4 }}>
-                      {(isDep || isCib) && <div style={{ position: "absolute", top: -18, left: "50%", transform: "translateX(-50%)", fontSize: 9, fontWeight: 800, color: "#1C1917" }}>{d}</div>}
-                    </div>
+                    <button key={d} onClick={function(){setDpeManuel(d);}}
+                      style={{ width:42, height:42, borderRadius:10, border:dpeManuel===d?"2.5px solid #1C1917":"2px solid transparent", background:DPE_COLORS[d], color:"#fff", fontWeight:800, fontSize:16, cursor:"pointer", opacity:dpeManuel===d?1:0.55, transform:dpeManuel===d?"scale(1.1)":"scale(1)", transition:"all 0.15s" }}>
+                      {d}
+                    </button>
                   );
                 })}
               </div>
             </div>
+          )}
+
+          {/* DPE cible */}
+          {dpeActuel && (
+            <div>
+              <div style={{ fontSize:12, color:"#A8A29E", marginBottom:8, fontWeight:600 }}>DPE CIBLE</div>
+              <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+                {DPE_ORDER.map(function(d) {
+                  var isBetter = DPE_ORDER.indexOf(d) < DPE_ORDER.indexOf(dpeActuel);
+                  return (
+                    <button key={d} onClick={function(){if(isBetter)setDpeCible(d);}}
+                      style={{ width:42, height:42, borderRadius:10, border:dpeCible===d?"2.5px solid #1C1917":"2px solid transparent", background:DPE_COLORS[d], color:"#fff", fontWeight:800, fontSize:16, cursor:isBetter?"pointer":"not-allowed", opacity:dpeCible===d?1:isBetter?0.65:0.2, transform:dpeCible===d?"scale(1.1)":"scale(1)", transition:"all 0.15s" }}>
+                      {d}
+                    </button>
+                  );
+                })}
+                <div style={{ marginLeft:8, display:"flex", gap:8, alignItems:"center" }}>
+                  <DPEBadge dpe={dpeActuel} lg={true} />
+                  <span style={{ fontSize:18, color:"#A8A29E" }}>→</span>
+                  <DPEBadge dpe={dpeCible} lg={true} />
+                </div>
+              </div>
+
+              {/* Alerte passoire */}
+              {estPassoire && (
+                <div style={{ marginTop:10, background:"rgba(220,38,38,0.07)", border:"1.5px solid rgba(220,38,38,0.25)", borderRadius:10, padding:"10px 14px", display:"flex", gap:8, alignItems:"flex-start" }}>
+                  <Icon name="ti-flame" size={18} color="#dc2626" />
+                  <div style={{ fontSize:13 }}>
+                    <strong style={{ color:"#dc2626" }}>Passoire thermique — Location interdite depuis 2025.</strong>
+                    <span style={{ color:"#78716C" }}> Une rénovation est obligatoire pour louer légalement ce logement.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Postes de travaux ── */}
+      {dpeActuel && (
+        <div style={SECTION}>
+          <SectionHeader icon="ti-hammer" title="Postes de travaux" badge={POSTES.filter(function(p){return postesState[p.id].actif;}).length+" sélectionné(s)"} />
+          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+            {POSTES.map(function(p) {
+              var ps = postesState[p.id];
+              var cout = p.cout[dpeActuel]||0;
+              var aide = AIDES[p.id];
+              var qteDefaut = p.unite==="logement"?nb:surf;
+              var qte = pf(ps.qte)||qteDefaut;
+              var coutPoste = ps.actif ? cout*qte : 0;
+              var aidePoste = ps.actif && aide && aide.taux>0 ? Math.min(coutPoste*aide.taux, aide.plafond*nb) : 0;
+              var eligible = aide && aide.taux > 0;
+
+              return (
+                <div key={p.id} style={{ background:ps.actif?"#FFF3EC":"#FFF8F3", border:"1.5px solid "+(ps.actif?"#FFE8D9":"#F5F0EB"), borderRadius:12, padding:"12px 14px", transition:"all 0.15s", opacity:cout===0?0.5:1 }}>
+                  <div style={{ display:"flex", alignItems:"flex-start", gap:10 }}>
+                    <button onClick={function(){if(cout>0)updatePoste(p.id,"actif",!ps.actif);}}
+                      style={{ width:22, height:22, borderRadius:6, border:"2px solid "+(ps.actif?"#F97316":"#D6D3D1"), background:ps.actif?"#F97316":"#fff", cursor:cout>0?"pointer":"not-allowed", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:2, transition:"all 0.15s" }}>
+                      {ps.actif && <Icon name="ti-check-circle" size={13} color="#fff" />}
+                    </button>
+                    <Icon name={p.icon} size={18} color={ps.actif?"#F97316":"#A8A29E"} style={{ marginTop:2, flexShrink:0 }} />
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:14, fontWeight:600, color:"#1C1917" }}>{p.label}</div>
+                      <div style={{ fontSize:11, color:"#A8A29E", marginTop:1 }}>{p.desc}</div>
+                      {eligible && <div style={{ fontSize:11, color:"#16a34a", fontWeight:600, marginTop:2 }}>✓ Éligible MaPrimeRénov — jusqu'à {fmtEur(aide.plafond)} par logement</div>}
+                      {!eligible && cout>0 && <div style={{ fontSize:11, color:"#dc2626", marginTop:2 }}>✗ Non éligible MaPrimeRénov</div>}
+                    </div>
+                    <div style={{ textAlign:"right", flexShrink:0 }}>
+                      {cout>0 ? (
+                        <>
+                          <div style={{ fontSize:12, color:"#A8A29E" }}>{cout.toLocaleString("fr-FR")} €/{p.unite}</div>
+                          {ps.actif && <div style={{ fontSize:13, fontWeight:700, color:"#F97316" }}>{fmtEur(coutPoste)}</div>}
+                          {ps.actif && aidePoste>0 && <div style={{ fontSize:11, color:"#16a34a" }}>−{fmtEur(aidePoste)} aide</div>}
+                        </>
+                      ) : (
+                        <div style={{ fontSize:11, color:"#16a34a", fontWeight:600 }}>Déjà optimal</div>
+                      )}
+                    </div>
+                    {ps.actif && p.unite!=="logement" && (
+                      <div style={{ display:"flex", alignItems:"center", gap:5, flexShrink:0 }}>
+                        <input type="number" value={ps.qte} placeholder={String(Math.round(qteDefaut))}
+                          onChange={function(e){updatePoste(p.id,"qte",e.target.value);}}
+                          style={{ width:64, background:"#fff", border:"1.5px solid #FFE8D9", borderRadius:8, padding:"4px 8px", fontSize:13, textAlign:"center", outline:"none" }} />
+                        <span style={{ fontSize:11, color:"#A8A29E" }}>{p.unite}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Résultats ── */}
+      {dpeActuel && coutBrut > 0 && (
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+
+          {/* Coûts */}
+          <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+            <div style={SECTION}>
+              <SectionHeader icon="ti-coin" title="Budget travaux" />
+              {[
+                { label:"Coût brut total", val:fmtEur(coutBrut), color:"#1C1917", bold:true },
+                { label:"Aides MaPrimeRénov estimées", val:"−"+fmtEur(aideTotal), color:"#16a34a", bold:false },
+                { label:"Coût net après aides", val:fmtEur(coutNet), color:"#F97316", bold:true },
+              ].map(function(r,i) {
+                return (
+                  <div key={i} style={{ display:"flex", justifyContent:"space-between", padding:"9px 0", borderBottom:i<2?"1px solid #FFE8D9":"none" }}>
+                    <span style={{ fontSize:13, color:"#78716C" }}>{r.label}</span>
+                    <span style={{ fontSize:r.bold?16:14, fontWeight:r.bold?800:600, color:r.color }}>{r.val}</span>
+                  </div>
+                );
+              })}
+              <div style={{ marginTop:10, background:"#FFF8F3", borderRadius:10, padding:"8px 12px", fontSize:11, color:"#78716C", lineHeight:1.6 }}>
+                ℹ Les aides MaPrimeRénov affichées correspondent au plafond maximum. Le montant réel dépend de vos revenus et du type de travaux. Consulte maprimerenov.gouv.fr.
+              </div>
+            </div>
+
+            {/* DPE avant/après */}
+            <div style={SECTION}>
+              <SectionHeader icon="ti-leaf" title="Transition énergétique" />
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:20, padding:"16px 0" }}>
+                <div style={{ textAlign:"center" }}>
+                  <div style={{ fontSize:11, color:"#A8A29E", marginBottom:8, fontWeight:600 }}>ACTUEL</div>
+                  <DPEBadge dpe={dpeActuel} lg={true} />
+                  {estPassoire && <div style={{ fontSize:10, color:"#dc2626", fontWeight:700, marginTop:6 }}>INTERDIT</div>}
+                </div>
+                <Icon name="ti-trending-up" size={24} color="#A8A29E" />
+                <div style={{ textAlign:"center" }}>
+                  <div style={{ fontSize:11, color:"#A8A29E", marginBottom:8, fontWeight:600 }}>CIBLE</div>
+                  <DPEBadge dpe={dpeCible} lg={true} />
+                  {seraLegal && <div style={{ fontSize:10, color:"#16a34a", fontWeight:700, marginTop:6 }}>LÉGAL</div>}
+                </div>
+              </div>
+              {/* Barre DPE */}
+              <div style={{ display:"flex", gap:3, height:14, borderRadius:8, overflow:"hidden", marginTop:4 }}>
+                {DPE_ORDER.map(function(d) {
+                  var isA = d===dpeActuel; var isC = d===dpeCible;
+                  return (
+                    <div key={d} style={{ flex:1, background:DPE_COLORS[d], opacity:isA||isC?1:0.25, border:isA||isC?"2px solid #1C1917":"none", borderRadius:4, position:"relative" }}>
+                      {(isA||isC) && <div style={{ position:"absolute", top:-18, left:"50%", transform:"translateX(-50%)", fontSize:9, fontWeight:800, color:DPE_COLORS[d] }}>{d}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+              {selectedDpe && selectedDpe.consommation_energie && (
+                <div style={{ marginTop:12, fontSize:12, color:"#78716C" }}>
+                  Consommation actuelle : <strong style={{ color:"#1C1917" }}>{Math.round(pf(selectedDpe.consommation_energie))} kWh/m²/an</strong>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Colonne droite : impacts */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={S}>
+          {/* Impacts financiers */}
+          <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+            <div style={SECTION}>
               <SectionHeader icon="ti-trending-up" title="Impact sur les revenus" />
               {[
-                { label: "Loyer actuel (" + dpeDepart + ")", value: fmtEur(loyer) + "/mois", color: "#78716C" },
-                { label: "Loyer estimé après (" + dpeCible + ")", value: fmtEur(nouveauLoyer) + "/mois", color: "#1C1917" },
-                { label: "Gain mensuel / logement", value: (gainLoyerMois >= 0 ? "+" : "") + fmtEur(gainLoyerMois) + "/mois", color: gainLoyerMois >= 0 ? "#16a34a" : "#dc2626" },
-                { label: "Gain annuel (" + nb + " logement" + (nb > 1 ? "s" : "") + ")", value: (gainTotalAn >= 0 ? "+" : "") + fmtEur(gainTotalAn) + "/an", color: gainTotalAn >= 0 ? "#16a34a" : "#dc2626" },
-              ].map(function(r) {
+                { label:"Loyer actuel ("+dpeActuel+")", val:fmtEur(loyerN)+"/mois", color:"#78716C" },
+                { label:"Loyer estimé après ("+dpeCible+")", val:fmtEur(nouveauLoyer)+"/mois", color:"#1C1917" },
+                { label:"Gain mensuel / logement", val:(gainLoyerMois>=0?"+":"")+fmtEur(gainLoyerMois)+"/mois", color:gainLoyerMois>=0?"#16a34a":"#dc2626" },
+                { label:"Gain annuel ("+nb+" logement"+(nb>1?"s":"")+")", val:(gainLoyerAn>=0?"+":"")+fmtEur(gainLoyerAn)+"/an", color:gainLoyerAn>=0?"#16a34a":"#dc2626" },
+              ].map(function(r,i) {
                 return (
-                  <div key={r.label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #FFE8D9" }}>
-                    <span style={{ fontSize: 13, color: "#78716C" }}>{r.label}</span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: r.color }}>{r.value}</span>
+                  <div key={i} style={{ display:"flex", justifyContent:"space-between", padding:"9px 0", borderBottom:i<3?"1px solid #FFE8D9":"none" }}>
+                    <span style={{ fontSize:13, color:"#78716C" }}>{r.label}</span>
+                    <span style={{ fontSize:14, fontWeight:600, color:r.color }}>{r.val}</span>
                   </div>
                 );
               })}
             </div>
 
-            <div style={S}>
+            <div style={SECTION}>
               <SectionHeader icon="ti-building-skyscraper" title="Impact sur la valeur" />
               {[
-                { label: "Valeur actuelle (" + dpeDepart + ")", value: fmtEur(valeur), color: "#78716C" },
-                { label: "Valeur estimée après (" + dpeCible + ")", value: fmtEur(nouvelleValeur), color: "#1C1917" },
-                { label: "Plus-value DPE estimée", value: (gainValeur >= 0 ? "+" : "") + fmtEur(gainValeur), color: gainValeur >= 0 ? "#16a34a" : "#dc2626" },
-              ].map(function(r) {
+                { label:"Valeur actuelle ("+dpeActuel+")", val:fmtEur(valeurN), color:"#78716C" },
+                { label:"Valeur estimée ("+dpeCible+")", val:fmtEur(valeurN+gainValeur), color:"#1C1917" },
+                { label:"Plus-value DPE estimée", val:(gainValeur>=0?"+":"")+fmtEur(gainValeur), color:gainValeur>=0?"#16a34a":"#dc2626" },
+              ].map(function(r,i) {
                 return (
-                  <div key={r.label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #FFE8D9" }}>
-                    <span style={{ fontSize: 13, color: "#78716C" }}>{r.label}</span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: r.color }}>{r.value}</span>
+                  <div key={i} style={{ display:"flex", justifyContent:"space-between", padding:"9px 0", borderBottom:i<2?"1px solid #FFE8D9":"none" }}>
+                    <span style={{ fontSize:13, color:"#78716C" }}>{r.label}</span>
+                    <span style={{ fontSize:14, fontWeight:600, color:r.color }}>{r.val}</span>
                   </div>
                 );
               })}
             </div>
 
-            <div style={Object.assign({}, S, { background: gainNetTotal >= 0 ? "rgba(22,163,74,0.05)" : "rgba(220,38,38,0.05)", border: "1.5px solid " + (gainNetTotal >= 0 ? "#BBF7D0" : "rgba(220,38,38,0.2)") })}>
+            <div style={Object.assign({},SECTION,{ background:gainNet10ans>=0?"rgba(22,163,74,0.04)":"rgba(220,38,38,0.04)", border:"1.5px solid "+(gainNet10ans>=0?"#BBF7D0":"rgba(220,38,38,0.2)") })}>
               <SectionHeader icon="ti-trophy" title="Rentabilité de la rénovation" />
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #FFE8D9" }}>
-                <span style={{ fontSize: 13, color: "#78716C" }}>Retour sur invest. (loyers)</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#1C1917" }}>
-                  {retourInvestissement ? retourInvestissement.toFixed(1) + " ans" : "—"}
-                </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #FFE8D9" }}>
-                <div>
-                  <div style={{ fontSize: 13, color: "#78716C" }}>Gain net global (10 ans)</div>
-                  <div style={{ fontSize: 11, color: "#A8A29E" }}>Plus-value + loyers − travaux nets</div>
-                </div>
-                <span style={{ fontSize: 16, fontWeight: 800, color: gainNetTotal >= 0 ? "#16a34a" : "#dc2626" }}>
-                  {gainNetTotal >= 0 ? "+" : ""}{fmtEur(gainNetTotal)}
-                </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0" }}>
-                <span style={{ fontSize: 13, color: "#78716C" }}>Obligation légale résolue</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: seraLegal ? "#16a34a" : "#dc2626" }}>
-                  {seraLegal ? "✓ Oui" : "✗ Non"}
-                </span>
-              </div>
-              <div style={{ marginTop: 10, padding: "10px 12px", background: "#FFF8F3", borderRadius: 10, fontSize: 12, color: "#78716C", lineHeight: 1.6 }}>
-                ℹ️ Estimations basées sur les données de marché 76. Les aides réelles dépendent des revenus du ménage et des travaux réalisés (MaPrimeRénov, CEE, éco-PTZ).
-              </div>
+              {[
+                { label:"Retour sur invest. (loyers seuls)", val:retourInvestissement ? retourInvestissement.toFixed(1)+" ans" : "—", color:"#1C1917" },
+                { label:"Obligation légale résolue", val:seraLegal?"✓ Oui":"✗ Non", color:seraLegal?"#16a34a":"#dc2626" },
+                { label:"Gain net global sur 10 ans", val:(gainNet10ans>=0?"+":"")+fmtEur(gainNet10ans), color:gainNet10ans>=0?"#16a34a":"#dc2626", big:true },
+              ].map(function(r,i) {
+                return (
+                  <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"9px 0", borderBottom:i<2?"1px solid #FFE8D9":"none" }}>
+                    <span style={{ fontSize:13, color:"#78716C" }}>{r.label}</span>
+                    <span style={{ fontSize:r.big?18:14, fontWeight:r.big?800:600, color:r.color }}>{r.val}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
       )}
 
-      {coutTravaux === 0 && (
-        <div style={{ textAlign: "center", padding: "40px 20px", color: "#A8A29E" }}>
+      {dpeActuel && coutBrut === 0 && (
+        <div style={{ textAlign:"center", padding:"40px 20px", color:"#A8A29E" }}>
+          <Icon name="ti-hammer" size={48} color="#FFE8D9" />
+          <div style={{ fontSize:16, fontWeight:600, color:"#78716C", marginTop:12 }}>Sélectionne des postes de travaux pour voir les résultats</div>
+        </div>
+      )}
+
+      {!dpeActuel && searchStatus !== "loading" && (
+        <div style={{ textAlign:"center", padding:"40px 20px", color:"#A8A29E" }}>
           <Icon name="ti-leaf" size={48} color="#FFE8D9" />
-          <div style={{ fontSize: 16, fontWeight: 600, color: "#78716C", marginTop: 12 }}>Sélectionne des postes de travaux pour voir les résultats</div>
-          <div style={{ fontSize: 13, marginTop: 6 }}>Coche les postes à rénover ci-dessus</div>
+          <div style={{ fontSize:16, fontWeight:600, color:"#78716C", marginTop:12 }}>Recherche une adresse ou utilise la saisie manuelle</div>
+          <div style={{ fontSize:13, marginTop:6 }}>L'outil interroge la base ADEME de plus de 12 millions de DPE</div>
         </div>
       )}
     </div>
