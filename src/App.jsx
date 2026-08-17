@@ -2737,7 +2737,7 @@ const TRAVAUX_DATA = {
 
 function Toggle({ value, onChange }) {
   return (
-    <button onClick={function() { onChange(!value); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 700, transition: "all 0.15s", background: value ? "#FFF3EC" : "rgba(220,38,38,0.12)", color: value ? "#fff" : "#dc2626", boxShadow: value ? "0 2px 8px #FFF3EC" : "inset 0 0 0 1.5px rgba(220,38,38,0.4)" }}>
+    <button onClick={function() { onChange(!value); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 700, transition: "all 0.15s", background: value ? "#F97316" : "rgba(220,38,38,0.12)", color: value ? "#fff" : "#dc2626", boxShadow: value ? "0 2px 8px rgba(249,115,22,0.3)" : "inset 0 0 0 1.5px rgba(220,38,38,0.4)" }}>
       {value ? "✓ Oui" : "✗ Non"}
     </button>
   );
@@ -2863,8 +2863,8 @@ function SimulateurTravaux() {
           <td style={{ padding: "10px 12px", textAlign: "center" }}>
             {isActif ? (
               <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
-                <button onClick={function() { updateState(setter, item.id, "delegue", true); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: s.delegue ? "#FFF3EC" : "rgba(148,163,184,0.2)", color: s.delegue ? "#fff" : "#78716C" }}>Entreprise</button>
-                <button onClick={function() { if (item.moi !== null && item.moi_inf !== undefined || item.moi !== null) updateState(setter, item.id, "delegue", false); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: item.moi !== null ? "pointer" : "not-allowed", fontSize: 12, fontWeight: 600, background: !s.delegue ? "rgba(22,163,74,0.85)" : "rgba(148,163,184,0.2)", color: !s.delegue ? "#fff" : "#78716C", opacity: item.moi === null && item.moi_inf === undefined ? 0.4 : 1 }}>Moi-même</button>
+                <button onClick={function() { updateState(setter, item.id, "delegue", true); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: s.delegue ? "#F97316" : "rgba(148,163,184,0.15)", color: s.delegue ? "#fff" : "#44403C", border: s.delegue ? "none" : "1px solid #D6D3D1" }}>Entreprise</button>
+                <button onClick={function() { if (item.moi !== null && item.moi_inf !== undefined || item.moi !== null) updateState(setter, item.id, "delegue", false); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: item.moi !== null ? "pointer" : "not-allowed", fontSize: 12, fontWeight: 600, background: !s.delegue ? "rgba(22,163,74,0.85)" : "rgba(148,163,184,0.15)", color: !s.delegue ? "#fff" : "#44403C", border: !s.delegue ? "none" : "1px solid #D6D3D1", opacity: item.moi === null && item.moi_inf === undefined ? 0.4 : 1 }}>Moi-même</button>
               </div>
             ) : <span style={{ fontSize: 12, color: "#cbd5e1" }}>—</span>}
           </td>
