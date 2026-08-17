@@ -1,5 +1,57 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 
+// ── Icônes SVG inline (Tabler-style, zéro dépendance) ──────────────────────
+const ICONS = {
+  "ti-layout-dashboard": "M4 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5zm10 0a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V5zM4 15a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4zm10-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7z",
+  "ti-map-search": "M11 4a7 7 0 1 0 0 14A7 7 0 0 0 11 4zM2 11C2 6.03 6.03 2 11 2s9 4.03 9 9-4.03 9-9 9-9-4.03-9-9zm15.32 5.9 3.38 3.38-1.42 1.42-3.38-3.38a9.06 9.06 0 0 0 1.42-1.42z",
+  "ti-chart-line": "M3 17l4-8 4 6 3-4 5 6M3 7h18",
+  "ti-chart-bar": "M3 12h4v9H3zm7-5h4v14h-4zm7-4h4v18h-4z",
+  "ti-building-community": "M8 9l4-4 4 4m-8 6l4-4 4 4M3 20h18M5 20V7l7-5 7 5v13",
+  "ti-credit-card": "M3 5h18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 5h18M7 15h.01M11 15h2",
+  "ti-scale": "M12 3v18M3 6l9-3 9 3M5 10a7 7 0 0 0 7 7 7 7 0 0 0 7-7H5z",
+  "ti-hammer": "M15 12l-8.5 8.5a2.12 2.12 0 0 1-3-3L12 9M17.64 15L22 10.36M2.36 6.36l4.5-4.5 3.18 3.18-4.5 4.5z",
+  "ti-trending-up": "M3 17l5-5 4 4 8-10M20 7h-5v5",
+  "ti-building-skyscraper": "M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01M9 14h.01M15 14h.01",
+  "ti-folder-open": "M5 19a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4l3 3h7a2 2 0 0 1 2 2v1M5 19h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H9a2 2 0 0 0-1.72.97L5 16.5V19z",
+  "ti-user-circle": "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 6a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-7 13a7 7 0 0 1 14 0",
+  "ti-star": "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  "ti-home": "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm6 11V12h6v8",
+  "ti-map-pin": "M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+  "ti-cash": "M3 5h18v14H3V5zm2 4h2m-2 4h10m-2 4h6M13 9a2 2 0 1 0 4 0 2 2 0 0 0-4 0z",
+  "ti-calendar": "M3 5h18v16H3V5zm5-3v3m8-3v3M3 10h18",
+  "ti-rocket": "M12 2s4 2 4 10l-4 4-4-4c0-8 4-10 4-10zM9.7 14l-5 5m10.6 0-5-5M12 12v.01",
+  "ti-tag": "M12 2H7a2 2 0 0 0-2 2v5l10 10 7-7L12 2zm-3 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2z",
+  "ti-clipboard-list": "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6m-6 4h4",
+  "ti-tool": "M7 10H4l-2 6h10l-2-6H7zm0-2V3m4.3 2.7 3-3m-1.4 5.4 3-3M4.7 5.7l-3-3",
+  "ti-building-bank": "M3 21h18M9 8v13M15 8v13M3 8h18M5 4l7-2 7 2H5z",
+  "ti-bolt": "M13 2L4 14h8l-1 8 9-12h-8l1-8z",
+  "ti-ruler": "M5 19L19 5M10 5H5v5m9 9h5v-5",
+  "ti-calculator": "M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm3 4h10M7 12h2m4 0h2M7 16h2m4 0h2",
+  "ti-coin": "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 6v8m-3-6h4.5a1.5 1.5 0 0 1 0 3H9.5a1.5 1.5 0 0 0 0 3H14",
+  "ti-trophy": "M8 15a4 4 0 0 0 8 0V5H8v10zm-4-7H3m18 0h-1M9 20h6m-5-2v2m4-2v2",
+  "ti-clock": "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 5v5l4 2",
+  "ti-receipt": "M5 3h14a1 1 0 0 1 1 1v17l-3-2-2 2-2-2-2 2-2-2-3 2V4a1 1 0 0 1 1-1zm4 6h6m-6 4h6m-6 4h4",
+  "ti-ruler-measure": "M14 5l7 7-7 7L7 12l7-7zM3 17l4-4",
+  "ti-crane": "M5 21V11M19 21V5L12 2 5 5M12 2v19m7-14H5m7-5v4",
+  "ti-refresh": "M20 11A8 8 0 1 0 12 20m8-9v5h-5",
+  "ti-user": "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+  "ti-chevron-right": "M9 18l6-6-6-6",
+};
+
+function Icon({ name, size, color, style }) {
+  var d = ICONS[name] || ICONS["ti-home"];
+  var sz = size || 18;
+  return (
+    <svg width={sz} height={sz} viewBox="0 0 24 24" fill="none"
+      stroke={color || "currentColor"} strokeWidth="1.75"
+      strokeLinecap="round" strokeLinejoin="round"
+      style={style} aria-hidden="true">
+      <path d={d} />
+    </svg>
+  );
+}
+
+
 const SUPABASE_URL = "https://iudxpwmbwcaspihtvhay.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Ab3inJlUcsRG-p6fU4y4pQ_0ncHppba";
 
@@ -80,7 +132,7 @@ function SectionHeader({ icon, title, badge }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
       <div style={{ width: 32, height: 32, borderRadius: 10, background: "#FFF3EC", display: "flex", alignItems: "center", justifyContent: "center", fontSize: isTabler ? 17 : 15, border: "1.5px solid #FFE8D9", color: "#F97316", flexShrink: 0 }}>
-        {isTabler ? <i className={`ti ${icon}`} aria-hidden="true"></i> : icon}
+        {isTabler ? <Icon name={icon} size={17} color="#F97316" /> : icon}
       </div>
       <div style={{ fontSize: 15, fontWeight: 800, color: "#1C1917" }}>{title}</div>
       {badge && <Tag color="purple">{badge}</Tag>}
@@ -2117,7 +2169,7 @@ function Dashboard({ projets, onOuvrir, onNav, user }) {
                 return (<div key={p.id} onClick={function() { onOuvrir(p); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 12, background: "#FFF8F3", border: "1.5px solid #FFE8D9", cursor: "pointer", transition: "transform 0.1s" }}
                   onMouseEnter={function(e) { e.currentTarget.style.transform = "translateX(4px)"; }}
                   onMouseLeave={function(e) { e.currentTarget.style.transform = ""; }}>
-                  {p.coverPhoto ? <img src={p.coverPhoto} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} /> : <div style={{ width: 40, height: 40, borderRadius: 8, background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}><i className="ti ti-home" style={{fontSize:18,color:"#F97316"}} aria-hidden="true"></i></div>}
+                  {p.coverPhoto ? <img src={p.coverPhoto} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} /> : <div style={{ width: 40, height: 40, borderRadius: 8, background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}><Icon name="ti-home" size={20} color="#F97316" /></div>}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 800, color: "#1C1917", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nom}</div>
                     <div style={{ fontSize: 11, color: "#A8A29E" }}>{p.savedAt} · {p.regimeActif}</div>
@@ -5497,7 +5549,7 @@ function SimulateurSCI() {
             <div style={Object.assign({}, SECTION)}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: "#1C1917" }}><i className="ti ti-home" style={{fontSize:18,color:"#F97316"}} aria-hidden="true"></i></span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: "#1C1917" }}><Icon name="ti-home" size={18} color="#F97316" /></span>
                   <input value={bien.nom} onChange={function(e) { updateBien(bien.id, "nom", e.target.value); }}
                     style={{ fontSize: 15, fontWeight: 700, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "2px dashed #FFE8D9" }} />
                 </div>
@@ -5802,7 +5854,7 @@ export default function App() {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FFF8F3", fontFamily: "system-ui,sans-serif" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}><i className="ti ti-home" style={{fontSize:18,color:"#F97316"}} aria-hidden="true"></i></div>
+          <div style={{ fontSize: 36, marginBottom: 12 }}><Icon name="ti-home" size={20} color="#F97316" /></div>
           <div style={{ fontSize: 14, color: "#78716C" }}>Chargement...</div>
         </div>
       </div>
@@ -5940,7 +5992,7 @@ function AppMain({ user, onLogout }) {
             return (
               <button key={n.id} onClick={function() { handleNav(n.id); }} 
                 style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-start", padding: "9px 10px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, width: "100%", textAlign: "left", background: isActive ? "#FFF3EC" : "transparent", color: isActive ? "#F97316" : "#A8A29E", borderLeft: isActive ? "3px solid #F97316" : "3px solid transparent", fontWeight: isActive ? 700 : 500, transition: "all 0.15s", overflow: "hidden", whiteSpace: "nowrap", position: "relative" }}>
-                <i className={`ti ${n.icon}`} style={{ fontSize: 17, flexShrink: 0, width: 20, textAlign: "center" }} aria-hidden="true"></i>
+                <Icon name={n.icon} size={18} style={{ flexShrink: 0 }} />
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{n.label}</span>
                 
               </button>
@@ -6007,7 +6059,7 @@ function AppMain({ user, onLogout }) {
                       <div style={{ height: 160, background: p.coverPhoto ? "transparent" : "linear-gradient(135deg,#FFF3EC,rgba(56,189,248,0.15))", position: "relative", overflow: "hidden" }}>
                         {p.coverPhoto
                           ? <img src={p.coverPhoto} alt={p.nom} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 48 }}><i className="ti ti-home" style={{fontSize:18,color:"#F97316"}} aria-hidden="true"></i></div>
+                          : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 48 }}><Icon name="ti-home" size={20} color="#F97316" /></div>
                         }
                         {/* Badge note */}
                         {note != null && (
