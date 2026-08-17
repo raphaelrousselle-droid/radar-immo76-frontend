@@ -135,9 +135,12 @@ function Tag({ color, children }) {
 }
 
 function SectionHeader({ icon, title, badge }) {
+  var isTabler = typeof icon === "string" && icon.startsWith("ti-");
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-      <div style={{ width: 32, height: 32, borderRadius: 10, background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{icon}</div>
+      <div style={{ width: 32, height: 32, borderRadius: 10, background: "#FFF3EC", border: "1.5px solid #FFE8D9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        {isTabler ? <Icon name={icon} size={17} color="#F97316" /> : <span style={{ fontSize: 16 }}>{icon}</span>}
+      </div>
       <div style={{ fontSize: 16, fontWeight: 700, color: "#1C1917" }}>{title}</div>
       {badge && <Tag color="purple">{badge}</Tag>}
     </div>
