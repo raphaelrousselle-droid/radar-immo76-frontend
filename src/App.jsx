@@ -124,7 +124,7 @@ function Tag({ color, children }) {
     purple: { bg: "#FFF3EC", text: "#F97316", border: "#FFE8D9" },
   };
   const c = colors[color] || colors.blue;
-  return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999, background: c.bg, color: c.text, border: "1px solid " + c.border }}>{children}</span>;
+  return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 19, fontWeight: 600, padding: "2px 8px", borderRadius: 999, background: c.bg, color: c.text, border: "1px solid " + c.border }}>{children}</span>;
 }
 
 function SectionHeader({ icon, title, badge }) {
@@ -134,7 +134,7 @@ function SectionHeader({ icon, title, badge }) {
       <div style={{ width: 32, height: 32, borderRadius: 10, background: "#FFF3EC", display: "flex", alignItems: "center", justifyContent: "center", fontSize: isTabler ? 17 : 15, border: "1.5px solid #FFE8D9", color: "#F97316", flexShrink: 0 }}>
         {isTabler ? <Icon name={icon} size={17} color="#F97316" /> : icon}
       </div>
-      <div style={{ fontSize: 15, fontWeight: 800, color: "#1C1917" }}>{title}</div>
+      <div style={{ fontSize: 19, fontWeight: 800, color: "#1C1917" }}>{title}</div>
       {badge && <Tag color="purple">{badge}</Tag>}
     </div>
   );
@@ -143,8 +143,8 @@ function SectionHeader({ icon, title, badge }) {
 function StatRow({ label, value, color, bold, border }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: border !== false ? "1px solid rgba(148,163,184,0.15)" : "none" }}>
-      <span style={{ fontSize: 13, color: "#78716C" }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: bold ? 700 : 500, color: color || "#1C1917" }}>{value}</span>
+      <span style={{ fontSize: 19, color: "#78716C" }}>{label}</span>
+      <span style={{ fontSize: 19, fontWeight: bold ? 700 : 500, color: color || "#1C1917" }}>{value}</span>
     </div>
   );
 }
@@ -188,18 +188,18 @@ function ScoreDetail({ scoreKey, detail, onClose }) {
   return (
     <div style={{ background: "#fff", borderRadius: 12, padding: 12, marginTop: 6, border: "1px solid " + cfg.color + "44" }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, alignItems: "center" }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: cfg.color }}>{cfg.title}</div>
-        <button onClick={onClose} style={{ border: "none", background: "transparent", color: "#A8A29E", cursor: "pointer", fontSize: 13 }}>×</button>
+        <div style={{ fontSize: 19, fontWeight: 600, color: cfg.color }}>{cfg.title}</div>
+        <button onClick={onClose} style={{ border: "none", background: "transparent", color: "#A8A29E", cursor: "pointer", fontSize: 19 }}>×</button>
       </div>
       {cfg.items.map(function(item) {
         return (
-          <div key={item.label} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px solid #FFE8D9", fontSize: 12 }}>
+          <div key={item.label} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px solid #FFE8D9", fontSize: 19 }}>
             <span style={{ color: "#78716C" }}>{item.label}</span>
             <span style={{ fontWeight: item.highlight ? 600 : 500, color: item.highlight ? "#1C1917" : "#44403C" }}>{item.value}</span>
           </div>
         );
       })}
-      <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 4, fontStyle: "italic" }}>{cfg.note}</div>
+      <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 4, fontStyle: "italic" }}>{cfg.note}</div>
     </div>
   );
 }
@@ -555,9 +555,9 @@ function EnrichmentChart({ data, depenseNette }) {
           { label: "Enrichissement total", value: fmtEur(Math.round(cumData[cumData.length - 1].enrichissement)), color: "#22c55e", icon: "▲" },
         ].map(function(k) {
           return (<div key={k.label} style={{ background: k.color + "12", borderRadius: 14, padding: "12px 14px", border: "1px solid " + k.color + "30", textAlign: "center" }}>
-            <div style={{ fontSize: 18, marginBottom: 2 }}>{k.icon}</div>
-            <div style={{ fontSize: 17, fontWeight: 800, color: k.color }}>{k.value}</div>
-            <div style={{ fontSize: 10, color: "#78716C", marginTop: 2 }}>{k.label}</div>
+            <div style={{ fontSize: 19, marginBottom: 2 }}>{k.icon}</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: k.color }}>{k.value}</div>
+            <div style={{ fontSize: 19, color: "#78716C", marginTop: 2 }}>{k.label}</div>
           </div>);
         })}
       </div>
@@ -568,18 +568,18 @@ function EnrichmentChart({ data, depenseNette }) {
 function InputField({ label, name, value, onChange, unit, step, min }) {
   return (
     <div style={{ marginBottom: 8 }}>
-      <label style={{ display: "block", fontSize: 11, color: "#78716C", marginBottom: 3, fontWeight: 500 }}>{label}</label>
+      <label style={{ display: "block", fontSize: 19, color: "#78716C", marginBottom: 3, fontWeight: 500 }}>{label}</label>
       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
         <input type="number" name={name} value={value} step={step || "1000"} min={min || "0"} onChange={onChange}
-          style={{ width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 10px", color: "#1C1917", fontSize: 13, outline: "none" }} />
-        {(unit !== undefined ? unit : "€") && <span style={{ color: "#A8A29E", fontSize: 11, minWidth: 24 }}>{unit !== undefined ? unit : "€"}</span>}
+          style={{ width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 10px", color: "#1C1917", fontSize: 19, outline: "none" }} />
+        {(unit !== undefined ? unit : "€") && <span style={{ color: "#A8A29E", fontSize: 19, minWidth: 24 }}>{unit !== undefined ? unit : "€"}</span>}
       </div>
     </div>
   );
 }
 
 function SectionTitle({ children }) {
-  return <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: "#A8A29E", margin: "12px 0 6px" }}>{children}</div>;
+  return <div style={{ fontSize: 19, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, color: "#A8A29E", margin: "12px 0 6px" }}>{children}</div>;
 }
 
 function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
@@ -596,14 +596,14 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
   const removeLot = function(id) { if (lots.length <= 1) return; onChange(lots.filter(function(l) { return l.id !== id; })); };
   const updateLot = function(id, field, value) { onChange(lots.map(function(l) { return l.id === id ? Object.assign({}, l, { [field]: value }) : l; })); };
 
-  var fieldS = { width: "100%", background: "#fff", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "6px 9px", fontSize: 13, color: "#1C1917", outline: "none" };
-  var labelS = { fontSize: 10, color: "#A8A29E", marginBottom: 2 };
+  var fieldS = { width: "100%", background: "#fff", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "6px 9px", fontSize: 19, color: "#1C1917", outline: "none" };
+  var labelS = { fontSize: 19, color: "#A8A29E", marginBottom: 2 };
 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#44403C" }}>Détail des lots ({lots.length})</div>
-        <button onClick={addLot} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "5px 12px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>+ Lot</button>
+        <div style={{ fontSize: 19, fontWeight: 600, color: "#44403C" }}>Détail des lots ({lots.length})</div>
+        <button onClick={addLot} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "5px 12px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 500 }}>+ Lot</button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {lots.map(function(lot, idx) {
@@ -615,11 +615,11 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
               {/* Header */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: 7, background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700 }}>#{idx + 1}</div>
-                  <input value={lot.nom} onChange={function(e) { updateLot(lot.id, "nom", e.target.value); }} style={{ fontWeight: 600, fontSize: 13, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed #cbd5e1", maxWidth: 120 }} />
-                  <span style={{ fontSize: 10, fontWeight: 600, color: debutColor, background: debutColor + "15", padding: "2px 7px", borderRadius: 6 }}> {debutLabel}</span>
+                  <div style={{ width: 22, height: 22, borderRadius: 7, background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19, color: "#fff", fontWeight: 700 }}>#{idx + 1}</div>
+                  <input value={lot.nom} onChange={function(e) { updateLot(lot.id, "nom", e.target.value); }} style={{ fontWeight: 600, fontSize: 19, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed #cbd5e1", maxWidth: 120 }} />
+                  <span style={{ fontSize: 19, fontWeight: 600, color: debutColor, background: debutColor + "15", padding: "2px 7px", borderRadius: 6 }}> {debutLabel}</span>
                 </div>
-                <button onClick={function() { removeLot(lot.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#dc2626", cursor: lots.length > 1 ? "pointer" : "not-allowed", fontSize: 11, opacity: lots.length > 1 ? 1 : 0.3 }}>×</button>
+                <button onClick={function() { removeLot(lot.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 6, padding: "3px 8px", color: "#dc2626", cursor: lots.length > 1 ? "pointer" : "not-allowed", fontSize: 19, opacity: lots.length > 1 ? 1 : 0.3 }}>×</button>
               </div>
               {/* Row 1: Surface + Loyer + Début loyer */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 6 }}>
@@ -627,21 +627,21 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
                   <div style={labelS}>Surface</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                     <input type="number" value={lot.surface} step="1" min="0" onChange={function(e) { updateLot(lot.id, "surface", e.target.value); }} style={fieldS} placeholder="—" />
-                    <span style={{ fontSize: 10, color: "#A8A29E" }}>m²</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E" }}>m²</span>
                   </div>
                 </div>
                 <div>
                   <div style={labelS}>Loyer HC/mois</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                     <input type="number" value={lot.loyer} step="50" min="0" onChange={function(e) { updateLot(lot.id, "loyer", e.target.value); }} style={fieldS} placeholder="—" />
-                    <span style={{ fontSize: 10, color: "#A8A29E" }}>€</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E" }}>€</span>
                   </div>
                 </div>
                 <div>
                   <div style={labelS}>Début loyer</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                     <input type="number" value={lot.debutLoyerMois} step="1" min="0" onChange={function(e) { updateLot(lot.id, "debutLoyerMois", e.target.value); }} style={fieldS} placeholder="0" />
-                    <span style={{ fontSize: 10, color: "#A8A29E" }}>mois</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E" }}>mois</span>
                   </div>
                 </div>
               </div>
@@ -651,14 +651,14 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
                   <div style={labelS}>Travaux</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                     <input type="number" value={lot.travaux} step="500" min="0" onChange={function(e) { updateLot(lot.id, "travaux", e.target.value); }} style={fieldS} placeholder="—" />
-                    <span style={{ fontSize: 10, color: "#A8A29E" }}>€</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E" }}>€</span>
                   </div>
                 </div>
                 <div>
                   <div style={labelS}>Charges/an</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                     <input type="number" value={lot.charges} step="100" min="0" onChange={function(e) { updateLot(lot.id, "charges", e.target.value); }} style={fieldS} placeholder="—" />
-                    <span style={{ fontSize: 10, color: "#A8A29E" }}>€</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E" }}>€</span>
                   </div>
                 </div>
                 <div>
@@ -669,7 +669,7 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
                       var isA = lot.dpe === note;
                       return (
                         <button key={note} onClick={function() { updateLot(lot.id, "dpe", isA ? "" : note); }}
-                          style={{ flex: 1, padding: "4px 0", borderRadius: 5, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 11,
+                          style={{ flex: 1, padding: "4px 0", borderRadius: 5, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 19,
                             background: isA ? colors[note] : "rgba(148,163,184,0.12)",
                             color: isA ? "#fff" : "#A8A29E" }}>
                           {note}
@@ -691,13 +691,13 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
           { label: "Σ Charges", value: fmtEur(totalCharges), ok: true, ref: false },
         ].map(function(s) {
           return (<div key={s.label} style={{ background: s.ref ? (s.ok ? "rgba(220,252,231,0.7)" : "rgba(254,243,199,0.7)") : "rgba(241,245,249,0.7)", borderRadius: 10, padding: "7px 10px", border: "1px solid " + (s.ref ? (s.ok ? "rgba(22,163,74,0.2)" : "rgba(251,191,36,0.3)") : "rgba(148,163,184,0.15)") }}>
-            <div style={{ fontSize: 10, color: "#A8A29E" }}>{s.label}</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: s.ref ? (s.ok ? "#15803d" : "#92400e") : "#1C1917" }}>{s.value} {s.ref && <span style={{ fontSize: 10, fontWeight: 400 }}>{s.ok ? "✓" : "≠ " + s.refVal}</span>}</div>
+            <div style={{ fontSize: 19, color: "#A8A29E" }}>{s.label}</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: s.ref ? (s.ok ? "#15803d" : "#92400e") : "#1C1917" }}>{s.value} {s.ref && <span style={{ fontSize: 19, fontWeight: 400 }}>{s.ok ? "✓" : "≠ " + s.refVal}</span>}</div>
           </div>);
         })}
       </div>
-      {(!surfOk && surfaceGlobale > 0) && <div style={{ marginTop: 6, background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#92400e" }}>⚠ Surfaces : {fmt(totalSurface, 0)} m² ≠ {fmt(surfaceGlobale, 0)} m² (global)</div>}
-      {(!loyerOk && loyerGlobal > 0) && <div style={{ marginTop: 4, background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#92400e" }}>⚠ Loyers : {fmtEur(totalLoyer)} ≠ {fmtEur(loyerGlobal)} (global)</div>}
+      {(!surfOk && surfaceGlobale > 0) && <div style={{ marginTop: 6, background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "5px 10px", fontSize: 19, color: "#92400e" }}>⚠ Surfaces : {fmt(totalSurface, 0)} m² ≠ {fmt(surfaceGlobale, 0)} m² (global)</div>}
+      {(!loyerOk && loyerGlobal > 0) && <div style={{ marginTop: 4, background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "5px 10px", fontSize: 19, color: "#92400e" }}>⚠ Loyers : {fmtEur(totalLoyer)} ≠ {fmtEur(loyerGlobal)} (global)</div>}
     </div>
   );
 }
@@ -1509,17 +1509,17 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
                 <circle cx="36" cy="36" r="28" fill="none" stroke={noteColor} strokeWidth="7" strokeDasharray={dash + " " + circumference} strokeLinecap="round" transform="rotate(-90 36 36)" style={{ transition: "stroke-dasharray 0.5s ease" }} />
                 <text x="36" y="40" textAnchor="middle" fontSize="17" fontWeight="700" fill={noteColor}>{note}</text>
               </svg>
-              <div style={{ fontSize: 10, fontWeight: 600, color: noteColor }}>{noteLabel}</div>
+              <div style={{ fontSize: 19, fontWeight: 600, color: noteColor }}>{noteLabel}</div>
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#1C1917" }}>Simulation projet</div>
-              <div style={{ fontSize: 12, color: "#78716C", marginTop: 2 }}>
+              <div style={{ fontSize: 19, fontWeight: 700, color: "#1C1917" }}>Simulation projet</div>
+              <div style={{ fontSize: 19, color: "#78716C", marginTop: 2 }}>
                 {pf(inputs.prixVente) > 0 && <span>{fmt(pf(inputs.prixVente))} € · </span>}
                 {pf(inputs.surfaceGlobale) > 0 && <span>{fmt(pf(inputs.surfaceGlobale), 0)} m² · </span>}
                                 <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 2 }}>
                   <Tag color="purple">{regimeActif}</Tag>
                   {inputs.noteDPE && (
-                    <span style={{ fontWeight: 800, fontSize: 13, padding: "1px 8px", borderRadius: 6,
+                    <span style={{ fontWeight: 800, fontSize: 19, padding: "1px 8px", borderRadius: 6,
                       background: { A:"#16a34a",B:"#4ade80",C:"#a3e635",D:"#facc15",E:"#fb923c",F:"#f97316",G:"#dc2626" }[inputs.noteDPE] + "22",
                       color: { A:"#15803d",B:"#166534",C:"#3f6212",D:"#854d0e",E:"#9a3412",F:"#7c2d12",G:"#991b1b" }[inputs.noteDPE],
                       border: "1px solid " + { A:"#16a34a",B:"#4ade80",C:"#a3e635",D:"#facc15",E:"#fb923c",F:"#f97316",G:"#dc2626" }[inputs.noteDPE] + "44" }}>
@@ -1538,20 +1538,20 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               { label: "Cashflow/mois", value: (tresoPMois >= 0 ? "+" : "") + fmt(tresoPMois, 0) + " €", color: tresoPMois >= 0 ? "#16a34a" : "#dc2626" },
             ].map(function(s) {
               return (<div key={s.label} style={{ textAlign: "center", minWidth: 80 }}>
-                <div style={{ fontSize: 11, color: "#A8A29E" }}>{s.label}</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: s.color }}>{s.value}</div>
+                <div style={{ fontSize: 19, color: "#A8A29E" }}>{s.label}</div>
+                <div style={{ fontSize: 19, fontWeight: 700, color: s.color }}>{s.value}</div>
               </div>);
             })}
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <input value={nomProjet} onChange={function(e) { setNomProjet(e.target.value); }} placeholder="Nom du projet…"
-              style={{ background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 12px", fontSize: 12, color: "#1C1917", width: 160, outline: "none" }} />
-            <button onClick={sauvegarder} style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, opacity: nomProjet.trim() ? 1 : 0.5 }}>Sauver</button>
-            <button onClick={exportJSON} style={{ background: "#FFF3EC", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 12px", color: "#F97316", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>JSON</button>
-            <label style={{ background: "#FFF3EC", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 12px", color: "#F97316", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>
+              style={{ background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 12px", fontSize: 19, color: "#1C1917", width: 160, outline: "none" }} />
+            <button onClick={sauvegarder} style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 700, opacity: nomProjet.trim() ? 1 : 0.5 }}>Sauver</button>
+            <button onClick={exportJSON} style={{ background: "#FFF3EC", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 12px", color: "#F97316", cursor: "pointer", fontSize: 19, fontWeight: 500 }}>JSON</button>
+            <label style={{ background: "#FFF3EC", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 12px", color: "#F97316", cursor: "pointer", fontSize: 19, fontWeight: 500 }}>
               ⬆ Import<input type="file" accept=".json" onChange={importJSON} style={{ display: "none" }} />
             </label>
-            <button onClick={exportPDF} style={{ background: "linear-gradient(135deg,#dc2626,#f97316)", border: "none", borderRadius: 10, padding: "7px 12px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>Export PDF</button>
+            <button onClick={exportPDF} style={{ background: "linear-gradient(135deg,#dc2626,#f97316)", border: "none", borderRadius: 10, padding: "7px 12px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 600 }}>Export PDF</button>
           </div>
         </div>
         {projets.length > 0 && (
@@ -1559,9 +1559,9 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
             {projets.map(function(p) {
               return (<div key={p.id} style={{ display: "flex", alignItems: "center", gap: 5, background: "#FFF3EC", border: "1px solid #FFE8D9", borderRadius: 8, padding: "3px 10px" }}>
                 {p.coverPhoto && <img src={p.coverPhoto} alt="" style={{ width: 36, height: 28, objectFit: "cover", borderRadius: 5, flexShrink: 0 }} />}
-                <button onClick={function() { charger(p); }} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: "#F97316", cursor: "pointer" }}> {p.nom}</button>
-                <span style={{ fontSize: 10, color: "#A8A29E" }}>{p.savedAt}</span>
-                <button onClick={function() { supprimer(p.id); }} style={{ background: "none", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 11 }}>×</button>
+                <button onClick={function() { charger(p); }} style={{ background: "none", border: "none", fontSize: 19, fontWeight: 600, color: "#F97316", cursor: "pointer" }}> {p.nom}</button>
+                <span style={{ fontSize: 19, color: "#A8A29E" }}>{p.savedAt}</span>
+                <button onClick={function() { supprimer(p.id); }} style={{ background: "none", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 19 }}>×</button>
               </div>);
             })}
           </div>
@@ -1571,8 +1571,8 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
       {/* ── Bloc Photos ── */}
       <div style={Object.assign({}, SECTION, { padding: "14px 20px" })}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: photos.length > 0 ? 12 : 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#44403C" }}> Photos du projet <span style={{ fontSize: 10, color: "#A8A29E", fontWeight: 400 }}>({photos.length} photo{photos.length > 1 ? "s" : ""})</span></div>
-          <label style={{ background: "#FFF3EC", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 14px", color: "#F97316", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>
+          <div style={{ fontSize: 19, fontWeight: 700, color: "#44403C" }}> Photos du projet <span style={{ fontSize: 19, color: "#A8A29E", fontWeight: 400 }}>({photos.length} photo{photos.length > 1 ? "s" : ""})</span></div>
+          <label style={{ background: "#FFF3EC", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 14px", color: "#F97316", cursor: "pointer", fontSize: 19, fontWeight: 500 }}>
             + Ajouter
             <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{ display: "none" }} />
           </label>
@@ -1582,17 +1582,17 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
             {photos.map(function(ph, idx) {
               return (
                 <div key={ph.id} style={{ position: "relative", borderRadius: 10, overflow: "hidden", border: idx === 0 ? "2px solid #F97316" : "1px solid rgba(148,163,184,0.3)" }}>
-                  {idx === 0 && <div style={{ position: "absolute", top: 4, left: 4, background: "#FFF3EC", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 6 }}>Couverture</div>}
+                  {idx === 0 && <div style={{ position: "absolute", top: 4, left: 4, background: "#FFF3EC", color: "#fff", fontSize: 19, fontWeight: 700, padding: "2px 7px", borderRadius: 6 }}>Couverture</div>}
                   <img src={ph.url} alt={ph.name} style={{ width: 110, height: 80, objectFit: "cover", display: "block" }} />
                   <button onClick={function() { removePhoto(ph.id); }}
-                    style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.55)", border: "none", borderRadius: "50%", width: 20, height: 20, color: "#fff", cursor: "pointer", fontSize: 12, lineHeight: "20px", padding: 0 }}>×</button>
+                    style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.55)", border: "none", borderRadius: "50%", width: 20, height: 20, color: "#fff", cursor: "pointer", fontSize: 19, lineHeight: "20px", padding: 0 }}>×</button>
                 </div>
               );
             })}
           </div>
         )}
         {photos.length === 0 && (
-          <div style={{ fontSize: 11, color: "#A8A29E", marginTop: 4 }}>Ajoute des photos pour les retrouver facilement dans tes projets sauvegardés</div>
+          <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 4 }}>Ajoute des photos pour les retrouver facilement dans tes projets sauvegardés</div>
         )}
       </div>
 
@@ -1600,7 +1600,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
       <div style={{ display: "flex", gap: 4, background: "#fff", borderRadius: 14, padding: 4, width: "fit-content", backdropFilter: "blur(18px)", border: "1.5px solid #FFE8D9" }}>
         {tabs.map(function(t) {
           return (<button key={t.id} onClick={function() { setActiveTab(t.id); }}
-            style={{ padding: "7px 16px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, background: activeTab === t.id ? "white" : "transparent", color: activeTab === t.id ? "#F97316" : "#78716C", boxShadow: activeTab === t.id ? "0 2px 8px #FFF3EC" : "none" }}>{t.label}</button>);
+            style={{ padding: "7px 16px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 500, background: activeTab === t.id ? "white" : "transparent", color: activeTab === t.id ? "#F97316" : "#78716C", boxShadow: activeTab === t.id ? "0 2px 8px #FFF3EC" : "none" }}>{t.label}</button>);
         })}
       </div>
 
@@ -1615,7 +1615,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               <input value={communeSearch}
                 onChange={function(e) { setCommuneSearch(e.target.value); if (!e.target.value) { setInputs(function(p) { return Object.assign({}, p, { commune: "" }); }); setDonneesCommune(null); setCommuneSuggestions([]); } }}
                 placeholder="Rechercher une commune (Seine-Maritime)..."
-                style={{ width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "8px 14px", fontSize: 13, color: "#1C1917", outline: "none", boxSizing: "border-box" }} />
+                style={{ width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "8px 14px", fontSize: 19, color: "#1C1917", outline: "none", boxSizing: "border-box" }} />
               {communeSuggestions.length > 0 && (
                 <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 1000, background: "#fff", border: "1.5px solid #FFE8D9", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.18)", marginTop: 4, overflow: "hidden" }}>
                   {communeSuggestions.map(function(c) {
@@ -1623,15 +1623,15 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
                       onClick={function() { setCommuneSearch(c.nom); setCommuneSuggestions([]); setInputs(function(p) { return Object.assign({}, p, { commune: c.nom }); }); fetchDonneesCommune(c.nom); }}
                       onMouseEnter={function(e) { e.currentTarget.style.background = "#FFF8F3"; }}
                       onMouseLeave={function(e) { e.currentTarget.style.background = ""; }}
-                      style={{ padding: "9px 14px", cursor: "pointer", fontSize: 13, color: "#1C1917", borderBottom: "1px solid #FFE8D9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      style={{ padding: "9px 14px", cursor: "pointer", fontSize: 19, color: "#1C1917", borderBottom: "1px solid #FFE8D9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span>{c.nom}</span>
-                      {c.scores && <span style={{ fontSize: 11, color: "#A8A29E" }}>Score {c.scores.global != null ? c.scores.global.toFixed(1) : "—"}/10</span>}
+                      {c.scores && <span style={{ fontSize: 19, color: "#A8A29E" }}>Score {c.scores.global != null ? c.scores.global.toFixed(1) : "—"}/10</span>}
                     </div>;
                   })}
                 </div>
               )}
             </div>
-            {loadingCommune && <div style={{ marginTop: 8, fontSize: 12, color: "#A8A29E" }}>⏳ Chargement des données marché...</div>}
+            {loadingCommune && <div style={{ marginTop: 8, fontSize: 19, color: "#A8A29E" }}>⏳ Chargement des données marché...</div>}
             {donneesCommune && donneesCommune.prix && (function() {
               var pri = donneesCommune.prix;
               var loy = donneesCommune.loyer;
@@ -1648,24 +1648,24 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               return (
                 <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
                   {prixM2Appart && <div style={{ background: gb(diffA), borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                    <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Prix marché appart.</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: gc(diffA), margin: "3px 0 2px" }}>{fmt(prixM2Appart, 0)} €/m²</div>
-                    <div style={{ fontSize: 11, color: "#78716C" }}>{diffLabel(diffA)}</div>
+                    <div style={{ fontSize: 19, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Prix marché appart.</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: gc(diffA), margin: "3px 0 2px" }}>{fmt(prixM2Appart, 0)} €/m²</div>
+                    <div style={{ fontSize: 19, color: "#78716C" }}>{diffLabel(diffA)}</div>
                   </div>}
                   {prixM2Maison && <div style={{ background: gb(diffM), borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                    <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Prix marché maison</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: gc(diffM), margin: "3px 0 2px" }}>{fmt(prixM2Maison, 0)} €/m²</div>
-                    <div style={{ fontSize: 11, color: "#78716C" }}>{diffLabel(diffM)}</div>
+                    <div style={{ fontSize: 19, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Prix marché maison</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: gc(diffM), margin: "3px 0 2px" }}>{fmt(prixM2Maison, 0)} €/m²</div>
+                    <div style={{ fontSize: 19, color: "#78716C" }}>{diffLabel(diffM)}</div>
                   </div>}
                   {loyerM2 && <div style={{ background: "rgba(224,242,254,0.5)", borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                    <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Loyer marché /m²</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#F97316", margin: "3px 0 2px" }}>{loyerM2.toFixed(1)} €/m²/mois</div>
-                    <div style={{ fontSize: 11, color: "#78716C" }}>{surf > 0 ? "→ Loyer estimé : " + fmt(loyerM2 * surf, 0) + " €/mois" : "Renseigne la surface"}</div>
+                    <div style={{ fontSize: 19, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Loyer marché /m²</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: "#F97316", margin: "3px 0 2px" }}>{loyerM2.toFixed(1)} €/m²/mois</div>
+                    <div style={{ fontSize: 19, color: "#78716C" }}>{surf > 0 ? "→ Loyer estimé : " + fmt(loyerM2 * surf, 0) + " €/mois" : "Renseigne la surface"}</div>
                   </div>}
                   {prixM2Projet && <div style={{ background: "rgba(238,242,255,0.7)", borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                    <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Votre prix /m²</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#F97316", margin: "3px 0 2px" }}>{fmt(prixM2Projet, 0)} €/m²</div>
-                    <div style={{ fontSize: 11, color: "#78716C" }}>{fmt(pf(inputs.prixVente), 0)} € ÷ {fmt(surf, 0)} m²</div>
+                    <div style={{ fontSize: 19, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Votre prix /m²</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: "#F97316", margin: "3px 0 2px" }}>{fmt(prixM2Projet, 0)} €/m²</div>
+                    <div style={{ fontSize: 19, color: "#78716C" }}>{fmt(pf(inputs.prixVente), 0)} € ÷ {fmt(surf, 0)} m²</div>
                   </div>}
                 </div>
               );
@@ -1684,7 +1684,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               <InputField label="Apport personnel" name="apport" value={inputs.apport} onChange={handleChange} />
               <InputField label="Surface globale" name="surfaceGlobale" value={inputs.surfaceGlobale} onChange={handleChange} unit="m²" step="1" />
                             <div style={{ gridColumn: "1 / -1" }}>
-                <div style={{ fontSize: 11, color: "#78716C", marginBottom: 4, fontWeight: 500 }}>Note DPE</div>
+                <div style={{ fontSize: 19, color: "#78716C", marginBottom: 4, fontWeight: 500 }}>Note DPE</div>
                 <div style={{ display: "flex", gap: 6 }}>
                   {["A", "B", "C", "D", "E", "F", "G", ""].map(function(note) {
                     const colors = { A: "#16a34a", B: "#4ade80", C: "#a3e635", D: "#facc15", E: "#fb923c", F: "#f97316", G: "#dc2626", "": "#A8A29E" };
@@ -1692,7 +1692,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
                     return (
                       <button key={note === "" ? "nd" : note}
                         onClick={function() { setInputs(function(prev) { return Object.assign({}, prev, { noteDPE: note }); }); }}
-                        style={{ flex: 1, padding: "5px 0", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 13,
+                        style={{ flex: 1, padding: "5px 0", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 19,
                           background: isActive ? colors[note] : "rgba(148,163,184,0.12)",
                           color: isActive ? (["A","B","C","D"].includes(note) ? "#fff" : "#1C1917") : "#78716C",
                           boxShadow: isActive ? "0 2px 8px " + colors[note] + "66" : "none" }}>
@@ -1704,17 +1704,17 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               </div>
             </div>
             <div style={{ marginTop: 8, background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 12px" }}>
-              <div style={{ fontSize: 11, color: "#A8A29E", marginBottom: 6, fontWeight: 600, textTransform: "uppercase" }}>Crédit</div>
+              <div style={{ fontSize: 19, color: "#A8A29E", marginBottom: 6, fontWeight: 600, textTransform: "uppercase" }}>Crédit</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 <InputField label="Taux crédit" name="tauxCredit" value={inputs.tauxCredit} onChange={handleChange} unit="%" step="0.05" />
                 <InputField label="Durée" name="dureeAnnees" value={inputs.dureeAnnees} onChange={handleChange} unit="ans" step="1" />
                 <InputField label="Différé de remboursement" name="differeMois" value={inputs.differeMois} onChange={handleChange} unit="mois" step="1" />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 6, background: "#FFF8F3", borderRadius: 10, padding: "8px 10px" }}>
-                <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Total à financer</div><div style={{ fontSize: 13, fontWeight: 700, color: "#F97316" }}>{fmtEur(result.depenseNette)}</div></div>
-                <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Apport</div><div style={{ fontSize: 13, fontWeight: 700, color: "#16a34a" }}>{fmtEur(pf(inputs.apport))}</div></div>
-                <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Reste à financer</div><div style={{ fontSize: 13, fontWeight: 700, color: "#dc2626" }}>{fmtEur(result.sommeEmpruntee)}</div></div>
-                <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Mensualité</div><div style={{ fontSize: 13, fontWeight: 700, color: "#F97316" }}>{fmtEur(result.mensualite)}</div></div>
+                <div><div style={{ fontSize: 19, color: "#A8A29E" }}>Total à financer</div><div style={{ fontSize: 19, fontWeight: 700, color: "#F97316" }}>{fmtEur(result.depenseNette)}</div></div>
+                <div><div style={{ fontSize: 19, color: "#A8A29E" }}>Apport</div><div style={{ fontSize: 19, fontWeight: 700, color: "#16a34a" }}>{fmtEur(pf(inputs.apport))}</div></div>
+                <div><div style={{ fontSize: 19, color: "#A8A29E" }}>Reste à financer</div><div style={{ fontSize: 19, fontWeight: 700, color: "#dc2626" }}>{fmtEur(result.sommeEmpruntee)}</div></div>
+                <div><div style={{ fontSize: 19, color: "#A8A29E" }}>Mensualité</div><div style={{ fontSize: 19, fontWeight: 700, color: "#F97316" }}>{fmtEur(result.mensualite)}</div></div>
               </div>
             </div>
           </div>
@@ -1760,7 +1760,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {Object.keys(result.regimes).map(function(r) {
               return (<button key={r} onClick={function() { setRegimeActif(r); }}
-                style={{ padding: "6px 14px", borderRadius: 10, border: regimeActif === r ? "1.5px solid #F97316" : "1px solid rgba(148,163,184,0.35)", background: regimeActif === r ? "#FFF3EC" : "rgba(255,255,255,0.7)", color: regimeActif === r ? "#F97316" : "#57534E", fontSize: 12, fontWeight: 500, cursor: "pointer" }}>{r}</button>);
+                style={{ padding: "6px 14px", borderRadius: 10, border: regimeActif === r ? "1.5px solid #F97316" : "1px solid rgba(148,163,184,0.35)", background: regimeActif === r ? "#FFF3EC" : "rgba(255,255,255,0.7)", color: regimeActif === r ? "#F97316" : "#57534E", fontSize: 19, fontWeight: 500, cursor: "pointer" }}>{r}</button>);
             })}
           </div>
 
@@ -1774,12 +1774,12 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               <StatRow label="Frais bancaires (dossier, garantie)" value={fmtEur(pf(inputs.fraisBancairesAchat))} />
               <StatRow label="Coût total" value={fmtEur(result.depenseNette)} bold color="#1C1917" border={false} />
               <div style={{ marginTop: 10, background: "#FFF8F3", borderRadius: 12, padding: "10px 12px", border: "1px solid #FFF3EC" }}>
-                <div style={{ fontSize: 11, color: "#A8A29E", marginBottom: 4 }}>Crédit · {fmt(pf(inputs.dureeAnnees), 0)} ans · {pf(inputs.tauxCredit)}%</div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                <div style={{ fontSize: 19, color: "#A8A29E", marginBottom: 4 }}>Crédit · {fmt(pf(inputs.dureeAnnees), 0)} ans · {pf(inputs.tauxCredit)}%</div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 19 }}>
                   <span style={{ color: "#78716C" }}>Montant emprunté</span><span style={{ fontWeight: 600, color: "#F97316" }}>{fmtEur(result.sommeEmpruntee)}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginTop: 4 }}>
-                  <span style={{ color: "#78716C" }}>Mensualité</span><span style={{ fontWeight: 700, color: "#F97316", fontSize: 15 }}>{fmtEur(result.mensualite)}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 19, marginTop: 4 }}>
+                  <span style={{ color: "#78716C" }}>Mensualité</span><span style={{ fontWeight: 700, color: "#F97316", fontSize: 19 }}>{fmtEur(result.mensualite)}</span>
                 </div>
               </div>
             </div>
@@ -1790,17 +1790,17 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               <StatRow label="Loyer mensuel" value={"+" + fmtEur(pf(inputs.loyerMensuelHC))} color="#16a34a" />
               <StatRow label="Loyer annuel" value={"+" + fmtEur(result.loyersAnnuels)} color="#16a34a" />
               <div style={{ margin: "8px 0", background: "rgba(220,252,231,0.5)", borderRadius: 10, padding: "8px 10px" }}>
-                <div style={{ fontSize: 11, color: "#78716C" }}>Rentabilité brute</div>
+                <div style={{ fontSize: 19, color: "#78716C" }}>Rentabilité brute</div>
                 <div style={{ fontSize: 20, fontWeight: 700, color: "#15803d" }}>{fmtPct(result.rendBrut)}</div>
-                <div style={{ fontSize: 11, color: "#A8A29E" }}>Loyers annuels / Coût total</div>
+                <div style={{ fontSize: 19, color: "#A8A29E" }}>Loyers annuels / Coût total</div>
               </div>
               <StatRow label="Charges annuelles" value={"–" + fmtEur(result.totalFraisAnnuels)} color="#d97706" />
               <StatRow label="EBE" value={fmtEur(regime.ebe)} color="#F97316" />
               <StatRow label="Fiscalité annuelle" value={"–" + fmtEur(regime.impot)} color="#dc2626" />
               <div style={{ margin: "8px 0", background: "rgba(220,252,231,0.5)", borderRadius: 10, padding: "8px 10px" }}>
-                <div style={{ fontSize: 11, color: "#78716C" }}>Rentabilité nette · {regimeActif}</div>
+                <div style={{ fontSize: 19, color: "#78716C" }}>Rentabilité nette · {regimeActif}</div>
                 <div style={{ fontSize: 20, fontWeight: 700, color: "#15803d" }}>{fmtPct(regime.rendNet)}</div>
-                <div style={{ fontSize: 11, color: "#A8A29E" }}>(Loyers – Charges) / Coût total</div>
+                <div style={{ fontSize: 19, color: "#A8A29E" }}>(Loyers – Charges) / Coût total</div>
               </div>
             </div>
 
@@ -1812,8 +1812,8 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               <StatRow label="Charges moy./mois" value={"–" + fmt(result.totalFraisAnnuels / 12, 0) + " €"} color="#d97706" />
               <StatRow label="Impôts moy./mois" value={"–" + fmt(regime.impot / 12, 0) + " €"} color="#f97316" />
               <div style={{ marginTop: 10, background: tresoPMois >= 0 ? "rgba(220,252,231,0.7)" : "rgba(254,226,226,0.7)", borderRadius: 12, padding: "10px 12px", border: "1px solid " + (tresoPMois >= 0 ? "rgba(22,163,74,0.3)" : "rgba(220,38,38,0.3)") }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#44403C" }}>Cashflow net après impôt</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: tresoPMois >= 0 ? "#15803d" : "#dc2626", marginTop: 2 }}>
+                <div style={{ fontSize: 19, fontWeight: 600, color: "#44403C" }}>Cashflow net après impôt</div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: tresoPMois >= 0 ? "#15803d" : "#dc2626", marginTop: 2 }}>
                   {tresoPMois >= 0 ? "+" : ""}{fmt(tresoPMois, 0)} €/mois
                 </div>
               </div>
@@ -1828,9 +1828,9 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
                     { label: "Dépense nette", value: fmtEur(result.depenseNette), color: "#1C1917", sub: "Tout inclus" },
                   ].map(function(k) {
                     return (<div key={k.label} style={{ background: "#FFF8F3", borderRadius: 12, padding: "8px 10px", border: "1.5px solid #FFE8D9" }}>
-                      <div style={{ fontSize: 10, color: "#A8A29E" }}>{k.label}</div>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: k.color }}>{k.value}</div>
-                      {k.sub && <div style={{ fontSize: 10, color: "#A8A29E" }}>{k.sub}</div>}
+                      <div style={{ fontSize: 19, color: "#A8A29E" }}>{k.label}</div>
+                      <div style={{ fontSize: 19, fontWeight: 700, color: k.color }}>{k.value}</div>
+                      {k.sub && <div style={{ fontSize: 19, color: "#A8A29E" }}>{k.sub}</div>}
                     </div>);
                   })}
                 </div>
@@ -1846,17 +1846,17 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {Object.keys(result.regimes).map(function(r) {
               return (<button key={r} onClick={function() { setRegimeActif(r); }}
-                style={{ padding: "6px 14px", borderRadius: 10, border: regimeActif === r ? "1.5px solid #F97316" : "1px solid rgba(148,163,184,0.35)", background: regimeActif === r ? "#FFF3EC" : "rgba(255,255,255,0.7)", color: regimeActif === r ? "#F97316" : "#57534E", fontSize: 12, fontWeight: 500, cursor: "pointer" }}>{r}</button>);
+                style={{ padding: "6px 14px", borderRadius: 10, border: regimeActif === r ? "1.5px solid #F97316" : "1px solid rgba(148,163,184,0.35)", background: regimeActif === r ? "#FFF3EC" : "rgba(255,255,255,0.7)", color: regimeActif === r ? "#F97316" : "#57534E", fontSize: 19, fontWeight: 500, cursor: "pointer" }}>{r}</button>);
             })}
           </div>
           <div style={SECTION} ref={chartRef}>
             <SectionHeader icon="ti-chart-line" title={"Cash-Flow sur " + (pf(inputs.dureeAnnees) + 5) + " ans"} badge={regimeActif} />
-            <div style={{ fontSize: 11, color: "#A8A29E", marginBottom: 12 }}>Loyers indexés +1%/an · survole pour le détail</div>
+            <div style={{ fontSize: 19, color: "#A8A29E", marginBottom: 12 }}>Loyers indexés +1%/an · survole pour le détail</div>
             <CashFlowChart data={cashFlowData} />
           </div>
           <div style={SECTION} ref={enrichChartRef}>
             <SectionHeader icon="ti-rocket" title="Évolution du capital net" badge={regimeActif} />
-            <div style={{ fontSize: 11, color: "#A8A29E", marginBottom: 12 }}>Trésorerie cumulée + Capital remboursé = Enrichissement total</div>
+            <div style={{ fontSize: 19, color: "#A8A29E", marginBottom: 12 }}>Trésorerie cumulée + Capital remboursé = Enrichissement total</div>
             <EnrichmentChart data={cashFlowData} depenseNette={result.depenseNette} />
           </div>
         </div>
@@ -1867,11 +1867,11 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
         <div style={SECTION}>
           <SectionHeader icon="ti-scale" title="Comparatif des régimes fiscaux" />
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 19 }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
                   {["Régime", "Tréso/an", "Cashflow/mois", "Impôt/an", "Rdt brut", "Rdt net", "TRI", "Règle 70%", "Note"].map(function(h) {
-                    return <th key={h} style={{ textAlign: h === "Régime" ? "left" : "right", padding: "8px 10px", fontWeight: 600, color: "#78716C", fontSize: 12 }}>{h}</th>;
+                    return <th key={h} style={{ textAlign: h === "Régime" ? "left" : "right", padding: "8px 10px", fontWeight: 600, color: "#78716C", fontSize: 19 }}>{h}</th>;
                   })}
                 </tr>
               </thead>
@@ -1916,8 +1916,8 @@ function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData })
   var rv = _ra[0]; var setRv = _ra[1];
   var handleRv = function(e) { setRv(function(p) { return Object.assign({}, p, { [e.target.name]: e.target.value }); }); };
 
-  var fS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" };
-  var lS = { display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 3 };
+  var fS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" };
+  var lS = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 3 };
 
   var anneeR = Math.max(1, Math.round(pf(rv.anneeRevente)));
   var surf = pf(inputs.surfaceGlobale);
@@ -1974,8 +1974,8 @@ function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData })
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
           <div><label style={lS}>Année de revente</label><input type="number" name="anneeRevente" value={rv.anneeRevente} onChange={handleRv} step="1" min="1" style={fS} /></div>
           <div><label style={lS}>Prix revente €/m² (optionnel)</label><input type="number" name="prixReventeM2" value={rv.prixReventeM2} onChange={handleRv} step="50" placeholder={"Auto: " + fmt(Math.round(prixReventeEstime / (surf || 1)), 0)} style={fS} /></div>
-          <div><label style={lS}>Revalorisation/an</label><div style={{ display: "flex", gap: 4 }}><input type="number" name="tauxPlusValueAn" value={rv.tauxPlusValueAn} onChange={handleRv} step="0.5" style={fS} /><span style={{ fontSize: 11, color: "#A8A29E", alignSelf: "center" }}>%</span></div></div>
-          <div><label style={lS}>Frais d'agence vente</label><div style={{ display: "flex", gap: 4 }}><input type="number" name="fraisAgenceVente" value={rv.fraisAgenceVente} onChange={handleRv} step="0.5" style={fS} /><span style={{ fontSize: 11, color: "#A8A29E", alignSelf: "center" }}>%</span></div></div>
+          <div><label style={lS}>Revalorisation/an</label><div style={{ display: "flex", gap: 4 }}><input type="number" name="tauxPlusValueAn" value={rv.tauxPlusValueAn} onChange={handleRv} step="0.5" style={fS} /><span style={{ fontSize: 19, color: "#A8A29E", alignSelf: "center" }}>%</span></div></div>
+          <div><label style={lS}>Frais d'agence vente</label><div style={{ display: "flex", gap: 4 }}><input type="number" name="fraisAgenceVente" value={rv.fraisAgenceVente} onChange={handleRv} step="0.5" style={fS} /><span style={{ fontSize: 19, color: "#A8A29E", alignSelf: "center" }}>%</span></div></div>
         </div>
       </div>
 
@@ -1990,9 +1990,9 @@ function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData })
           { label: "Gain total net", value: (gainTotal >= 0 ? "+" : "") + fmtEur(Math.round(gainTotal)), icon: "▲", color: gainTotal >= 0 ? "#16a34a" : "#dc2626" },
         ].map(function(k) {
           return (<div key={k.label} style={{ background: "#fff", borderRadius: 14, padding: "10px 12px", border: "1.5px solid #FFE8D9", textAlign: "center" }}>
-            <div style={{ fontSize: 16, marginBottom: 2 }}>{k.icon}</div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: k.color }}>{k.value}</div>
-            <div style={{ fontSize: 9, color: "#A8A29E", marginTop: 2 }}>{k.label}</div>
+            <div style={{ fontSize: 19, marginBottom: 2 }}>{k.icon}</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: k.color }}>{k.value}</div>
+            <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{k.label}</div>
           </div>);
         })}
       </div>
@@ -2020,19 +2020,19 @@ function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData })
         {/* KPIs finaux */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
           <div style={{ background: "#FFF3EC", borderRadius: 14, padding: "12px", textAlign: "center", border: "1px solid #FFF3EC" }}>
-            <div style={{ fontSize: 10, color: "#78716C" }}>ROI sur apport</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: roiSurApport >= 0 ? "#16a34a" : "#dc2626" }}>{fmt(roiSurApport, 0)} %</div>
-            <div style={{ fontSize: 10, color: "#A8A29E" }}>Gain / Apport initial</div>
+            <div style={{ fontSize: 19, color: "#78716C" }}>ROI sur apport</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: roiSurApport >= 0 ? "#16a34a" : "#dc2626" }}>{fmt(roiSurApport, 0)} %</div>
+            <div style={{ fontSize: 19, color: "#A8A29E" }}>Gain / Apport initial</div>
           </div>
           <div style={{ background: "rgba(22,163,74,0.08)", borderRadius: 14, padding: "12px", textAlign: "center", border: "1px solid rgba(22,163,74,0.15)" }}>
-            <div style={{ fontSize: 10, color: "#78716C" }}>TRI annualisé</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: triAnnualise >= 0 ? "#16a34a" : "#dc2626" }}>{fmt(triAnnualise, 1)} %</div>
-            <div style={{ fontSize: 10, color: "#A8A29E" }}>Rendement annuel réel</div>
+            <div style={{ fontSize: 19, color: "#78716C" }}>TRI annualisé</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: triAnnualise >= 0 ? "#16a34a" : "#dc2626" }}>{fmt(triAnnualise, 1)} %</div>
+            <div style={{ fontSize: 19, color: "#A8A29E" }}>Rendement annuel réel</div>
           </div>
           <div style={{ background: gainTotal >= 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)", borderRadius: 14, padding: "12px", textAlign: "center", border: "1px solid " + (gainTotal >= 0 ? "rgba(22,163,74,0.15)" : "rgba(220,38,38,0.15)") }}>
-            <div style={{ fontSize: 10, color: "#78716C" }}>Gain total net</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: gainTotal >= 0 ? "#16a34a" : "#dc2626" }}>{(gainTotal >= 0 ? "+" : "") + fmtEur(Math.round(gainTotal))}</div>
-            <div style={{ fontSize: 10, color: "#A8A29E" }}>Revente + CF − Apport</div>
+            <div style={{ fontSize: 19, color: "#78716C" }}>Gain total net</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: gainTotal >= 0 ? "#16a34a" : "#dc2626" }}>{(gainTotal >= 0 ? "+" : "") + fmtEur(Math.round(gainTotal))}</div>
+            <div style={{ fontSize: 19, color: "#A8A29E" }}>Revente + CF − Apport</div>
           </div>
         </div>
       </div>
@@ -2108,18 +2108,18 @@ function Dashboard({ projets, onOuvrir, onNav, user }) {
       <div style={{ background: "linear-gradient(135deg, #FFF3EC, rgba(56,189,248,0.08))", borderRadius: 20, padding: "20px 24px", border: "1px solid #FFE8D9" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: "#1C1917" }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#1C1917" }}>
               Bonjour{profil && profil.emprunteurs && profil.emprunteurs[0].prenom ? " " + profil.emprunteurs[0].prenom : ""} 
             </div>
-            <div style={{ fontSize: 13, color: "#78716C", marginTop: 4 }}>{nbProjetsTotal} projet{nbProjetsTotal > 1 ? "s" : ""} en cours · Radar Immo 76</div>
+            <div style={{ fontSize: 19, color: "#78716C", marginTop: 4 }}>{nbProjetsTotal} projet{nbProjetsTotal > 1 ? "s" : ""} en cours · Radar Immo 76</div>
           </div>
           {/* Météo investisseur */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 16, padding: "12px 20px", border: "1.5px solid #FFE8D9" }}>
-            <div style={{ fontSize: 36 }}>{santeEmoji}</div>
+            <div style={{ fontSize: 38 }}>{santeEmoji}</div>
             <div>
-              <div style={{ fontSize: 11, color: "#A8A29E", fontWeight: 600 }}>Santé financière</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: santeColor }}>{scoreSante}/100</div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: santeColor }}>{santeLabel}</div>
+              <div style={{ fontSize: 19, color: "#A8A29E", fontWeight: 600 }}>Santé financière</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: santeColor }}>{scoreSante}/100</div>
+              <div style={{ fontSize: 19, fontWeight: 600, color: santeColor }}>{santeLabel}</div>
             </div>
             <div style={{ width: 50, height: 50, position: "relative" }}>
               <svg viewBox="0 0 40 40" style={{ width: 50, height: 50 }}>
@@ -2142,9 +2142,9 @@ function Dashboard({ projets, onOuvrir, onNav, user }) {
           { label: "Projets en cours", value: String(nbProjetsTotal), icon: "", color: "#F97316" },
         ].map(function(k) {
           return (<div key={k.label} style={{ background: "#fff", borderRadius: 14, padding: "10px 12px", border: "1.5px solid #FFE8D9", textAlign: "center" }}>
-            <div style={{ fontSize: 16, marginBottom: 2 }}>{k.icon}</div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: k.color }}>{k.value}</div>
-            <div style={{ fontSize: 9, color: "#A8A29E", marginTop: 2 }}>{k.label}</div>
+            <div style={{ fontSize: 19, marginBottom: 2 }}>{k.icon}</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: k.color }}>{k.value}</div>
+            <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{k.label}</div>
           </div>);
         })}
       </div>
@@ -2158,8 +2158,8 @@ function Dashboard({ projets, onOuvrir, onNav, user }) {
           {derniersProjets.length === 0 ? (
             <div style={{ textAlign: "center", padding: "24px 10px", color: "#A8A29E" }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>Stats</div>
-              <div style={{ fontSize: 13, fontWeight: 500 }}>Aucun projet pour l'instant</div>
-              <button onClick={function() { onNav("simulation"); }} style={{ marginTop: 10, background: "#F97316", border: "none", borderRadius: 10, padding: "8px 18px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Créer ma première simulation</button>
+              <div style={{ fontSize: 19, fontWeight: 500 }}>Aucun projet pour l'instant</div>
+              <button onClick={function() { onNav("simulation"); }} style={{ marginTop: 10, background: "#F97316", border: "none", borderRadius: 10, padding: "8px 18px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 700 }}>Créer ma première simulation</button>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -2169,19 +2169,19 @@ function Dashboard({ projets, onOuvrir, onNav, user }) {
                 return (<div key={p.id} onClick={function() { onOuvrir(p); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 12, background: "#FFF8F3", border: "1.5px solid #FFE8D9", cursor: "pointer", transition: "transform 0.1s" }}
                   onMouseEnter={function(e) { e.currentTarget.style.transform = "translateX(4px)"; }}
                   onMouseLeave={function(e) { e.currentTarget.style.transform = ""; }}>
-                  {p.coverPhoto ? <img src={p.coverPhoto} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} /> : <div style={{ width: 40, height: 40, borderRadius: 8, background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}><Icon name="ti-home" size={20} color="#F97316" /></div>}
+                  {p.coverPhoto ? <img src={p.coverPhoto} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} /> : <div style={{ width: 40, height: 40, borderRadius: 8, background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19 }}><Icon name="ti-home" size={20} color="#F97316" /></div>}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: "#1C1917", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nom}</div>
-                    <div style={{ fontSize: 11, color: "#A8A29E" }}>{p.savedAt} · {p.regimeActif}</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: "#1C1917", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nom}</div>
+                    <div style={{ fontSize: 19, color: "#A8A29E" }}>{p.savedAt} · {p.regimeActif}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: cashflow >= 0 ? "#16a34a" : "#dc2626" }}>{(cashflow >= 0 ? "+" : "") + fmt(Math.round(cashflow), 0)} €/m</div>
-                    {p.inputs && p.inputs.prixVente && <div style={{ fontSize: 10, color: "#78716C" }}>{fmtEur(pf(p.inputs.prixVente))}</div>}
+                    <div style={{ fontSize: 19, fontWeight: 700, color: cashflow >= 0 ? "#16a34a" : "#dc2626" }}>{(cashflow >= 0 ? "+" : "") + fmt(Math.round(cashflow), 0)} €/m</div>
+                    {p.inputs && p.inputs.prixVente && <div style={{ fontSize: 19, color: "#78716C" }}>{fmtEur(pf(p.inputs.prixVente))}</div>}
                   </div>
                 </div>);
               })}
               {(projets || []).length > 4 && (
-                <button onClick={function() { onNav("favoris"); }} style={{ background: "none", border: "1px dashed #FFE8D9", borderRadius: 10, padding: "8px", color: "#F97316", cursor: "pointer", fontSize: 12, fontWeight: 500, textAlign: "center" }}>Voir tous les projets ({(projets || []).length})</button>
+                <button onClick={function() { onNav("favoris"); }} style={{ background: "none", border: "1px dashed #FFE8D9", borderRadius: 10, padding: "8px", color: "#F97316", cursor: "pointer", fontSize: 19, fontWeight: 500, textAlign: "center" }}>Voir tous les projets ({(projets || []).length})</button>
               )}
             </div>
           )}
@@ -2197,8 +2197,8 @@ function Dashboard({ projets, onOuvrir, onNav, user }) {
                 onMouseLeave={function(e) { e.currentTarget.style.background = "rgba(248,250,252,0.8)"; e.currentTarget.style.borderColor = "rgba(148,163,184,0.12)"; }}>
                 <span style={{ fontSize: 24 }}>{o.icon}</span>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1C1917" }}>{o.label}</div>
-                  <div style={{ fontSize: 10, color: "#A8A29E" }}>{o.desc}</div>
+                  <div style={{ fontSize: 19, fontWeight: 700, color: "#1C1917" }}>{o.label}</div>
+                  <div style={{ fontSize: 19, color: "#A8A29E" }}>{o.desc}</div>
                 </div>
               </div>);
             })}
@@ -2232,8 +2232,8 @@ function Dashboard({ projets, onOuvrir, onNav, user }) {
               ];
             })().map(function(k) {
               return (<div key={k.label} style={{ background: "#fff", borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                <div style={{ fontSize: 10, color: "#A8A29E" }}>{k.label}</div>
-                <div style={{ fontSize: 17, fontWeight: 800, color: k.color, marginTop: 2 }}>{k.value}</div>
+                <div style={{ fontSize: 19, color: "#A8A29E" }}>{k.label}</div>
+                <div style={{ fontSize: 19, fontWeight: 800, color: k.color, marginTop: 2 }}>{k.value}</div>
               </div>);
             })}
           </div>
@@ -2244,9 +2244,9 @@ function Dashboard({ projets, onOuvrir, onNav, user }) {
       {(!profil || !profil.emprunteurs || !profil.emprunteurs[0].nom) && (
         <div style={{ background: "linear-gradient(135deg, #FFF8F3, rgba(56,189,248,0.06))", borderRadius: 16, padding: "20px", border: "1px dashed #FFE8D9", textAlign: "center" }}>
           <div style={{ fontSize: 28, marginBottom: 8 }}></div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: "#1C1917", marginBottom: 4 }}>Complète ta fiche patrimoine</div>
-          <div style={{ fontSize: 12, color: "#78716C", marginBottom: 12 }}>Renseigne tes revenus, crédits et patrimoine pour voir ta capacité d'investissement et générer un dossier bancaire complet.</div>
-          <button onClick={function() { onNav("profil"); }} style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "10px 24px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>Remplir ma fiche</button>
+          <div style={{ fontSize: 19, fontWeight: 700, color: "#1C1917", marginBottom: 4 }}>Complète ta fiche patrimoine</div>
+          <div style={{ fontSize: 19, color: "#78716C", marginBottom: 12 }}>Renseigne tes revenus, crédits et patrimoine pour voir ta capacité d'investissement et générer un dossier bancaire complet.</div>
+          <button onClick={function() { onNav("profil"); }} style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "10px 24px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 700 }}>Remplir ma fiche</button>
         </div>
       )}
     </div>
@@ -2297,21 +2297,21 @@ function AnalyseCommunes() {
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div style={{ maxWidth: 820, flex: 1, display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", borderRadius: 999, background: "#fff", boxShadow: "0 4px 20px #FFF3EC", backdropFilter: "blur(18px)", border: "1.5px solid #FFE8D9" }}>
-          <span style={{ fontSize: 16 }}></span>
-          <input value={search} onChange={function(e) { setSearch(e.target.value); }} placeholder="Rechercher une commune… (TOP 10 affiché)" style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 14, color: "#1C1917" }} />
-          <select value={sortKey} onChange={function(e) { setSortKey(e.target.value); }} style={{ background: "rgba(241,245,249,0.9)", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "5px 10px", fontSize: 12, color: "#44403C", outline: "none" }}>
+          <span style={{ fontSize: 19 }}></span>
+          <input value={search} onChange={function(e) { setSearch(e.target.value); }} placeholder="Rechercher une commune… (TOP 10 affiché)" style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 19, color: "#1C1917" }} />
+          <select value={sortKey} onChange={function(e) { setSortKey(e.target.value); }} style={{ background: "rgba(241,245,249,0.9)", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "5px 10px", fontSize: 19, color: "#44403C", outline: "none" }}>
             {[{ key: "global", label: "Score global" }, { key: "rendement", label: "Rendement" }, { key: "demographie", label: "Démographie" }, { key: "socio_eco", label: "Socio-éco" }].map(function(k) { return <option key={k.key} value={k.key}>{k.label}</option>; })}
           </select>
-          <select value={filterMin} onChange={function(e) { setFilterMin(Number(e.target.value)); }} style={{ background: "rgba(241,245,249,0.9)", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "5px 10px", fontSize: 12, color: "#44403C", outline: "none" }}>
+          <select value={filterMin} onChange={function(e) { setFilterMin(Number(e.target.value)); }} style={{ background: "rgba(241,245,249,0.9)", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "5px 10px", fontSize: 19, color: "#44403C", outline: "none" }}>
             <option value={0}>Tous</option><option value={5}>≥ 5</option><option value={6}>≥ 6</option><option value={7}>≥ 7</option>
           </select>
         </div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ fontSize: 11, color: "#A8A29E" }}>{filtered.length} communes · top 10 · clic = détail · clic droit = comparer</span>
+        <span style={{ fontSize: 19, color: "#A8A29E" }}>{filtered.length} communes · top 10 · clic = détail · clic droit = comparer</span>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={function() { loadCommunes(true); }} style={{ background: "linear-gradient(135deg,#38bdf8,#F97316)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>↻ Actualiser</button>
-          {compareList.length > 0 && <button onClick={function() { setShowCompare(true); }} style={{ background: "linear-gradient(135deg,#a855f7,#ec4899)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>Comparer ({compareList.length})</button>}
+          <button onClick={function() { loadCommunes(true); }} style={{ background: "linear-gradient(135deg,#38bdf8,#F97316)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 500 }}>↻ Actualiser</button>
+          {compareList.length > 0 && <button onClick={function() { setShowCompare(true); }} style={{ background: "linear-gradient(135deg,#a855f7,#ec4899)", border: "none", borderRadius: 10, padding: "7px 14px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 500 }}>Comparer ({compareList.length})</button>}
         </div>
       </div>
 
@@ -2329,19 +2329,19 @@ function AnalyseCommunes() {
                   <div key={c.nom} onClick={function() { setSelected(isSelected ? null : c); }} onContextMenu={function(e) { e.preventDefault(); toggleCompare(c); }}
                     style={{ background: "#fff", borderRadius: 16, padding: "12px 14px", boxShadow: isSelected ? "0 6px 24px #FFF3EC" : "0 2px 10px #FFF8F3", border: isSelected ? "1.5px solid #F97316" : isCompared ? "1.5px solid #a855f7" : "1px solid rgba(148,163,184,0.2)", cursor: "pointer", backdropFilter: "blur(12px)", transition: "box-shadow 0.2s" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                      <div style={{ fontWeight: 700, fontSize: 13, color: "#1C1917" }}>{c.nom}</div>
+                      <div style={{ fontWeight: 700, fontSize: 19, color: "#1C1917" }}>{c.nom}</div>
                       <div style={{ fontSize: 20, fontWeight: 800, color: nc(g) }}>{g != null ? g.toFixed(1) : "—"}</div>
                     </div>
-                    {c.population && <div style={{ fontSize: 11, color: "#A8A29E", marginBottom: 6 }}>{c.population.toLocaleString("fr-FR")} hab.</div>}
+                    {c.population && <div style={{ fontSize: 19, color: "#A8A29E", marginBottom: 6 }}>{c.population.toLocaleString("fr-FR")} hab.</div>}
                     {/* Indicateurs rapides : prix m² + tension locative */}
                     <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 8 }}>
                       {c.prix && c.prix.appartement_m2 && (
-                        <span style={{ fontSize: 10, fontWeight: 600, background: "#FFF3EC", color: "#F97316", borderRadius: 6, padding: "2px 7px" }}>
+                        <span style={{ fontSize: 19, fontWeight: 600, background: "#FFF3EC", color: "#F97316", borderRadius: 6, padding: "2px 7px" }}>
                           {Number(c.prix.appartement_m2).toLocaleString("fr-FR")} €/m²
                         </span>
                       )}
                       {c.demographie && c.demographie.tension_locative_pct != null && (
-                        <span style={{ fontSize: 10, fontWeight: 600,
+                        <span style={{ fontSize: 19, fontWeight: 600,
                           background: c.demographie.tension_locative_pct > 15 ? "rgba(220,38,38,0.1)" : c.demographie.tension_locative_pct > 8 ? "rgba(217,119,6,0.1)" : "rgba(22,163,74,0.1)",
                           color: c.demographie.tension_locative_pct > 15 ? "#dc2626" : c.demographie.tension_locative_pct > 8 ? "#d97706" : "#16a34a",
                           borderRadius: 6, padding: "2px 7px" }}>
@@ -2349,7 +2349,7 @@ function AnalyseCommunes() {
                         </span>
                       )}
                       {c.loyer && c.loyer.appartement_m2 != null && (
-                        <span style={{ fontSize: 10, fontWeight: 600, background: "rgba(14,165,233,0.08)", color: "#0369a1", borderRadius: 6, padding: "2px 7px" }}>
+                        <span style={{ fontSize: 19, fontWeight: 600, background: "rgba(14,165,233,0.08)", color: "#0369a1", borderRadius: 6, padding: "2px 7px" }}>
                           {Number(c.loyer.appartement_m2).toFixed(1)} €/m²/mois
                         </span>
                       )}
@@ -2358,9 +2358,9 @@ function AnalyseCommunes() {
                       {["rendement", "demographie", "socio_eco"].map(function(k) {
                         const v = sn(c.scores && c.scores[k]);
                         return (<div key={k} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <div style={{ fontSize: 10, color: "#A8A29E", width: 76 }}>{k === "rendement" ? "Rendement" : k === "demographie" ? "Démographie" : "Socio-éco"}</div>
+                          <div style={{ fontSize: 19, color: "#A8A29E", width: 76 }}>{k === "rendement" ? "Rendement" : k === "demographie" ? "Démographie" : "Socio-éco"}</div>
                           <ProgressBar value={v} />
-                          <div style={{ fontSize: 11, color: nc(v), minWidth: 26, textAlign: "right", fontWeight: 600 }}>{v != null ? v.toFixed(1) : "—"}</div>
+                          <div style={{ fontSize: 19, color: nc(v), minWidth: 26, textAlign: "right", fontWeight: 600 }}>{v != null ? v.toFixed(1) : "—"}</div>
                         </div>);
                       })}
                     </div>
@@ -2379,22 +2379,22 @@ function AnalyseCommunes() {
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14, alignItems: "flex-start" }}>
                   <div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#1C1917" }}>{detail.commune}</div>
-                    <div style={{ fontSize: 11, color: "#A8A29E", marginTop: 2 }}>{detail.code_insee} · Zone {detail.zonage_abc}</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: "#1C1917" }}>{detail.commune}</div>
+                    <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{detail.code_insee} · Zone {detail.zonage_abc}</div>
                   </div>
-                  <button onClick={function() { setSelected(null); setDetail(null); setOpenScore(null); }} style={{ background: "transparent", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 18 }}>×</button>
+                  <button onClick={function() { setSelected(null); setDetail(null); setOpenScore(null); }} style={{ background: "transparent", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 19 }}>×</button>
                 </div>
                 <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, color: "#A8A29E", fontWeight: 600, marginBottom: 6, textTransform: "uppercase" }}>Scores · clic = détail</div>
+                  <div style={{ fontSize: 19, color: "#A8A29E", fontWeight: 600, marginBottom: 6, textTransform: "uppercase" }}>Scores · clic = détail</div>
                   {[{ key: "global", label: "Global", v: sn(detail.scores && detail.scores.global) }, { key: "rendement", label: "Rendement", v: sn(detail.scores && detail.scores.rendement) }, { key: "demographie", label: "Démographie", v: sn(detail.scores && detail.scores.demographie) }, { key: "socio_eco", label: "Socio-éco", v: sn(detail.scores && detail.scores.socio_eco) }].map(function(item) {
                     const clickable = item.key !== "global"; const isOpen = openScore === item.key;
                     return (<div key={item.key} style={{ marginBottom: 5 }}>
                       <div onClick={function() { if (clickable) setOpenScore(isOpen ? null : item.key); }} style={{ display: "flex", alignItems: "center", gap: 7, cursor: clickable ? "pointer" : "default", padding: "2px 0" }}>
-                        <div style={{ fontSize: 12, width: 76, color: "#57534E" }}>{item.label}</div>
+                        <div style={{ fontSize: 19, width: 76, color: "#57534E" }}>{item.label}</div>
                         <ProgressBar value={item.v} clickable={clickable} />
-                        <div style={{ fontSize: 13, fontWeight: 700, color: nc(item.v), minWidth: 30, textAlign: "right" }}>{item.v != null ? item.v.toFixed(1) : "—"}</div>
-                        <div style={{ fontSize: 10, color: nc(item.v), minWidth: 38 }}>{nLabel(item.v)}</div>
-                        {clickable && <div style={{ fontSize: 10, color: "#A8A29E" }}>{isOpen ? "▲" : "▼"}</div>}
+                        <div style={{ fontSize: 19, fontWeight: 700, color: nc(item.v), minWidth: 30, textAlign: "right" }}>{item.v != null ? item.v.toFixed(1) : "—"}</div>
+                        <div style={{ fontSize: 19, color: nc(item.v), minWidth: 38 }}>{nLabel(item.v)}</div>
+                        {clickable && <div style={{ fontSize: 19, color: "#A8A29E" }}>{isOpen ? "▲" : "▼"}</div>}
                       </div>
                       {isOpen && clickable && <ScoreDetail scoreKey={item.key} detail={detail} onClose={function() { setOpenScore(null); }} />}
                     </div>);
@@ -2402,13 +2402,13 @@ function AnalyseCommunes() {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
                   {[{ label: "Appartement", value: detail.prix && detail.prix.appartement_m2 ? detail.prix.appartement_m2.toLocaleString("fr-FR") + " €/m²" : "—", sub: detail.prix && detail.prix.nb_ventes_apt ? detail.prix.nb_ventes_apt + " ventes" : "" }, { label: "Maison", value: detail.prix && detail.prix.maison_m2 ? detail.prix.maison_m2.toLocaleString("fr-FR") + " €/m²" : "—", sub: detail.prix && detail.prix.nb_ventes_mai ? detail.prix.nb_ventes_mai + " ventes" : "" }].map(function(x) {
-                    return (<div key={x.label} style={{ background: "rgba(241,245,249,0.8)", borderRadius: 10, padding: "8px 10px" }}><div style={{ fontSize: 10, color: "#A8A29E" }}>{x.label}</div><div style={{ fontSize: 14, fontWeight: 700, color: "#1C1917" }}>{x.value}</div>{x.sub && <div style={{ fontSize: 10, color: "#A8A29E" }}>{x.sub}</div>}</div>);
+                    return (<div key={x.label} style={{ background: "rgba(241,245,249,0.8)", borderRadius: 10, padding: "8px 10px" }}><div style={{ fontSize: 19, color: "#A8A29E" }}>{x.label}</div><div style={{ fontSize: 19, fontWeight: 700, color: "#1C1917" }}>{x.value}</div>{x.sub && <div style={{ fontSize: 19, color: "#A8A29E" }}>{x.sub}</div>}</div>);
                   })}
                 </div>
                 {detail.loyer && detail.loyer.appartement_m2 != null && (
                   <div style={{ marginBottom: 10, background: "rgba(224,242,254,0.8)", borderRadius: 10, padding: "8px 10px", border: "1px solid rgba(56,189,248,0.3)" }}>
-                    <div style={{ fontSize: 10, color: "#0369a1" }}>Loyer médian</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#1C1917" }}>{Number(detail.loyer.appartement_m2).toFixed(1)} €/m²/mois</div>
+                    <div style={{ fontSize: 19, color: "#0369a1" }}>Loyer médian</div>
+                    <div style={{ fontSize: 19, fontWeight: 700, color: "#1C1917" }}>{Number(detail.loyer.appartement_m2).toFixed(1)} €/m²/mois</div>
                   </div>
                 )}
                 {detail.demographie && detail.demographie.tension_locative_pct != null && (function() {
@@ -2421,33 +2421,33 @@ function AnalyseCommunes() {
                     <div style={{ marginBottom: 10, background: bg, borderRadius: 10, padding: "10px 12px", border: "1px solid " + border }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <div>
-                          <div style={{ fontSize: 10, color: color, fontWeight: 600, textTransform: "uppercase" }}>Tension locative</div>
-                          <div style={{ fontSize: 22, fontWeight: 800, color: color, lineHeight: 1.1 }}>{t} %</div>
-                          <div style={{ fontSize: 11, color: color, marginTop: 2 }}>{label}</div>
+                          <div style={{ fontSize: 19, color: color, fontWeight: 600, textTransform: "uppercase" }}>Tension locative</div>
+                          <div style={{ fontSize: 24, fontWeight: 800, color: color, lineHeight: 1.1 }}>{t} %</div>
+                          <div style={{ fontSize: 19, color: color, marginTop: 2 }}>{label}</div>
                         </div>
                         <div style={{ fontSize: 32 }}>{t > 15 ? "▲" : t > 8 ? "" : "●"}</div>
                       </div>
                       <div style={{ marginTop: 8, background: "#fff", borderRadius: 6, height: 6, overflow: "hidden" }}>
                         <div style={{ width: Math.min(100, t * 4) + "%", height: "100%", background: color, borderRadius: 6, transition: "width 0.4s" }} />
                       </div>
-                      <div style={{ fontSize: 9, color: color, marginTop: 3, opacity: 0.7 }}>Ratio demandes / offres locatives disponibles</div>
+                      <div style={{ fontSize: 19, color: color, marginTop: 3, opacity: 0.7 }}>Ratio demandes / offres locatives disponibles</div>
                     </div>
                   );
                 })()}
                 {detail.rentabilite_brute_pct && (
                   <div style={{ marginBottom: 10, background: "rgba(220,252,231,0.8)", borderRadius: 10, padding: "8px 10px", border: "1px solid rgba(34,197,94,0.3)" }}>
-                    <div style={{ fontSize: 10, color: "#15803d" }}>Rentabilité brute estimée</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#15803d" }}>{detail.rentabilite_brute_pct} %</div>
+                    <div style={{ fontSize: 19, color: "#15803d" }}>Rentabilité brute estimée</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: "#15803d" }}>{detail.rentabilite_brute_pct} %</div>
                   </div>
                 )}
                 {[{ title: "Socio-éco", rows: [{ label: "Revenu médian", v: detail.socio_eco && detail.socio_eco.revenu_median ? detail.socio_eco.revenu_median.toLocaleString("fr-FR") + " €" : "—" }, { label: "Chômage", v: detail.socio_eco && detail.socio_eco.chomage_pct != null ? detail.socio_eco.chomage_pct + " %" : "—" }, { label: "Taux pauvreté", v: detail.socio_eco && detail.socio_eco.taux_pauvrete_pct != null ? detail.socio_eco.taux_pauvrete_pct + " %" : "—" }] }, { title: "Démographie", rows: [{ label: "Population", v: detail.population ? detail.population.toLocaleString("fr-FR") + " hab." : "—" }, { label: "Évolution/an", v: detail.demographie && detail.demographie.evolution_pop_pct_an != null ? detail.demographie.evolution_pop_pct_an + " %" : "—" }, { label: "Vacance", v: detail.demographie && detail.demographie.vacance_pct != null ? detail.demographie.vacance_pct + " %" : "—" }, { label: "Tension locative", v: detail.demographie && detail.demographie.tension_locative_pct != null ? detail.demographie.tension_locative_pct + " %" : "—", highlight: true }] }].map(function(block) {
                   return (<div key={block.title} style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: "#A8A29E", textTransform: "uppercase", marginBottom: 4 }}>{block.title}</div>
-                    {block.rows.map(function(row) { return (<div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px solid #FFE8D9", fontSize: 12 }}><span style={{ color: "#78716C" }}>{row.label}</span><span style={{ fontWeight: 500, color: "#1C1917" }}>{row.v}</span></div>); })}
+                    <div style={{ fontSize: 19, fontWeight: 600, color: "#A8A29E", textTransform: "uppercase", marginBottom: 4 }}>{block.title}</div>
+                    {block.rows.map(function(row) { return (<div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px solid #FFE8D9", fontSize: 19 }}><span style={{ color: "#78716C" }}>{row.label}</span><span style={{ fontWeight: 500, color: "#1C1917" }}>{row.v}</span></div>); })}
                   </div>);
                 })}
-                {detail.prix && detail.prix.avertissement_apt && <div style={{ background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "6px 10px", fontSize: 11, color: "#92400e", marginBottom: 8 }}>⚠ {detail.prix.avertissement_apt}</div>}
-                <div style={{ fontSize: 10, color: "#A8A29E" }}>Sources : {detail.prix && detail.prix.source} · {detail.loyer && detail.loyer.source}</div>
+                {detail.prix && detail.prix.avertissement_apt && <div style={{ background: "rgba(254,243,199,0.9)", borderRadius: 8, padding: "6px 10px", fontSize: 19, color: "#92400e", marginBottom: 8 }}>⚠ {detail.prix.avertissement_apt}</div>}
+                <div style={{ fontSize: 19, color: "#A8A29E" }}>Sources : {detail.prix && detail.prix.source} · {detail.loyer && detail.loyer.source}</div>
               </div>
             )}
           </div>
@@ -2458,10 +2458,10 @@ function AnalyseCommunes() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.45)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={function() { setShowCompare(false); }}>
           <div style={{ background: "#fff", borderRadius: 20, padding: 20, minWidth: 500, maxWidth: 820, maxHeight: "80vh", overflowY: "auto", boxShadow: "0 20px 50px rgba(15,23,42,0.2)" }} onClick={function(e) { e.stopPropagation(); }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14, alignItems: "center" }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "#1C1917" }}>Comparaison de communes</div>
-              <button onClick={function() { setShowCompare(false); }} style={{ background: "transparent", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 18 }}>×</button>
+              <div style={{ fontSize: 19, fontWeight: 700, color: "#1C1917" }}>Comparaison de communes</div>
+              <button onClick={function() { setShowCompare(false); }} style={{ background: "transparent", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 19 }}>×</button>
             </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 19 }}>
               <thead><tr style={{ color: "#A8A29E" }}><th style={{ textAlign: "left", padding: "6px 8px" }}>Critère</th>{compareList.map(function(c) { return <th key={c.nom} style={{ textAlign: "right", padding: "6px 8px", color: "#1C1917", fontWeight: 600 }}>{c.nom}</th>; })}</tr></thead>
               <tbody>
                 {[{ label: "Score global", fn: function(c) { const v = sn(c.scores && c.scores.global); return v != null ? v.toFixed(1) : "—"; } }, { label: "Rendement", fn: function(c) { const v = sn(c.scores && c.scores.rendement); return v != null ? v.toFixed(1) : "—"; } }, { label: "Démographie", fn: function(c) { const v = sn(c.scores && c.scores.demographie); return v != null ? v.toFixed(1) : "—"; } }, { label: "Socio-éco", fn: function(c) { const v = sn(c.scores && c.scores.socio_eco); return v != null ? v.toFixed(1) : "—"; } }, { label: "Population", fn: function(c) { return c.population ? c.population.toLocaleString("fr-FR") : "—"; } }].map(function(row) {
@@ -2469,7 +2469,7 @@ function AnalyseCommunes() {
                 })}
               </tbody>
             </table>
-            <div style={{ marginTop: 8, fontSize: 11, color: "#A8A29E" }}>Clic droit sur une commune pour ajouter/retirer.</div>
+            <div style={{ marginTop: 8, fontSize: 19, color: "#A8A29E" }}>Clic droit sur une commune pour ajouter/retirer.</div>
           </div>
         </div>
       )}
@@ -2533,8 +2533,8 @@ function SimulateurCredit() {
 
   const M = pf(montant);
   const tresoPMois = calc.mensualiteTotale;
-  const inputStyle = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "8px 12px", color: "#1C1917", fontSize: 14, outline: "none" };
-  const labelStyle = { display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 };
+  const inputStyle = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "8px 12px", color: "#1C1917", fontSize: 19, outline: "none" };
+  const labelStyle = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -2550,35 +2550,35 @@ function SimulateurCredit() {
               <label style={labelStyle}>Montant emprunté</label>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input type="number" value={montant} step="5000" min="0" onChange={function(e) { setMontant(e.target.value); }} style={inputStyle} />
-                <span style={{ color: "#A8A29E", fontSize: 13, minWidth: 16 }}>€</span>
+                <span style={{ color: "#A8A29E", fontSize: 19, minWidth: 16 }}>€</span>
               </div>
             </div>
             <div>
               <label style={labelStyle}>Durée du prêt</label>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input type="number" value={duree} step="1" min="1" max="30" onChange={function(e) { setDuree(e.target.value); }} style={inputStyle} />
-                <span style={{ color: "#A8A29E", fontSize: 13, minWidth: 28 }}>ans</span>
+                <span style={{ color: "#A8A29E", fontSize: 19, minWidth: 28 }}>ans</span>
               </div>
             </div>
             <div>
               <label style={labelStyle}>Taux hors assurance</label>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input type="number" value={tauxHorsAssurance} step="0.05" min="0" onChange={function(e) { setTauxHorsAssurance(e.target.value); }} style={inputStyle} />
-                <span style={{ color: "#A8A29E", fontSize: 13, minWidth: 16 }}>%</span>
+                <span style={{ color: "#A8A29E", fontSize: 19, minWidth: 16 }}>%</span>
               </div>
             </div>
             <div>
               <label style={labelStyle}>Taux assurance (sur capital initial)</label>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input type="number" value={tauxAssurance} step="0.01" min="0" onChange={function(e) { setTauxAssurance(e.target.value); }} style={inputStyle} />
-                <span style={{ color: "#A8A29E", fontSize: 13, minWidth: 16 }}>%</span>
+                <span style={{ color: "#A8A29E", fontSize: 19, minWidth: 16 }}>%</span>
               </div>
             </div>
           </div>
 
           {/* Barre durée visuelle */}
           <div style={{ marginTop: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#A8A29E", marginBottom: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 19, color: "#A8A29E", marginBottom: 4 }}>
               <span>1 an</span><span>{duree} ans</span><span>30 ans</span>
             </div>
             <input type="range" min="1" max="30" value={duree} onChange={function(e) { setDuree(e.target.value); }}
@@ -2591,18 +2591,18 @@ function SimulateurCredit() {
 
           {/* Mensualité hero */}
           <div style={Object.assign({}, SECTION, { textAlign: "center", padding: "24px 20px" })}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#78716C", marginBottom: 8 }}>Votre mensualité sera de</div>
+            <div style={{ fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 8 }}>Votre mensualité sera de</div>
             <div style={{ fontSize: 48, fontWeight: 800, color: "#F97316", lineHeight: 1 }}>
               {fmt(calc.mensualiteTotale, 0)} <span style={{ fontSize: 32 }}>€</span>
             </div>
-            <div style={{ fontSize: 12, color: "#A8A29E", marginTop: 6 }}>
+            <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 6 }}>
               dont {fmt(calc.mensualiteAssur, 0)} € d'assurance / mois
             </div>
             <div style={{ marginTop: 14, height: 8, borderRadius: 999, background: "rgba(148,163,184,0.2)", overflow: "hidden", display: "flex" }}>
               <div style={{ flex: calc.mensualiteHorsAssur, background: "linear-gradient(90deg,#F97316,#38bdf8)", borderRadius: "999px 0 0 999px" }} />
               <div style={{ flex: calc.mensualiteAssur, background: "#f97316", borderRadius: "0 999px 999px 0" }} />
             </div>
-            <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 6, fontSize: 11, color: "#A8A29E" }}>
+            <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 6, fontSize: 19, color: "#A8A29E" }}>
               <span>● Crédit : {fmt(calc.mensualiteHorsAssur, 0)} €</span>
               <span>● Assurance : {fmt(calc.mensualiteAssur, 0)} €</span>
             </div>
@@ -2620,8 +2620,8 @@ function SimulateurCredit() {
             <StatRow label="Coût total assurance" value={fmtEur(calc.coutTotalAssur)} color="#f97316" />
             <StatRow label="Coût total (intérêts + assurance)" value={fmtEur(calc.coutTotal)} bold color="#dc2626" border={false} />
             <div style={{ marginTop: 10, background: "rgba(254,226,226,0.5)", borderRadius: 10, padding: "8px 12px", border: "1px solid rgba(220,38,38,0.15)" }}>
-              <div style={{ fontSize: 11, color: "#A8A29E" }}>Coût total remboursé (capital + intérêts + assurance)</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#dc2626" }}>{fmtEur(M + calc.coutTotal)}</div>
+              <div style={{ fontSize: 19, color: "#A8A29E" }}>Coût total remboursé (capital + intérêts + assurance)</div>
+              <div style={{ fontSize: 19, fontWeight: 800, color: "#dc2626" }}>{fmtEur(M + calc.coutTotal)}</div>
             </div>
           </div>
         </div>
@@ -2639,15 +2639,15 @@ function SimulateurCredit() {
             <label style={labelStyle}>Montant remboursé</label>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input type="number" value={rembAnticipeMontant} step="5000" min="0" placeholder="Ex: 50000" onChange={function(e) { setRembAnticipeMontant(e.target.value); }} style={inputStyle} />
-              <span style={{ color: "#A8A29E", fontSize: 13, minWidth: 16 }}>€</span>
+              <span style={{ color: "#A8A29E", fontSize: 19, minWidth: 16 }}>€</span>
             </div>
           </div>
           <div>
             {pf(rembAnticipeAnnee) > 0 && pf(rembAnticipeMontant) > 0 && (
               <div style={{ background: "rgba(22,163,74,0.08)", borderRadius: 10, padding: "8px 12px", border: "1px solid rgba(22,163,74,0.2)" }}>
-                <div style={{ fontSize: 10, color: "#16a34a", fontWeight: 600 }}>Économie d'intérêts</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#16a34a" }}>{fmtEur(Math.round(calc.economieInterets))}</div>
-                {calc.anneesEffectives < pf(duree) && <div style={{ fontSize: 10, color: "#78716C" }}>Prêt soldé en {calc.anneesEffectives} ans au lieu de {duree}</div>}
+                <div style={{ fontSize: 19, color: "#16a34a", fontWeight: 600 }}>Économie d'intérêts</div>
+                <div style={{ fontSize: 19, fontWeight: 800, color: "#16a34a" }}>{fmtEur(Math.round(calc.economieInterets))}</div>
+                {calc.anneesEffectives < pf(duree) && <div style={{ fontSize: 19, color: "#78716C" }}>Prêt soldé en {calc.anneesEffectives} ans au lieu de {duree}</div>}
               </div>
             )}
           </div>
@@ -2658,11 +2658,11 @@ function SimulateurCredit() {
       <div style={SECTION}>
         <SectionHeader icon="ti-calendar" title="Tableau d'amortissement" badge={calc.anneesEffectives + " ans"} />
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 19 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
                 {["Année", "Capital remboursé", "Intérêts", "Assurance", "Remb. anticipé", "Mensualité totale", "Capital restant dû"].map(function(h) {
-                  return <th key={h} style={{ padding: "8px 10px", textAlign: h === "Année" ? "left" : "right", fontSize: 10, fontWeight: 600, color: "#78716C", textTransform: "uppercase" }}>{h}</th>;
+                  return <th key={h} style={{ padding: "8px 10px", textAlign: h === "Année" ? "left" : "right", fontSize: 19, fontWeight: 600, color: "#78716C", textTransform: "uppercase" }}>{h}</th>;
                 })}
               </tr>
             </thead>
@@ -2730,7 +2730,7 @@ const TRAVAUX_DATA = {
 
 function Toggle({ value, onChange }) {
   return (
-    <button onClick={function() { onChange(!value); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.15s", background: value ? "#FFF3EC" : "rgba(220,38,38,0.12)", color: value ? "#fff" : "#dc2626", boxShadow: value ? "0 2px 8px #FFE8D9" : "inset 0 0 0 1.5px rgba(220,38,38,0.4)" }}>
+    <button onClick={function() { onChange(!value); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 700, transition: "all 0.15s", background: value ? "#FFF3EC" : "rgba(220,38,38,0.12)", color: value ? "#fff" : "#dc2626", boxShadow: value ? "0 2px 8px #FFE8D9" : "inset 0 0 0 1.5px rgba(220,38,38,0.4)" }}>
       {value ? "✓ Oui" : "✗ Non"}
     </button>
   );
@@ -2845,8 +2845,8 @@ function SimulateurTravaux() {
         <tr key={item.id} style={{ borderBottom: "1px solid #FFE8D9", background: isActif ? "#FFF3EC" : "transparent", opacity: isActif ? 1 : 0.55, transition: "all 0.15s" }}>
           <td style={{ padding: "10px 12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>{item.icon}</span>
-              <span style={{ fontSize: 13, fontWeight: 500, color: "#1C1917" }}>{item.label}</span>
+              <span style={{ fontSize: 19 }}>{item.icon}</span>
+              <span style={{ fontSize: 19, fontWeight: 500, color: "#1C1917" }}>{item.label}</span>
               {item.moi === null && isActif && s.delegue === false && <Tag color="orange">Délégatoire uniquement</Tag>}
             </div>
           </td>
@@ -2856,23 +2856,23 @@ function SimulateurTravaux() {
           <td style={{ padding: "10px 12px", textAlign: "center" }}>
             {isActif ? (
               <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
-                <button onClick={function() { updateState(setter, item.id, "delegue", true); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: s.delegue ? "#FFF3EC" : "rgba(148,163,184,0.2)", color: s.delegue ? "#fff" : "#78716C" }}>Entreprise</button>
-                <button onClick={function() { if (item.moi !== null && item.moi_inf !== undefined || item.moi !== null) updateState(setter, item.id, "delegue", false); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: item.moi !== null ? "pointer" : "not-allowed", fontSize: 11, fontWeight: 600, background: !s.delegue ? "rgba(22,163,74,0.85)" : "rgba(148,163,184,0.2)", color: !s.delegue ? "#fff" : "#78716C", opacity: item.moi === null && item.moi_inf === undefined ? 0.4 : 1 }}>Moi-même</button>
+                <button onClick={function() { updateState(setter, item.id, "delegue", true); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: s.delegue ? "#FFF3EC" : "rgba(148,163,184,0.2)", color: s.delegue ? "#fff" : "#78716C" }}>Entreprise</button>
+                <button onClick={function() { if (item.moi !== null && item.moi_inf !== undefined || item.moi !== null) updateState(setter, item.id, "delegue", false); }} style={{ padding: "3px 10px", borderRadius: 8, border: "none", cursor: item.moi !== null ? "pointer" : "not-allowed", fontSize: 19, fontWeight: 600, background: !s.delegue ? "rgba(22,163,74,0.85)" : "rgba(148,163,184,0.2)", color: !s.delegue ? "#fff" : "#78716C", opacity: item.moi === null && item.moi_inf === undefined ? 0.4 : 1 }}>Moi-même</button>
               </div>
-            ) : <span style={{ fontSize: 11, color: "#D6D3D1" }}>—</span>}
+            ) : <span style={{ fontSize: 19, color: "#D6D3D1" }}>—</span>}
           </td>
           {(showQty === "quantite" || showQty === "fixe") && (
             <td style={{ padding: "10px 12px", textAlign: "center" }}>
               {isActif ? (
                 <input type="number" value={s.quantite} min="1" step="1" onChange={function(e) { updateState(setter, item.id, "quantite", e.target.value); }}
-                  style={{ width: 50, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "4px 8px", fontSize: 12, color: "#1C1917", outline: "none", textAlign: "center" }} />
-              ) : <span style={{ fontSize: 11, color: "#D6D3D1" }}>—</span>}
+                  style={{ width: 50, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "4px 8px", fontSize: 19, color: "#1C1917", outline: "none", textAlign: "center" }} />
+              ) : <span style={{ fontSize: 19, color: "#D6D3D1" }}>—</span>}
             </td>
           )}
-          <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12, color: "#A8A29E" }}>
+          <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 19, color: "#A8A29E" }}>
             {isActif && prix != null ? fmt(prix, 0) + " €" + (showQty !== "fixe" ? (showQty === "quantite" ? "/u" : "/m²") : "") : "—"}
           </td>
-          <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: montant != null ? "#F97316" : "#f97316", fontSize: 13 }}>
+          <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: montant != null ? "#F97316" : "#f97316", fontSize: 19 }}>
             {montant != null ? fmtEur(montant) : isActif ? "⚠ N/A" : "—"}
           </td>
         </tr>
@@ -2881,13 +2881,13 @@ function SimulateurTravaux() {
   };
 
   const theadStyle = { borderBottom: "2px solid rgba(148,163,184,0.2)" };
-  const thStyle = function(align) { return { padding: "8px 12px", textAlign: align || "left", fontSize: 11, fontWeight: 600, color: "#78716C", textTransform: "uppercase", letterSpacing: 0.3 }; };
+  const thStyle = function(align) { return { padding: "8px 12px", textAlign: align || "left", fontSize: 19, fontWeight: 600, color: "#78716C", textTransform: "uppercase", letterSpacing: 0.3 }; };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
       {/* Avertissement */}
-      <div style={{ background: "rgba(254,243,199,0.9)", borderRadius: 14, padding: "10px 16px", border: "1px solid rgba(251,191,36,0.4)", fontSize: 12, color: "#92400e" }}>
+      <div style={{ background: "rgba(254,243,199,0.9)", borderRadius: 14, padding: "10px 16px", border: "1px solid rgba(251,191,36,0.4)", fontSize: 19, color: "#92400e" }}>
         ⚠ <strong>Estimation indicative uniquement.</strong> Les prix peuvent varier selon la région et les artisans. Faites venir plusieurs devis pour une estimation précise.
       </div>
 
@@ -2902,13 +2902,13 @@ function SimulateurTravaux() {
           ].map(function(f) {
             return (
               <div key={f.label} style={{ background: "#FFF8F3", borderRadius: 12, padding: "12px 14px", border: "1.5px solid #FFE8D9" }}>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 4 }}>{f.label}</label>
+                <label style={{ display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 4 }}>{f.label}</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <input type="number" value={f.value} min="1" step="1" onChange={function(e) { f.setter(e.target.value); }}
-                    style={{ width: "100%", background: "white", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "7px 10px", fontSize: 16, fontWeight: 700, color: "#1C1917", outline: "none" }} />
-                  <span style={{ color: "#A8A29E", fontSize: 13 }}>{f.unit}</span>
+                    style={{ width: "100%", background: "white", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "7px 10px", fontSize: 19, fontWeight: 700, color: "#1C1917", outline: "none" }} />
+                  <span style={{ color: "#A8A29E", fontSize: 19 }}>{f.unit}</span>
                 </div>
-                <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 4 }}>{f.sub}</div>
+                <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 4 }}>{f.sub}</div>
               </div>
             );
           })}
@@ -2981,9 +2981,9 @@ function SimulateurTravaux() {
               <th style={thStyle("right")}>Montant</th>
             </tr></thead>
             <tbody>
-              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 11, fontWeight: 600, color: "#A8A29E", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Toiture — {fmt(surfT, 0)} m²</td></tr>
+              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 19, fontWeight: 600, color: "#A8A29E", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Toiture — {fmt(surfT, 0)} m²</td></tr>
               {renderRows(TRAVAUX_DATA.batiment.filter(function(i) { return i.type === "toiture"; }), stateB, setStateB, "m2_toiture")}
-              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 11, fontWeight: 600, color: "#A8A29E", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Façade — {fmt(surfF, 0)} m²</td></tr>
+              <tr><td colSpan={5} style={{ padding: "6px 12px", fontSize: 19, fontWeight: 600, color: "#A8A29E", background: "rgba(241,245,249,0.8)", textTransform: "uppercase" }}>Façade — {fmt(surfF, 0)} m²</td></tr>
               {renderRows(TRAVAUX_DATA.batiment.filter(function(i) { return i.type === "facade"; }), stateB, setStateB, "m2_facade")}
             </tbody>
           </table>
@@ -3002,20 +3002,20 @@ function SimulateurTravaux() {
           ].map(function(c) {
             return (
               <div key={c.label} style={{ background: "#fff", borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                <div style={{ fontSize: 11, color: "#A8A29E" }}>{c.label}</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: c.color }}>{c.value}</div>
+                <div style={{ fontSize: 19, color: "#A8A29E" }}>{c.label}</div>
+                <div style={{ fontSize: 19, fontWeight: 700, color: c.color }}>{c.value}</div>
               </div>
             );
           })}
         </div>
         <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ background: "#fff", borderRadius: 16, padding: "14px 20px", flex: 1, minWidth: 180, border: "1px solid #FFE8D9" }}>
-            <div style={{ fontSize: 12, color: "#78716C", marginBottom: 4 }}>Coût total estimé</div>
+            <div style={{ fontSize: 19, color: "#78716C", marginBottom: 4 }}>Coût total estimé</div>
             <div style={{ fontSize: 32, fontWeight: 800, color: "#F97316" }}>{fmtEur(totalGeneral)}</div>
           </div>
           <div style={{ background: "#fff", borderRadius: 16, padding: "14px 20px", flex: 1, minWidth: 180, border: "1.5px solid #FFE8D9" }}>
-            <div style={{ fontSize: 12, color: "#78716C", marginBottom: 4 }}>Prix rénovation / m² habitable</div>
-            <div style={{ fontSize: 32, fontWeight: 800, color: "#1C1917" }}>{fmt(prixM2, 0)} <span style={{ fontSize: 16 }}>€/m²</span></div>
+            <div style={{ fontSize: 19, color: "#78716C", marginBottom: 4 }}>Prix rénovation / m² habitable</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: "#1C1917" }}>{fmt(prixM2, 0)} <span style={{ fontSize: 19 }}>€/m²</span></div>
           </div>
         </div>
       </div>
@@ -3140,10 +3140,10 @@ function ComparateurOffres() {
   };
 
   const couleurs = ["#F97316", "#F97316", "#16a34a", "#f97316", "#a855f7"];
-  const inputSmall = { background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "5px 8px", fontSize: 13, color: "#1C1917", outline: "none", width: "100%" };
+  const inputSmall = { background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 8, padding: "5px 8px", fontSize: 19, color: "#1C1917", outline: "none", width: "100%" };
 
   const BestBadge = function() {
-    return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 999, background: "#F0FDF4", color: "#16a34a", border: "1px solid #BBF7D0", marginLeft: 5 }}>✓ Meilleur</span>;
+    return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 19, fontWeight: 700, padding: "1px 7px", borderRadius: 999, background: "#F0FDF4", color: "#16a34a", border: "1px solid #BBF7D0", marginLeft: 5 }}>✓ Meilleur</span>;
   };
 
   return (
@@ -3151,20 +3151,20 @@ function ComparateurOffres() {
 
       {/* Save/Load comparatifs */}
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <input type="text" value={nomComparatif} onChange={function(e) { setNomComparatif(e.target.value); }} placeholder="Nom du comparatif..." style={{ flex: 1, minWidth: 140, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 12px", fontSize: 13, outline: "none", color: "#1C1917" }} />
-        <button onClick={sauverComparatif} disabled={!nomComparatif.trim()} style={{ background: nomComparatif.trim() ? "linear-gradient(135deg,#F97316,#38bdf8)" : "rgba(148,163,184,0.3)", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", cursor: nomComparatif.trim() ? "pointer" : "not-allowed", fontSize: 12, fontWeight: 600 }}>Sauver</button>
-        {saveStatusComp === "saved" && <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 600 }}>✓ Sauvé</span>}
+        <input type="text" value={nomComparatif} onChange={function(e) { setNomComparatif(e.target.value); }} placeholder="Nom du comparatif..." style={{ flex: 1, minWidth: 140, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 12px", fontSize: 19, outline: "none", color: "#1C1917" }} />
+        <button onClick={sauverComparatif} disabled={!nomComparatif.trim()} style={{ background: nomComparatif.trim() ? "linear-gradient(135deg,#F97316,#38bdf8)" : "rgba(148,163,184,0.3)", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", cursor: nomComparatif.trim() ? "pointer" : "not-allowed", fontSize: 19, fontWeight: 600 }}>Sauver</button>
+        {saveStatusComp === "saved" && <span style={{ fontSize: 19, color: "#16a34a", fontWeight: 600 }}>✓ Sauvé</span>}
         {comparatifs.length > 0 && comparatifs.slice(0, 5).map(function(c) {
           return (<div key={c.id} style={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <button onClick={function() { chargerComparatif(c); }} style={{ background: "#FFF3EC", border: "1px solid #FFE8D9", borderRadius: 8, padding: "4px 10px", fontSize: 11, color: "#F97316", cursor: "pointer", fontWeight: 500 }}>{c.nom}</button>
-            <button onClick={function() { supprimerComparatif(c.id); }} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontSize: 10, padding: "2px" }}>×</button>
+            <button onClick={function() { chargerComparatif(c); }} style={{ background: "#FFF3EC", border: "1px solid #FFE8D9", borderRadius: 8, padding: "4px 10px", fontSize: 19, color: "#F97316", cursor: "pointer", fontWeight: 500 }}>{c.nom}</button>
+            <button onClick={function() { supprimerComparatif(c.id); }} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontSize: 19, padding: "2px" }}>×</button>
           </div>);
         })}
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: 12, color: "#A8A29E" }}>{offres.length} offre{offres.length > 1 ? "s" : ""} comparée{offres.length > 1 ? "s" : ""}</div>
-        <button onClick={ajouterOffre} style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>+ Ajouter une offre</button>
+        <div style={{ fontSize: 19, color: "#A8A29E" }}>{offres.length} offre{offres.length > 1 ? "s" : ""} comparée{offres.length > 1 ? "s" : ""}</div>
+        <button onClick={ajouterOffre} style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 600 }}>+ Ajouter une offre</button>
       </div>
 
       {/* Cartes */}
@@ -3179,9 +3179,9 @@ function ComparateurOffres() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: couleur }} />
-                  <input value={o.banque} onChange={function(e) { updateOffre(o.id, "banque", e.target.value); }} style={{ fontWeight: 700, fontSize: 14, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed " + couleur + "66", width: 140 }} />
+                  <input value={o.banque} onChange={function(e) { updateOffre(o.id, "banque", e.target.value); }} style={{ fontWeight: 700, fontSize: 19, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed " + couleur + "66", width: 140 }} />
                 </div>
-                <button onClick={function() { supprimerOffre(o.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 8, padding: "3px 9px", color: "#dc2626", cursor: offres.length > 1 ? "pointer" : "not-allowed", fontSize: 12, opacity: offres.length > 1 ? 1 : 0.3 }}>×</button>
+                <button onClick={function() { supprimerOffre(o.id); }} style={{ background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 8, padding: "3px 9px", color: "#dc2626", cursor: offres.length > 1 ? "pointer" : "not-allowed", fontSize: 19, opacity: offres.length > 1 ? 1 : 0.3 }}>×</button>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -3198,10 +3198,10 @@ function ComparateurOffres() {
                 ].map(function(f) {
                   return (
                     <div key={f.field}>
-                      <div style={{ fontSize: 10, color: "#A8A29E", marginBottom: 2, fontWeight: 600 }}>{f.label}</div>
+                      <div style={{ fontSize: 19, color: "#A8A29E", marginBottom: 2, fontWeight: 600 }}>{f.label}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <input type="number" value={o[f.field]} step={f.step} min="0" onChange={function(e) { updateOffre(o.id, f.field, e.target.value); }} style={inputSmall} />
-                        <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 20 }}>{f.unit}</span>
+                        <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 20 }}>{f.unit}</span>
                       </div>
                     </div>
                   );
@@ -3209,7 +3209,7 @@ function ComparateurOffres() {
 
                 {/* Options */}
                 <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 5 }}>
-                  <div style={{ fontSize: 10, color: "#A8A29E", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Options</div>
+                  <div style={{ fontSize: 19, color: "#A8A29E", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Options</div>
                   {[
                     { field: "modulation", label: "Modulation des mensualités" },
                     { field: "remboursementAnticipe", label: "Remboursement anticipé sans pénalité" },
@@ -3217,9 +3217,9 @@ function ComparateurOffres() {
                   ].map(function(opt) {
                     return (
                       <div key={opt.field} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 11, color: "#57534E" }}>{opt.label}</span>
+                        <span style={{ fontSize: 19, color: "#57534E" }}>{opt.label}</span>
                         <button onClick={function() { updateOffre(o.id, opt.field, !o[opt.field]); }}
-                          style={{ padding: "2px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, background: o[opt.field] ? "#FFF3EC" : "rgba(220,38,38,0.1)", color: o[opt.field] ? "#fff" : "#dc2626", boxShadow: o[opt.field] ? "0 2px 6px #FFE8D9" : "inset 0 0 0 1px rgba(220,38,38,0.3)" }}>
+                          style={{ padding: "2px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 700, background: o[opt.field] ? "#FFF3EC" : "rgba(220,38,38,0.1)", color: o[opt.field] ? "#fff" : "#dc2626", boxShadow: o[opt.field] ? "0 2px 6px #FFE8D9" : "inset 0 0 0 1px rgba(220,38,38,0.3)" }}>
                           {o[opt.field] ? "✓ Oui" : "✗ Non"}
                         </button>
                       </div>
@@ -3229,20 +3229,20 @@ function ComparateurOffres() {
 
                 {/* Différé */}
                 <div style={{ marginTop: 4, paddingTop: 6, borderTop: "1px solid #FFE8D9" }}>
-                  <div style={{ fontSize: 10, color: "#A8A29E", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Différé</div>
+                  <div style={{ fontSize: 19, color: "#A8A29E", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Différé</div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                    <span style={{ fontSize: 11, color: "#57534E" }}>Différé de remboursement</span>
+                    <span style={{ fontSize: 19, color: "#57534E" }}>Différé de remboursement</span>
                     <button onClick={function() { updateOffre(o.id, "differe", !o.differe); }}
-                      style={{ padding: "2px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700, background: o.differe ? "#FFF3EC" : "rgba(220,38,38,0.1)", color: o.differe ? "#fff" : "#dc2626", boxShadow: o.differe ? "0 2px 6px #FFE8D9" : "inset 0 0 0 1px rgba(220,38,38,0.3)" }}>
+                      style={{ padding: "2px 10px", borderRadius: 999, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 700, background: o.differe ? "#FFF3EC" : "rgba(220,38,38,0.1)", color: o.differe ? "#fff" : "#dc2626", boxShadow: o.differe ? "0 2px 6px #FFE8D9" : "inset 0 0 0 1px rgba(220,38,38,0.3)" }}>
                       {o.differe ? "✓ Oui" : "✗ Non"}
                     </button>
                   </div>
                   {o.differe && (
                     <div>
-                      <div style={{ fontSize: 10, color: "#A8A29E", marginBottom: 2 }}>Durée du différé</div>
+                      <div style={{ fontSize: 19, color: "#A8A29E", marginBottom: 2 }}>Durée du différé</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <input type="number" value={o.dureeDiffere} step="1" min="0" max="24" onChange={function(e) { updateOffre(o.id, "dureeDiffere", e.target.value); }} style={inputSmall} />
-                        <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 28 }}>mois</span>
+                        <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 28 }}>mois</span>
                       </div>
                     </div>
                   )}
@@ -3250,20 +3250,20 @@ function ComparateurOffres() {
 
                 {/* Garantie */}
                 <div style={{ marginTop: 4, paddingTop: 6, borderTop: "1px solid #FFE8D9" }}>
-                  <div style={{ fontSize: 10, color: "#A8A29E", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Type de garantie</div>
+                  <div style={{ fontSize: 19, color: "#A8A29E", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 }}>Type de garantie</div>
                   <div style={{ display: "flex", gap: 6 }}>
                     {[{ val: "caution", label: "Cautionnement" }, { val: "hypotheque", label: "Hypothèque" }].map(function(g) {
                       const isActive = o.typeGarantie === g.val;
                       return (
                         <button key={g.val} onClick={function() { updateOffre(o.id, "typeGarantie", g.val); }}
-                          style={{ flex: 1, padding: "5px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isActive ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isActive ? "#fff" : "#78716C", boxShadow: isActive ? "0 2px 6px #FFE8D9" : "none" }}>
+                          style={{ flex: 1, padding: "5px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: isActive ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isActive ? "#fff" : "#78716C", boxShadow: isActive ? "0 2px 6px #FFE8D9" : "none" }}>
                           {g.label}
                         </button>
                       );
                     })}
                   </div>
                   {o.typeGarantie === "hypotheque" && (
-                    <div style={{ marginTop: 5, background: "rgba(254,243,199,0.8)", borderRadius: 8, padding: "5px 8px", fontSize: 10, color: "#92400e" }}>
+                    <div style={{ marginTop: 5, background: "rgba(254,243,199,0.8)", borderRadius: 8, padding: "5px 8px", fontSize: 19, color: "#92400e" }}>
                       ⚠ Hypothèque : frais de mainlevée à prévoir en cas de revente anticipée
                     </div>
                   )}
@@ -3272,20 +3272,20 @@ function ComparateurOffres() {
 
               {/* Mini résultat */}
               <div style={{ marginTop: 12, background: couleur + "10", borderRadius: 12, padding: "10px 12px", border: "1px solid " + couleur + "33" }}>
-                <div style={{ fontSize: 11, color: "#78716C" }}>Mensualité totale</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: couleur }}>{fmt(r.mensualiteTotale, 0)} €<span style={{ fontSize: 13, fontWeight: 400 }}>/mois</span></div>
-                <div style={{ fontSize: 11, color: "#A8A29E" }}>dont {fmt(r.mensualiteAssur, 0)} € assurance</div>
+                <div style={{ fontSize: 19, color: "#78716C" }}>Mensualité totale</div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: couleur }}>{fmt(r.mensualiteTotale, 0)} €<span style={{ fontSize: 19, fontWeight: 400 }}>/mois</span></div>
+                <div style={{ fontSize: 19, color: "#A8A29E" }}>dont {fmt(r.mensualiteAssur, 0)} € assurance</div>
               </div>
 
               {/* Score global */}
               <div style={{ marginTop: 8, background: scoreColor + "10", borderRadius: 10, padding: "8px 12px", border: "1px solid " + scoreColor + "33", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Score global</div>
-                  <div style={{ fontSize: 11, color: "#A8A29E", marginTop: 1 }}>Durée · Taux · Apport · Différé · Garantie</div>
+                  <div style={{ fontSize: 19, color: "#78716C", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Score global</div>
+                  <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 1 }}>Durée · Taux · Apport · Différé · Garantie</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{s}<span style={{ fontSize: 13, fontWeight: 500 }}>/100</span></div>
-                  {s === meilleurScore && <div style={{ fontSize: 10, fontWeight: 700, color: "#16a34a", marginTop: 2 }}>Trophée Meilleure offre</div>}
+                  <div style={{ fontSize: 28, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{s}<span style={{ fontSize: 19, fontWeight: 500 }}>/100</span></div>
+                  {s === meilleurScore && <div style={{ fontSize: 19, fontWeight: 700, color: "#16a34a", marginTop: 2 }}>Trophée Meilleure offre</div>}
                 </div>
               </div>
             </div>
@@ -3297,12 +3297,12 @@ function ComparateurOffres() {
       <div style={SECTION}>
         <SectionHeader icon="ti-scale" title="Tableau comparatif" />
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 19 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
-                <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#78716C", textTransform: "uppercase" }}>Critère</th>
+                <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 19, fontWeight: 600, color: "#78716C", textTransform: "uppercase" }}>Critère</th>
                 {offres.map(function(o, idx) {
-                  return <th key={o.id} style={{ padding: "10px 12px", textAlign: "right", fontSize: 13, fontWeight: 700, color: couleurs[idx % couleurs.length] }}>{o.banque}</th>;
+                  return <th key={o.id} style={{ padding: "10px 12px", textAlign: "right", fontSize: 19, fontWeight: 700, color: couleurs[idx % couleurs.length] }}>{o.banque}</th>;
                 })}
               </tr>
             </thead>
@@ -3331,7 +3331,7 @@ function ComparateurOffres() {
               ].map(function(row, idx) {
                 return (
                   <tr key={row.label} style={{ borderBottom: "1px solid #FFE8D9", background: row.highlight ? "#FFF3EC" : (idx % 2 === 0 ? "rgba(248,250,252,0.5)" : "transparent") }}>
-                    <td style={{ padding: "9px 12px", fontSize: 12, fontWeight: row.highlight ? 700 : 400, color: row.highlight ? "#44403C" : "#78716C" }}>{row.label}</td>
+                    <td style={{ padding: "9px 12px", fontSize: 19, fontWeight: row.highlight ? 700 : 400, color: row.highlight ? "#44403C" : "#78716C" }}>{row.label}</td>
                     {resultats.map(function(r, ridx) {
                       const isB = row.bestFn && row.bestVal !== null && isBest(row.bestFn(r), row.bestVal);
                       return (
@@ -3369,9 +3369,9 @@ function ComparateurOffres() {
             const couleur = couleurs[idx % couleurs.length];
             return (
               <div key={critere.label} style={{ background: "#fff", borderRadius: 14, padding: "12px 16px", border: "1.5px solid " + couleur + "44", textAlign: "center" }}>
-                <div style={{ fontSize: 11, color: "#A8A29E", marginBottom: 4 }}>{critere.label}</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: couleur }}>{winner.offre.banque}</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#44403C", marginTop: 2 }}>{critere.format(critere.best)}</div>
+                <div style={{ fontSize: 19, color: "#A8A29E", marginBottom: 4 }}>{critere.label}</div>
+                <div style={{ fontSize: 19, fontWeight: 800, color: couleur }}>{winner.offre.banque}</div>
+                <div style={{ fontSize: 19, fontWeight: 600, color: "#44403C", marginTop: 2 }}>{critere.format(critere.best)}</div>
               </div>
             );
           })}
@@ -3480,13 +3480,13 @@ function CalculateurPlusValue() {
     return Object.assign({}, base0, { pvNette: produitNetAvantImpot - impotTotal, impotIR, impotPS, impotTotal, abattIR, abattPS, exonere, surtaxe, baseIR, basePS });
   }, [vals, duree, typeBien, regime, debutMois, debutAnnee]);
 
-  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" };
-  const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 3 };
+  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" };
+  const labelS = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 3 };
 
   const BarAb = function(props) {
     return (
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 19, marginBottom: 3 }}>
           <span style={{ color: "#78716C" }}>{props.label}</span>
           <span style={{ fontWeight: 700, color: props.color }}>{props.value}%</span>
         </div>
@@ -3507,20 +3507,20 @@ function CalculateurPlusValue() {
 
           {/* Type de bien */}
           <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 6 }}>Type de bien</div>
+            <div style={{ fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 6 }}>Type de bien</div>
             <div style={{ display: "flex", gap: 6 }}>
               {[{ val: "resid-principale", label: "Maison Résidence principale" }, { val: "non-resid", label: "Immeuble Locatif / secondaire" }].map(function(t) {
                 const isA = typeBien === t.val;
                 return (
                   <button key={t.val} onClick={function() { setTypeBien(t.val); }}
-                    style={{ flex: 1, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "linear-gradient(135deg,#F97316,#38bdf8)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C", boxShadow: isA ? "0 2px 8px #FFE8D9" : "none" }}>
+                    style={{ flex: 1, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: isA ? "linear-gradient(135deg,#F97316,#38bdf8)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C", boxShadow: isA ? "0 2px 8px #FFE8D9" : "none" }}>
                     {t.label}
                   </button>
                 );
               })}
             </div>
             {typeBien === "resid-principale" && (
-              <div style={{ marginTop: 8, background: "rgba(220,252,231,0.8)", borderRadius: 8, padding: "6px 10px", fontSize: 11, color: "#15803d" }}>
+              <div style={{ marginTop: 8, background: "rgba(220,252,231,0.8)", borderRadius: 8, padding: "6px 10px", fontSize: 19, color: "#15803d" }}>
                 ✓ Exonération totale, quelle que soit la durée de détention.
               </div>
             )}
@@ -3529,13 +3529,13 @@ function CalculateurPlusValue() {
           {/* Régime fiscal */}
           {typeBien !== "resid-principale" && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 6 }}>Régime fiscal</div>
+              <div style={{ fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 6 }}>Régime fiscal</div>
               <div style={{ display: "flex", gap: 6 }}>
                 {[{ val: "particulier", label: " Particulier / LMNP" }, { val: "sci-is", label: "Immeuble SCI à l'IS" }].map(function(r) {
                   const isA = regime === r.val;
                   return (
                     <button key={r.val} onClick={function() { setRegime(r.val); }}
-                      style={{ flex: 1, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "linear-gradient(135deg,#F97316,#38bdf8)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C", boxShadow: isA ? "0 2px 8px #FFE8D9" : "none" }}>
+                      style={{ flex: 1, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: isA ? "linear-gradient(135deg,#F97316,#38bdf8)" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C", boxShadow: isA ? "0 2px 8px #FFE8D9" : "none" }}>
                       {r.label}
                     </button>
                   );
@@ -3546,7 +3546,7 @@ function CalculateurPlusValue() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {/* À l'achat */}
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5 }}>À l'achat</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5 }}>À l'achat</div>
             {[
               { field: "prixAchat",    label: "Prix d'achat",              unit: "€", step: "1000" },
               { field: "fraisAchat",   label: "Frais notaire + agence",    unit: "€", step: "500"  },
@@ -3558,14 +3558,14 @@ function CalculateurPlusValue() {
                   <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                     <input type="number" value={vals[f.field]} step={f.step} min="0"
                       onChange={function(e) { handleChange(f.field, e.target.value); }} style={inputS} />
-                    <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 20 }}>{f.unit}</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 20 }}>{f.unit}</span>
                   </div>
                 </div>
               );
             })}
 
             {/* À la vente */}
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>À la vente</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>À la vente</div>
             {[
               { field: "prixVente",  label: "Prix de vente",        unit: "€", step: "1000" },
               { field: "fraisVente", label: "Frais d'agence vente",  unit: "€", step: "500"  },
@@ -3576,7 +3576,7 @@ function CalculateurPlusValue() {
                   <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                     <input type="number" value={vals[f.field]} step={f.step} min="0"
                       onChange={function(e) { handleChange(f.field, e.target.value); }} style={inputS} />
-                    <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 20 }}>{f.unit}</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 20 }}>{f.unit}</span>
                   </div>
                 </div>
               );
@@ -3585,15 +3585,15 @@ function CalculateurPlusValue() {
             {/* SCI IS params */}
             {regime === "sci-is" && typeBien !== "resid-principale" && (
               <>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Paramètres SCI IS</div>
+                <div style={{ fontSize: 19, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Paramètres SCI IS</div>
                 <div>
                   <label style={labelS}>Taux d'amortissement annuel</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                     <input type="number" value={vals.coefAmortissement} step="0.25" min="0" max="10"
                       onChange={function(e) { handleChange("coefAmortissement", e.target.value); }} style={inputS} />
-                    <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 40 }}>%/an</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 40 }}>%/an</span>
                   </div>
-                  <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 2 }}>Généralement 2.5% pour l'immobilier (hors terrain)</div>
+                  <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>Généralement 2.5% pour l'immobilier (hors terrain)</div>
                 </div>
                 <div>
                   <label style={labelS}>Taux IS applicable</label>
@@ -3602,7 +3602,7 @@ function CalculateurPlusValue() {
                       const isA = vals.tauxIS === t.val;
                       return (
                         <button key={t.val} onClick={function() { handleChange("tauxIS", t.val); }}
-                          style={{ flex: 1, padding: "6px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>
+                          style={{ flex: 1, padding: "6px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>
                           {t.label}
                         </button>
                       );
@@ -3613,7 +3613,7 @@ function CalculateurPlusValue() {
             )}
 
             {/* Crédit */}
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Crédit immobilier</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Crédit immobilier</div>
             {[
               { field: "montantCredit", label: "Montant emprunté",    unit: "€",   step: "5000" },
               { field: "tauxCredit",    label: "Taux hors assurance", unit: "%",   step: "0.05" },
@@ -3625,7 +3625,7 @@ function CalculateurPlusValue() {
                   <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                     <input type="number" value={vals[f.field]} step={f.step} min="0"
                       onChange={function(e) { handleChange(f.field, e.target.value); }} style={inputS} />
-                    <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 28 }}>{f.unit}</span>
+                    <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 28 }}>{f.unit}</span>
                   </div>
                 </div>
               );
@@ -3634,14 +3634,14 @@ function CalculateurPlusValue() {
               <label style={labelS}>Date de début du crédit</label>
               <div style={{ display: "flex", gap: 8 }}>
                 <select value={debutMois} onChange={function(e) { setDebutMois(e.target.value); }}
-                  style={{ flex: 1, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" }}>
+                  style={{ flex: 1, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" }}>
                   {["01","02","03","04","05","06","07","08","09","10","11","12"].map(function(m, i) {
                     const labels = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
                     return <option key={m} value={m}>{labels[i]}</option>;
                   })}
                 </select>
                 <select value={debutAnnee} onChange={function(e) { setDebutAnnee(e.target.value); }}
-                  style={{ width: 95, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" }}>
+                  style={{ width: 95, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" }}>
                   {Array.from({ length: 21 }, function(_, i) { return String(2014 + i); }).map(function(y) {
                     return <option key={y} value={y}>{y}</option>;
                   })}
@@ -3650,13 +3650,13 @@ function CalculateurPlusValue() {
             </div>
 
             {/* Détention */}
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Durée de détention</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 4 }}>Durée de détention</div>
             <div>
               <label style={labelS}>Revente dans : <strong style={{ color: "#F97316" }}>{duree} ans</strong></label>
               <input type="range" min="0" max="30" value={duree}
                 onChange={function(e) { setDuree(Number(e.target.value)); }}
                 style={{ width: "100%", accentColor: "#F97316", marginTop: 4 }} />
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#A8A29E", marginTop: 2 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 19, color: "#A8A29E", marginTop: 2 }}>
                 <span>0 an</span><span>6 ans</span><span>22 ans</span><span>30 ans</span>
               </div>
             </div>
@@ -3676,7 +3676,7 @@ function CalculateurPlusValue() {
             <div style={{ margin: "10px 0", height: 1, background: "rgba(148,163,184,0.2)" }} />
             <StatRow label="Prix de vente net vendeur" value={fmtEur(pf(vals.prixVente) - pf(vals.fraisVente))} color="#16a34a" />
             <div style={{ marginTop: 10, background: calc.pvBrute > 0 ? "rgba(220,252,231,0.7)" : "rgba(254,226,226,0.7)", borderRadius: 12, padding: "12px 14px", border: "1px solid " + (calc.pvBrute > 0 ? "rgba(22,163,74,0.3)" : "rgba(220,38,38,0.3)") }}>
-              <div style={{ fontSize: 12, color: "#78716C" }}>Plus-value brute</div>
+              <div style={{ fontSize: 19, color: "#78716C" }}>Plus-value brute</div>
               <div style={{ fontSize: 28, fontWeight: 900, color: calc.pvBrute > 0 ? "#15803d" : "#dc2626" }}>
                 {calc.pvBrute > 0 ? "+" : ""}{fmtEur(calc.pvBrute)}
               </div>
@@ -3692,7 +3692,7 @@ function CalculateurPlusValue() {
               <StatRow label="Mois écoulés à la revente" value={calc.moisEcoules + " mois"} />
               <StatRow label="Capital déjà remboursé" value={fmtEur(calc.creditRembourse)} color="#16a34a" />
               <StatRow label="Capital restant dû" value={"– " + fmtEur(calc.creditRestant)} color="#dc2626" bold border={false} />
-              <div style={{ marginTop: 8, background: "rgba(254,243,199,0.7)", borderRadius: 10, padding: "6px 10px", fontSize: 10, color: "#92400e", border: "1px solid rgba(251,191,36,0.3)" }}>
+              <div style={{ marginTop: 8, background: "rgba(254,243,199,0.7)", borderRadius: 10, padding: "6px 10px", fontSize: 19, color: "#92400e", border: "1px solid rgba(251,191,36,0.3)" }}>
                 ⚠ IRA (indemnités remboursement anticipé) non incluses — max 3% du capital restant ou 6 mois d'intérêts.
               </div>
             </div>
@@ -3711,9 +3711,9 @@ function CalculateurPlusValue() {
                   const atteint = calc.ans >= j.ans;
                   return (
                     <div key={j.ans} style={{ flex: 1, minWidth: 80, padding: "6px 8px", borderRadius: 8, textAlign: "center", background: atteint ? "#FFF3EC" : "rgba(148,163,184,0.08)", border: "1px solid " + (atteint ? "#FFE8D9" : "rgba(148,163,184,0.2)") }}>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: atteint ? "#F97316" : "#A8A29E" }}>{j.ans} ans</div>
-                      <div style={{ fontSize: 10, color: atteint ? "#F97316" : "#A8A29E" }}>{j.label}</div>
-                      {atteint && <div style={{ fontSize: 10, color: "#16a34a", fontWeight: 700 }}>✓ Atteint</div>}
+                      <div style={{ fontSize: 19, fontWeight: 800, color: atteint ? "#F97316" : "#A8A29E" }}>{j.ans} ans</div>
+                      <div style={{ fontSize: 19, color: atteint ? "#F97316" : "#A8A29E" }}>{j.label}</div>
+                      {atteint && <div style={{ fontSize: 19, color: "#16a34a", fontWeight: 700 }}>✓ Atteint</div>}
                     </div>
                   );
                 })}
@@ -3725,7 +3725,7 @@ function CalculateurPlusValue() {
           {typeBien !== "resid-principale" && regime === "sci-is" && calc.pvBrute > 0 && calc.isSCI && (
             <div style={SECTION}>
               <SectionHeader icon="ti-building-skyscraper" title="Fiscalité SCI IS" />
-              <div style={{ marginBottom: 10, background: "rgba(254,243,199,0.7)", borderRadius: 10, padding: "8px 12px", fontSize: 11, color: "#92400e", border: "1px solid rgba(251,191,36,0.3)" }}>
+              <div style={{ marginBottom: 10, background: "rgba(254,243,199,0.7)", borderRadius: 10, padding: "8px 12px", fontSize: 19, color: "#92400e", border: "1px solid rgba(251,191,36,0.3)" }}>
                 ⚠ En SCI IS, <strong>aucun abattement</strong> pour durée de détention. La base imposable = prix vente − valeur nette comptable (les amortissements sont réintégrés).
               </div>
               <StatRow label="Prix d'achat (base amortissable)" value={fmtEur(pf(vals.prixAchat))} />
@@ -3747,8 +3747,8 @@ function CalculateurPlusValue() {
               {calc.exonere ? (
                 <div style={{ background: "rgba(220,252,231,0.8)", borderRadius: 12, padding: "14px", textAlign: "center", border: "1px solid rgba(22,163,74,0.3)" }}>
                   <div style={{ fontSize: 24 }}></div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#15803d", marginTop: 4 }}>Totalement exonéré d'impôt !</div>
-                  <div style={{ fontSize: 12, color: "#78716C", marginTop: 2 }}>IR et prélèvements sociaux = 0 €</div>
+                  <div style={{ fontSize: 19, fontWeight: 700, color: "#15803d", marginTop: 4 }}>Totalement exonéré d'impôt !</div>
+                  <div style={{ fontSize: 19, color: "#78716C", marginTop: 2 }}>IR et prélèvements sociaux = 0 €</div>
                 </div>
               ) : (
                 <>
@@ -3773,7 +3773,7 @@ function CalculateurPlusValue() {
               {!calc.exonere && <StatRow label={"– Impôt (" + (calc.isSCI ? "IS" : "IR+PS") + ")"} value={"– " + fmtEur(calc.impotTotal)} color="#dc2626" />}
               {calc.exonere && <StatRow label="– Impôt" value="0 € (exonéré ✓)" color="#16a34a" />}
               <div style={{ marginTop: 10, background: calc.pvNette > 0 ? "rgba(220,252,231,0.8)" : "rgba(254,226,226,0.8)", borderRadius: 12, padding: "12px 14px", border: "1px solid " + (calc.pvNette > 0 ? "rgba(22,163,74,0.3)" : "rgba(220,38,38,0.3)") }}>
-                <div style={{ fontSize: 11, color: "#78716C" }}>Net encaissé après crédit + impôt</div>
+                <div style={{ fontSize: 19, color: "#78716C" }}>Net encaissé après crédit + impôt</div>
                 <div style={{ fontSize: 28, fontWeight: 900, color: calc.pvNette > 0 ? "#15803d" : "#dc2626" }}>
                   {calc.pvNette > 0 ? "+" : ""}{fmtEur(calc.pvNette)}
                 </div>
@@ -3784,7 +3784,7 @@ function CalculateurPlusValue() {
         </div>
       </div>
 
-      <div style={{ background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 14px", fontSize: 11, color: "#78716C", border: "1.5px solid #FFE8D9" }}>
+      <div style={{ background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 14px", fontSize: 19, color: "#78716C", border: "1.5px solid #FFE8D9" }}>
         ℹ Particulier : IR 19% + PS 17.2%, abattements à partir de 6 ans, exo IR 22 ans, exo totale 30 ans, surtaxe si PV &gt; 50 000 €. — SCI IS : aucun abattement, base = prix vente − VNC, IS 15% ou 25%. — IRA crédit non incluses.
       </div>
     </div>
@@ -3793,17 +3793,17 @@ function CalculateurPlusValue() {
 
 
 function SCIField({ sciVals, onChange, field, label, unit, step, hint }) {
-  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" };
-  const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 3 };
+  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" };
+  const labelS = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 3 };
   return (
     <div>
       <label style={labelS}>{label}</label>
       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
         <input type="number" value={sciVals[field]} step={step || "100"} min="0"
           onChange={function(e) { onChange(field, e.target.value); }} style={inputS} />
-        {unit && <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 28 }}>{unit}</span>}
+        {unit && <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 28 }}>{unit}</span>}
       </div>
-      {hint && <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 2 }}>{hint}</div>}
+      {hint && <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{hint}</div>}
     </div>
   );
 }
@@ -4022,17 +4022,17 @@ function projeterSCI(biens, sciParams, ccaAssocies) {
 }
 // ─── CHAMP INPUT GENERIQUE ────────────────────────────────────────────────────
 function BienField({ vals, onChange, field, label, unit, step, hint }) {
-  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" };
-  const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 3 };
+  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" };
+  const labelS = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 3 };
   return (
     <div>
       <label style={labelS}>{label}</label>
       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
         <input type="number" value={vals[field]} step={step || "100"} min="0"
           onChange={function(e) { onChange(field, e.target.value); }} style={inputS} />
-        {unit && <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 32 }}>{unit}</span>}
+        {unit && <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 32 }}>{unit}</span>}
       </div>
-      {hint && <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 2 }}>{hint}</div>}
+      {hint && <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{hint}</div>}
     </div>
   );
 }
@@ -4095,7 +4095,7 @@ function SCIConsolideChart({ rows }) {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 10, paddingLeft: 4 }}>
         {legendItems.map(function(l) {
           return (
-            <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#57534E", fontWeight: 500 }}>
+            <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 19, color: "#57534E", fontWeight: 500 }}>
               {l.dash
                 ? <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke={l.color} strokeWidth="2.5" /><circle cx="9" cy="5" r="3.5" fill="white" stroke={l.color} strokeWidth="2" /></svg>
                 : <div style={{ width: 12, height: 12, borderRadius: 3, background: l.color }} />
@@ -4219,11 +4219,11 @@ function SCITableauAnnuel({ rows, sciParams }) {
     <div style={Object.assign({}, SECTION, { marginTop: 0 })}>
       <SectionHeader icon="ti-clipboard-list" title="Tableau de bord annuel consolidé" />
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 19 }}>
           <thead>
             <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
               {["An", "Loyers", "Charges+Amort", "Int. CCA", "Base IS", "IS dû", "Palier", "Tréso/mois", "CCA restant", "Dividendes nets"].map(function(h) {
-                return <th key={h} style={{ padding: "7px 8px", textAlign: h === "An" ? "left" : "right", fontSize: 10, fontWeight: 600, color: "#78716C", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>;
+                return <th key={h} style={{ padding: "7px 8px", textAlign: h === "An" ? "left" : "right", fontSize: 19, fontWeight: 600, color: "#78716C", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>;
               })}
             </tr>
           </thead>
@@ -4249,7 +4249,7 @@ function SCITableauAnnuel({ rows, sciParams }) {
                         <div style={{ flex: 1, height: 5, background: "rgba(148,163,184,0.2)", borderRadius: 999, overflow: "hidden" }}>
                           <div style={{ width: Math.min(100, margePct) + "%", height: "100%", background: margePct > 100 ? "#ef4444" : margePct > 80 ? "#f97316" : "#FBB042", borderRadius: 999 }} />
                         </div>
-                        <span style={{ fontSize: 9, color: margePct >= 100 ? "#dc2626" : "#A8A29E", minWidth: 28 }}>
+                        <span style={{ fontSize: 19, color: margePct >= 100 ? "#dc2626" : "#A8A29E", minWidth: 28 }}>
                           {margePct >= 100 ? "25%" : Math.round(margePct) + "%"}
                         </span>
                       </div>
@@ -4264,14 +4264,14 @@ function SCITableauAnnuel({ rows, sciParams }) {
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                           {r.bienDetails.map(function(bd) {
                             return (
-                              <div key={bd.nom} style={{ background: "#fff", borderRadius: 8, padding: "6px 10px", fontSize: 10, border: "1.5px solid #FFE8D9", minWidth: 140 }}>
+                              <div key={bd.nom} style={{ background: "#fff", borderRadius: 8, padding: "6px 10px", fontSize: 19, border: "1.5px solid #FFE8D9", minWidth: 140 }}>
                                 <div style={{ fontWeight: 700, color: "#44403C", marginBottom: 2 }}>{bd.nom}</div>
                                 <div style={{ color: "#16a34a" }}>Loyers : {fmtEur(bd.loyers)}</div>
                                 <div style={{ color: bd.resultat >= 0 ? "#F97316" : "#dc2626" }}>Résultat : {fmtEur(bd.resultat)}</div>
                               </div>
                             );
                           })}
-                          <div style={{ background: "#fff", borderRadius: 8, padding: "6px 10px", fontSize: 10, border: "1px solid #FFE8D9", minWidth: 140 }}>
+                          <div style={{ background: "#fff", borderRadius: 8, padding: "6px 10px", fontSize: 19, border: "1px solid #FFE8D9", minWidth: 140 }}>
                             <div style={{ fontWeight: 700, color: "#F97316", marginBottom: 2 }}>Marge avant 25%</div>
                             <div style={{ color: "#44403C" }}>{r.resultatFiscal > SEUIL_IS_BAS ? "⚠ Seuil dépassé !" : fmtEur(r.margeAvantBasculement) + " restants"}</div>
                             {r.remboursementCCA > 0 && <div style={{ color: "#FBB042" }}>Remb. CCA : {fmtEur(r.remboursementCCA)}</div>}
@@ -4286,16 +4286,16 @@ function SCITableauAnnuel({ rows, sciParams }) {
           </tbody>
         </table>
       </div>
-      <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 6 }}> Cliquer sur une ligne pour voir le détail par bien</div>
+      <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 6 }}> Cliquer sur une ligne pour voir le détail par bien</div>
     </div>
   );
 }
 
 // ─── FORMULAIRE BIEN ──────────────────────────────────────────────────────────
 function FormulaireBien({ bien, onChange }) {
-  const sepS = { fontSize: 10, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 8 };
-  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" };
-  const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 3 };
+  const sepS = { fontSize: 19, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 8 };
+  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" };
+  const labelS = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 3 };
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
@@ -4316,7 +4316,7 @@ function FormulaireBien({ bien, onChange }) {
             {[{ val: "1", label: "÷5 ans" }, { val: "0", label: "An 1" }].map(function(t) {
               const isA = bien.fraisNotaireAmort === t.val;
               return <button key={t.val} onClick={function() { onChange("fraisNotaireAmort", t.val); }}
-                style={{ flex: 1, padding: "6px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>{t.label}</button>;
+                style={{ flex: 1, padding: "6px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>{t.label}</button>;
             })}
           </div>
         </div>
@@ -4337,7 +4337,7 @@ function FormulaireBien({ bien, onChange }) {
                 var parts = (bien.dateAchat || (new Date().getFullYear() + "-01")).split("-");
                 onChange("dateAchat", parts[0] + "-" + e.target.value);
               }}
-              style={{ flex: 1, minWidth: 0, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 6px", color: "#1C1917", fontSize: 12, outline: "none" }}>
+              style={{ flex: 1, minWidth: 0, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 6px", color: "#1C1917", fontSize: 19, outline: "none" }}>
               {["01","02","03","04","05","06","07","08","09","10","11","12"].map(function(m) {
                 var labels = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
                 return <option key={m} value={m}>{labels[parseInt(m,10)-1]}</option>;
@@ -4349,7 +4349,7 @@ function FormulaireBien({ bien, onChange }) {
                 var parts = (bien.dateAchat || (new Date().getFullYear() + "-01")).split("-");
                 onChange("dateAchat", e.target.value + "-" + (parts[1] || "01"));
               }}
-              style={{ flex: 1, minWidth: 0, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 6px", color: "#1C1917", fontSize: 12, outline: "none" }}>
+              style={{ flex: 1, minWidth: 0, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 6px", color: "#1C1917", fontSize: 19, outline: "none" }}>
               {(function() {
                 var opts = []; var now = new Date().getFullYear();
                 for (var yr = now - 10; yr <= now + 15; yr++) opts.push(yr);
@@ -4363,8 +4363,8 @@ function FormulaireBien({ bien, onChange }) {
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <input type="number" value={bien.tauxOccupation} step="0.5" min="0" max="12"
               onChange={function(e) { onChange("tauxOccupation", e.target.value); }}
-              style={{ width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" }} />
-            <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 55 }}>mois/an</span>
+              style={{ width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" }} />
+            <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 55 }}>mois/an</span>
           </div>
         </div>
         <div style={sepS}>Charges annuelles</div>
@@ -4451,8 +4451,8 @@ function SimulateurExploitation({ simProjets }) {
   var supprimer = function(id) { var liste = projets.filter(function(p) { return p.id !== id; }); setProjets(liste); localStorage.setItem(EXPLOIT_KEY, JSON.stringify(liste)); debouncedCloudSave("exploit_projets", liste, 1000); };
 
   var handleChange = function(e) { var n = e.target.name; var v = e.target.value; setInputs(function(p) { var next = Object.assign({}, p, { [n]: v }); if (n === "prixAchat" && pf(v) > 0) next.fraisNotaire = String(Math.round(pf(v) * 0.085)); return next; }); };
-  var fS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 8px", color: "#1C1917", fontSize: 12, outline: "none", boxSizing: "border-box" };
-  var lS = { display: "block", fontSize: 10, fontWeight: 600, color: "#78716C", marginBottom: 2 };
+  var fS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 8px", color: "#1C1917", fontSize: 19, outline: "none", boxSizing: "border-box" };
+  var lS = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 2 };
 
   // Commune autocomplete
   React.useEffect(function() {
@@ -4556,22 +4556,22 @@ function SimulateurExploitation({ simProjets }) {
 
       {/* Save bar + Import */}
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <input type="text" value={nomSimu} onChange={function(e) { setNomSimu(e.target.value); }} placeholder="Nom de la simulation..." style={{ flex: 1, minWidth: 140, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 12px", fontSize: 13, outline: "none", color: "#1C1917" }} />
-        <button onClick={sauvegarder} disabled={!nomSimu.trim()} style={{ background: nomSimu.trim() ? "linear-gradient(135deg,#F97316,#38bdf8)" : "rgba(148,163,184,0.3)", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", cursor: nomSimu.trim() ? "pointer" : "not-allowed", fontSize: 12, fontWeight: 600 }}>Sauver</button>
-        {saveStatus === "saved" && <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 600 }}>✓ Sauvé</span>}
+        <input type="text" value={nomSimu} onChange={function(e) { setNomSimu(e.target.value); }} placeholder="Nom de la simulation..." style={{ flex: 1, minWidth: 140, background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 12px", fontSize: 19, outline: "none", color: "#1C1917" }} />
+        <button onClick={sauvegarder} disabled={!nomSimu.trim()} style={{ background: nomSimu.trim() ? "linear-gradient(135deg,#F97316,#38bdf8)" : "rgba(148,163,184,0.3)", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", cursor: nomSimu.trim() ? "pointer" : "not-allowed", fontSize: 19, fontWeight: 600 }}>Sauver</button>
+        {saveStatus === "saved" && <span style={{ fontSize: 19, color: "#16a34a", fontWeight: 600 }}>✓ Sauvé</span>}
         {projets.length > 0 && projets.slice(0, 4).map(function(p) {
           return (<div key={p.id} style={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <button onClick={function() { charger(p); }} style={{ background: "#FFF3EC", border: "1px solid #FFE8D9", borderRadius: 8, padding: "4px 10px", fontSize: 11, color: "#F97316", cursor: "pointer", fontWeight: 500 }}>{p.nom}</button>
-            <button onClick={function() { supprimer(p.id); }} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontSize: 10, padding: "2px" }}>×</button>
+            <button onClick={function() { charger(p); }} style={{ background: "#FFF3EC", border: "1px solid #FFE8D9", borderRadius: 8, padding: "4px 10px", fontSize: 19, color: "#F97316", cursor: "pointer", fontWeight: 500 }}>{p.nom}</button>
+            <button onClick={function() { supprimer(p.id); }} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontSize: 19, padding: "2px" }}>×</button>
           </div>);
         })}
       </div>
       {/* Import depuis simulation projet */}
       {(simProjets || []).length > 0 && (
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 11, color: "#A8A29E", fontWeight: 600 }}> Importer un projet :</span>
+          <span style={{ fontSize: 19, color: "#A8A29E", fontWeight: 600 }}> Importer un projet :</span>
           {(simProjets || []).slice(0, 6).map(function(p) {
-            return (<button key={p.id} onClick={function() { importerProjet(p); }} style={{ background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)", borderRadius: 8, padding: "4px 10px", fontSize: 11, color: "#16a34a", cursor: "pointer", fontWeight: 500 }}>{p.nom}</button>);
+            return (<button key={p.id} onClick={function() { importerProjet(p); }} style={{ background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)", borderRadius: 8, padding: "4px 10px", fontSize: 19, color: "#16a34a", cursor: "pointer", fontWeight: 500 }}>{p.nom}</button>);
           })}
         </div>
       )}
@@ -4586,9 +4586,9 @@ function SimulateurExploitation({ simProjets }) {
           { label: lots.length + " lots · " + fmt(totalSurf, 0) + " m²", value: fmtEur(Math.round(mensualite)) + "/mois", icon: "Banque", color: "#78716C" },
         ].map(function(k) {
           return (<div key={k.label} style={{ background: "#fff", borderRadius: 12, padding: "8px 10px", border: "1.5px solid #FFE8D9", textAlign: "center" }}>
-            <div style={{ fontSize: 14, marginBottom: 1 }}>{k.icon}</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: k.color }}>{k.value}</div>
-            <div style={{ fontSize: 9, color: "#A8A29E", marginTop: 1 }}>{k.label}</div>
+            <div style={{ fontSize: 19, marginBottom: 1 }}>{k.icon}</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: k.color }}>{k.value}</div>
+            <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 1 }}>{k.label}</div>
           </div>);
         })}
       </div>
@@ -4597,7 +4597,7 @@ function SimulateurExploitation({ simProjets }) {
       <div style={{ display: "flex", gap: 6 }}>
         {[{ id: "lots", label: "Logement Lots & Paramètres" }, { id: "compare", label: " Comparer tous les modes" }].map(function(t) {
           var isA = view === t.id;
-          return (<button key={t.id} onClick={function() { setView(t.id); }} style={{ padding: "8px 16px", borderRadius: 10, border: isA ? "2px solid #F97316" : "1px solid rgba(148,163,184,0.3)", background: isA ? "#FFF3EC" : "rgba(255,255,255,0.7)", color: isA ? "#F97316" : "#78716C", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>{t.label}</button>);
+          return (<button key={t.id} onClick={function() { setView(t.id); }} style={{ padding: "8px 16px", borderRadius: 10, border: isA ? "2px solid #F97316" : "1px solid rgba(148,163,184,0.3)", background: isA ? "#FFF3EC" : "rgba(255,255,255,0.7)", color: isA ? "#F97316" : "#78716C", fontSize: 19, fontWeight: 600, cursor: "pointer" }}>{t.label}</button>);
         })}
       </div>
 
@@ -4622,12 +4622,12 @@ function SimulateurExploitation({ simProjets }) {
                 <input type="text" value={communeSearch} onChange={function(e) { setCommuneSearch(e.target.value); }} placeholder="Rechercher..." style={fS} />
                 {suggestions.length > 0 && (
                   <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 20, maxHeight: 150, overflowY: "auto", border: "1.5px solid #FFE8D9" }}>
-                    {suggestions.map(function(c) { return (<div key={c.nom} onClick={function() { selectCommune(c.nom); }} style={{ padding: "6px 10px", cursor: "pointer", fontSize: 11, borderBottom: "1px solid #FFE8D9" }}>{c.nom}</div>); })}
+                    {suggestions.map(function(c) { return (<div key={c.nom} onClick={function() { selectCommune(c.nom); }} style={{ padding: "6px 10px", cursor: "pointer", fontSize: 19, borderBottom: "1px solid #FFE8D9" }}>{c.nom}</div>); })}
                   </div>
                 )}
               </div>
               {donneesCommune && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, fontSize: 11 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, fontSize: 19 }}>
                   <div style={{ background: "#FFF8F3", borderRadius: 6, padding: "4px 6px" }}><span style={{ color: "#A8A29E" }}>Pop.</span> <b>{fmt(pop, 0)}</b></div>
                   <div style={{ background: "#FFF8F3", borderRadius: 6, padding: "4px 6px" }}><span style={{ color: "#A8A29E" }}>Étudiants</span> <b style={{ color: tauxEtu > 5 ? "#16a34a" : "#78716C" }}>{tauxEtu > 0 ? tauxEtu + "%" : "—"}</b></div>
                   <div style={{ background: "#FFF8F3", borderRadius: 6, padding: "4px 6px" }}><span style={{ color: "#A8A29E" }}>Tension</span> <b>{donneesCommune.demographie && donneesCommune.demographie.tension_locative_pct != null ? donneesCommune.demographie.tension_locative_pct + "%" : "—"}</b></div>
@@ -4642,26 +4642,26 @@ function SimulateurExploitation({ simProjets }) {
           {/* Colonne droite : Lots */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#44403C" }}>Lots ({lots.length})</span>
-              <button onClick={addLot} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "5px 12px", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600 }}>+ Lot</button>
+              <span style={{ fontSize: 19, fontWeight: 700, color: "#44403C" }}>Lots ({lots.length})</span>
+              <button onClick={addLot} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "5px 12px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 600 }}>+ Lot</button>
             </div>
             {lotsR.map(function(lot, idx) {
               var m = lot.modeInfo;
               return (<div key={lot.id} style={{ background: "#fff", borderRadius: 14, padding: "10px 12px", border: "2px solid " + m.color + "30" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 20, height: 20, borderRadius: 6, background: m.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700 }}>#{idx + 1}</div>
-                    <input value={lot.nom} onChange={function(e) { updateLot(lot.id, "nom", e.target.value); }} style={{ fontWeight: 600, fontSize: 12, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed " + m.color, maxWidth: 100 }} />
+                    <div style={{ width: 20, height: 20, borderRadius: 6, background: m.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19, color: "#fff", fontWeight: 700 }}>#{idx + 1}</div>
+                    <input value={lot.nom} onChange={function(e) { updateLot(lot.id, "nom", e.target.value); }} style={{ fontWeight: 600, fontSize: 19, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed " + m.color, maxWidth: 100 }} />
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: "#16a34a" }}>{fmtEur(lot.loyerMois)}/m</span>
-                    <button onClick={function() { removeLot(lot.id); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 5, padding: "2px 6px", color: "#dc2626", cursor: lots.length > 1 ? "pointer" : "not-allowed", fontSize: 10, opacity: lots.length > 1 ? 1 : 0.3 }}>×</button>
+                    <span style={{ fontSize: 19, fontWeight: 800, color: "#16a34a" }}>{fmtEur(lot.loyerMois)}/m</span>
+                    <button onClick={function() { removeLot(lot.id); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 5, padding: "2px 6px", color: "#dc2626", cursor: lots.length > 1 ? "pointer" : "not-allowed", fontSize: 19, opacity: lots.length > 1 ? 1 : 0.3 }}>×</button>
                   </div>
                 </div>
                 {/* Mode buttons */}
                 <div style={{ display: "flex", gap: 3, marginBottom: 6 }}>
                   {Object.entries(MODES).map(function(e) { var mId = e[0]; var mm = e[1]; var isA = lot.mode === mId;
-                    return (<button key={mId} onClick={function() { updateLot(lot.id, "mode", mId); }} style={{ flex: 1, padding: "4px 2px", borderRadius: 6, border: isA ? "2px solid " + mm.color : "1px solid rgba(148,163,184,0.2)", background: isA ? mm.color + "12" : "transparent", cursor: "pointer", fontSize: 9, fontWeight: 600, color: isA ? mm.color : "#A8A29E" }}>{mm.icon} {mm.nom.split(" ")[0]}</button>);
+                    return (<button key={mId} onClick={function() { updateLot(lot.id, "mode", mId); }} style={{ flex: 1, padding: "4px 2px", borderRadius: 6, border: isA ? "2px solid " + mm.color : "1px solid rgba(148,163,184,0.2)", background: isA ? mm.color + "12" : "transparent", cursor: "pointer", fontSize: 19, fontWeight: 600, color: isA ? mm.color : "#A8A29E" }}>{mm.icon} {mm.nom.split(" ")[0]}</button>);
                   })}
                 </div>
                 {/* Fields */}
@@ -4674,27 +4674,27 @@ function SimulateurExploitation({ simProjets }) {
             })}
             {/* Synthèse tableau */}
             <div style={{ background: "#fff", borderRadius: 12, padding: 10, border: "1.5px solid #FFE8D9" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 19 }}>
                 <thead><tr style={{ borderBottom: "2px solid rgba(148,163,184,0.15)" }}>
-                  {["Lot", "Mode", "m²", "Loyer/m", "Loyer/an", "Charges", "Mobilier"].map(function(h) { return <th key={h} style={{ padding: "4px 4px", textAlign: h === "Lot" ? "left" : "center", fontSize: 9, color: "#A8A29E", fontWeight: 600 }}>{h}</th>; })}
+                  {["Lot", "Mode", "m²", "Loyer/m", "Loyer/an", "Charges", "Mobilier"].map(function(h) { return <th key={h} style={{ padding: "4px 4px", textAlign: h === "Lot" ? "left" : "center", fontSize: 19, color: "#A8A29E", fontWeight: 600 }}>{h}</th>; })}
                 </tr></thead>
                 <tbody>
                   {lotsR.map(function(l) { var m = l.modeInfo; return (<tr key={l.id} style={{ borderBottom: "1px solid #FFE8D9" }}>
-                    <td style={{ padding: "3px 4px", fontWeight: 600, fontSize: 10 }}>{l.nom}</td>
-                    <td style={{ textAlign: "center" }}><span style={{ fontSize: 9, color: m.color, fontWeight: 600 }}>{m.icon}</span></td>
-                    <td style={{ textAlign: "center", fontSize: 10 }}>{l.surface}</td>
-                    <td style={{ textAlign: "center", fontWeight: 600, color: "#16a34a", fontSize: 10 }}>{fmtEur(l.loyerMois)}</td>
-                    <td style={{ textAlign: "center", fontSize: 10 }}>{fmtEur(Math.round(l.loyerAn))}</td>
-                    <td style={{ textAlign: "center", color: "#dc2626", fontSize: 10 }}>{fmtEur(Math.round(l.totalCh))}</td>
-                    <td style={{ textAlign: "center", fontSize: 10 }}>{l.mobilier > 0 ? fmtEur(l.mobilier) : "—"}</td>
+                    <td style={{ padding: "3px 4px", fontWeight: 600, fontSize: 19 }}>{l.nom}</td>
+                    <td style={{ textAlign: "center" }}><span style={{ fontSize: 19, color: m.color, fontWeight: 600 }}>{m.icon}</span></td>
+                    <td style={{ textAlign: "center", fontSize: 19 }}>{l.surface}</td>
+                    <td style={{ textAlign: "center", fontWeight: 600, color: "#16a34a", fontSize: 19 }}>{fmtEur(l.loyerMois)}</td>
+                    <td style={{ textAlign: "center", fontSize: 19 }}>{fmtEur(Math.round(l.loyerAn))}</td>
+                    <td style={{ textAlign: "center", color: "#dc2626", fontSize: 19 }}>{fmtEur(Math.round(l.totalCh))}</td>
+                    <td style={{ textAlign: "center", fontSize: 19 }}>{l.mobilier > 0 ? fmtEur(l.mobilier) : "—"}</td>
                   </tr>); })}
                   <tr style={{ borderTop: "2px solid rgba(148,163,184,0.2)", background: "#FFF3EC" }}>
-                    <td style={{ padding: "4px", fontWeight: 700, color: "#F97316", fontSize: 10 }}>TOTAL</td><td></td>
-                    <td style={{ textAlign: "center", fontWeight: 600, fontSize: 10 }}>{fmt(totalSurf, 0)}</td>
-                    <td style={{ textAlign: "center", fontWeight: 700, color: "#16a34a", fontSize: 10 }}>{fmtEur(totalLoyerMois)}</td>
-                    <td style={{ textAlign: "center", fontWeight: 600, fontSize: 10 }}>{fmtEur(Math.round(totalLoyerAn))}</td>
-                    <td style={{ textAlign: "center", fontWeight: 600, color: "#dc2626", fontSize: 10 }}>{fmtEur(Math.round(totalChLots))}</td>
-                    <td style={{ textAlign: "center", fontWeight: 600, fontSize: 10 }}>{totalMob > 0 ? fmtEur(totalMob) : "—"}</td>
+                    <td style={{ padding: "4px", fontWeight: 700, color: "#F97316", fontSize: 19 }}>TOTAL</td><td></td>
+                    <td style={{ textAlign: "center", fontWeight: 600, fontSize: 19 }}>{fmt(totalSurf, 0)}</td>
+                    <td style={{ textAlign: "center", fontWeight: 700, color: "#16a34a", fontSize: 19 }}>{fmtEur(totalLoyerMois)}</td>
+                    <td style={{ textAlign: "center", fontWeight: 600, fontSize: 19 }}>{fmtEur(Math.round(totalLoyerAn))}</td>
+                    <td style={{ textAlign: "center", fontWeight: 600, color: "#dc2626", fontSize: 19 }}>{fmtEur(Math.round(totalChLots))}</td>
+                    <td style={{ textAlign: "center", fontWeight: 600, fontSize: 19 }}>{totalMob > 0 ? fmtEur(totalMob) : "—"}</td>
                   </tr>
                 </tbody>
               </table>
@@ -4710,11 +4710,11 @@ function SimulateurExploitation({ simProjets }) {
             {compareAll.map(function(r) {
               var isBest = r.id === bestCF.id;
               return (<div key={r.id} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: isBest ? "2px solid " + r.color : "1px solid rgba(148,163,184,0.15)", position: "relative" }}>
-                {isBest && <div style={{ background: r.color, color: "#fff", fontSize: 9, fontWeight: 700, textAlign: "center", padding: "2px 0" }}>⭐ MEILLEUR CASH-FLOW</div>}
+                {isBest && <div style={{ background: r.color, color: "#fff", fontSize: 19, fontWeight: 700, textAlign: "center", padding: "2px 0" }}>⭐ MEILLEUR CASH-FLOW</div>}
                 <div style={{ padding: "12px 14px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                    <span style={{ fontSize: 22 }}>{r.icon}</span>
-                    <div><div style={{ fontSize: 13, fontWeight: 800 }}>{r.nom}</div><span style={{ fontSize: 9, fontWeight: 600, color: r.color, background: r.color + "15", padding: "1px 6px", borderRadius: 5 }}>{r.badge}</span></div>
+                    <span style={{ fontSize: 24 }}>{r.icon}</span>
+                    <div><div style={{ fontSize: 19, fontWeight: 800 }}>{r.nom}</div><span style={{ fontSize: 19, fontWeight: 600, color: r.color, background: r.color + "15", padding: "1px 6px", borderRadius: 5 }}>{r.badge}</span></div>
                   </div>
                   {[
                     { l: "Loyers/mois", v: fmtEur(r.loyerMois), c: "#16a34a" },
@@ -4723,11 +4723,11 @@ function SimulateurExploitation({ simProjets }) {
                     { l: "Rdt brut", v: fmtPct(r.rdtBrut), c: r.color },
                     { l: "Rdt net", v: fmtPct(r.rdtNet), c: r.rdtNet >= 0 ? "#16a34a" : "#dc2626" },
                   ].map(function(k) { return (<div key={k.l} style={{ display: "flex", justifyContent: "space-between", fontSize: k.big ? 13 : 11, marginBottom: k.big ? 4 : 1 }}><span style={{ color: "#78716C" }}>{k.l}</span><span style={{ fontWeight: k.big ? 700 : 600, color: k.c, fontSize: k.big ? 15 : 11 }}>{k.v}</span></div>); })}
-                  {r.mobilier > 0 && <div style={{ marginTop: 4, fontSize: 10, color: "#78716C", background: "#FFF8F3", borderRadius: 6, padding: "3px 6px" }}>Poste Mobilier : {fmtEur(r.mobilier)}</div>}
+                  {r.mobilier > 0 && <div style={{ marginTop: 4, fontSize: 19, color: "#78716C", background: "#FFF8F3", borderRadius: 6, padding: "3px 6px" }}>Poste Mobilier : {fmtEur(r.mobilier)}</div>}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 6 }}>
                     {[{ l: "Risque", v: r.risque }, { l: "Gestion", v: r.gestion }].map(function(b) {
                       var bc = b.v <= 2 ? "#16a34a" : b.v <= 3 ? "#f59e0b" : "#dc2626";
-                      return (<div key={b.l}><div style={{ fontSize: 9, color: "#A8A29E" }}>{b.l} {b.v}/5</div><div style={{ height: 4, background: "rgba(148,163,184,0.15)", borderRadius: 99 }}><div style={{ width: (b.v / 5 * 100) + "%", height: "100%", background: bc, borderRadius: 99 }} /></div></div>);
+                      return (<div key={b.l}><div style={{ fontSize: 19, color: "#A8A29E" }}>{b.l} {b.v}/5</div><div style={{ height: 4, background: "rgba(148,163,184,0.15)", borderRadius: 99 }}><div style={{ width: (b.v / 5 * 100) + "%", height: "100%", background: bc, borderRadius: 99 }} /></div></div>);
                     })}
                   </div>
                 </div>
@@ -4740,7 +4740,7 @@ function SimulateurExploitation({ simProjets }) {
             <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
               <Radar />
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                {compareAll.map(function(r) { return (<div key={r.id} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}><div style={{ width: 12, height: 12, borderRadius: 3, background: r.color }} /><b>{r.nom}</b><span style={{ color: "#78716C" }}>CF : {(r.cfMois >= 0 ? "+" : "") + fmt(Math.round(r.cfMois), 0)} €/m</span></div>); })}
+                {compareAll.map(function(r) { return (<div key={r.id} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 19 }}><div style={{ width: 12, height: 12, borderRadius: 3, background: r.color }} /><b>{r.nom}</b><span style={{ color: "#78716C" }}>CF : {(r.cfMois >= 0 ? "+" : "") + fmt(Math.round(r.cfMois), 0)} €/m</span></div>); })}
               </div>
             </div>
           </div>
@@ -4802,8 +4802,8 @@ function SuiviPortfolio({ simProjets }) {
     }));
   };
 
-  var fS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 8px", color: "#1C1917", fontSize: 12, outline: "none", boxSizing: "border-box" };
-  var lS = { display: "block", fontSize: 10, fontWeight: 600, color: "#78716C", marginBottom: 2 };
+  var fS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 8px", color: "#1C1917", fontSize: 19, outline: "none", boxSizing: "border-box" };
+  var lS = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 2 };
 
   // KPIs globaux portfolio
   var totalLoyerReelMois = 0, totalLoyerProjeteMois = 0, totalChargesReelMois = 0, totalCreditMois = 0;
@@ -4854,9 +4854,9 @@ function SuiviPortfolio({ simProjets }) {
           { label: "Cash-flow réel/mois", value: (cfReelMois >= 0 ? "+" : "") + fmtEur(Math.round(cfReelMois)), icon: "", color: cfReelMois >= 0 ? "#16a34a" : "#dc2626" },
         ].map(function(k) {
           return (<div key={k.label} style={{ background: "#fff", borderRadius: 14, padding: "10px 12px", border: "1.5px solid #FFE8D9", textAlign: "center" }}>
-            <div style={{ fontSize: 16, marginBottom: 2 }}>{k.icon}</div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: k.color }}>{k.value}</div>
-            <div style={{ fontSize: 9, color: "#A8A29E", marginTop: 2 }}>{k.label}</div>
+            <div style={{ fontSize: 19, marginBottom: 2 }}>{k.icon}</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: k.color }}>{k.value}</div>
+            <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{k.label}</div>
           </div>);
         })}
       </div>
@@ -4865,15 +4865,15 @@ function SuiviPortfolio({ simProjets }) {
         {/* Colonne gauche : liste des biens */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={ajouterBien} style={{ flex: 1, background: "#F97316", border: "none", borderRadius: 10, padding: "8px 12px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>+ Ajouter un bien</button>
+            <button onClick={ajouterBien} style={{ flex: 1, background: "#F97316", border: "none", borderRadius: 10, padding: "8px 12px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 600 }}>+ Ajouter un bien</button>
           </div>
           {/* Import depuis projets */}
           {(simProjets || []).length > 0 && (
             <div style={{ background: "#FFF8F3", borderRadius: 10, padding: "8px", border: "1.5px solid #FFE8D9" }}>
-              <div style={{ fontSize: 10, color: "#A8A29E", fontWeight: 600, marginBottom: 4 }}> Importer un projet :</div>
+              <div style={{ fontSize: 19, color: "#A8A29E", fontWeight: 600, marginBottom: 4 }}> Importer un projet :</div>
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                 {(simProjets || []).slice(0, 5).map(function(p) {
-                  return (<button key={p.id} onClick={function() { importerProjet(p); }} style={{ background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)", borderRadius: 6, padding: "3px 8px", fontSize: 10, color: "#16a34a", cursor: "pointer", fontWeight: 500 }}>{p.nom}</button>);
+                  return (<button key={p.id} onClick={function() { importerProjet(p); }} style={{ background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)", borderRadius: 6, padding: "3px 8px", fontSize: 19, color: "#16a34a", cursor: "pointer", fontWeight: 500 }}>{p.nom}</button>);
                 })}
               </div>
             </div>
@@ -4884,18 +4884,18 @@ function SuiviPortfolio({ simProjets }) {
             var md = b.moisData[moisDernierKey] || {};
             return (<div key={b.id} onClick={function() { setSelected(b.id); }} style={{ padding: "10px 12px", borderRadius: 12, background: isActive ? "#FFF3EC" : "rgba(255,255,255,0.8)", border: isActive ? "2px solid #F97316" : "1px solid rgba(148,163,184,0.12)", cursor: "pointer" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: "#1C1917" }}>{b.nom}</div>
-                <button onClick={function(e) { e.stopPropagation(); supprimerBien(b.id); }} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontSize: 10 }}>×</button>
+                <div style={{ fontSize: 19, fontWeight: 800, color: "#1C1917" }}>{b.nom}</div>
+                <button onClick={function(e) { e.stopPropagation(); supprimerBien(b.id); }} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontSize: 19 }}>×</button>
               </div>
-              <div style={{ fontSize: 10, color: "#A8A29E" }}>{b.adresse || "Sans adresse"}</div>
-              <div style={{ display: "flex", gap: 8, marginTop: 4, fontSize: 11 }}>
+              <div style={{ fontSize: 19, color: "#A8A29E" }}>{b.adresse || "Sans adresse"}</div>
+              <div style={{ display: "flex", gap: 8, marginTop: 4, fontSize: 19 }}>
                 <span style={{ color: "#16a34a", fontWeight: 600 }}>Projeté: {fmtEur(pf(b.loyerProjete))}/m</span>
                 {pf(md.loyerReel) > 0 && <span style={{ color: "#F97316", fontWeight: 600 }}>Réel: {fmtEur(pf(md.loyerReel))}/m</span>}
               </div>
             </div>);
           })}
           {biens.length === 0 && (
-            <div style={{ textAlign: "center", padding: 20, color: "#A8A29E", fontSize: 12 }}>Aucun bien dans le portfolio</div>
+            <div style={{ textAlign: "center", padding: 20, color: "#A8A29E", fontSize: 19 }}>Aucun bien dans le portfolio</div>
           )}
         </div>
 
@@ -4929,8 +4929,8 @@ function SuiviPortfolio({ simProjets }) {
                   { label: "Total charges", value: fmtEur(Math.round(bienStats.totalCharges)), color: "#dc2626" },
                 ].map(function(k) {
                   return (<div key={k.label} style={{ background: "#fff", borderRadius: 10, padding: "8px 10px", border: "1.5px solid #FFE8D9", textAlign: "center" }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: k.color }}>{k.value}</div>
-                    <div style={{ fontSize: 9, color: "#A8A29E", marginTop: 1 }}>{k.label}</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: k.color }}>{k.value}</div>
+                    <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 1 }}>{k.label}</div>
                   </div>);
                 })}
               </div>
@@ -4961,7 +4961,7 @@ function SuiviPortfolio({ simProjets }) {
                       </div>);
                     })}
                   </div>
-                  <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 6, fontSize: 10, color: "#A8A29E" }}>
+                  <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 6, fontSize: 19, color: "#A8A29E" }}>
                     <span><span style={{ display: "inline-block", width: 8, height: 8, background: "rgba(14,165,233,0.3)", borderRadius: 2, marginRight: 3 }}></span>Projeté</span>
                     <span><span style={{ display: "inline-block", width: 8, height: 8, background: "#16a34a", borderRadius: 2, marginRight: 3 }}></span>Réel ≥ projeté</span>
                     <span><span style={{ display: "inline-block", width: 8, height: 8, background: "#f59e0b", borderRadius: 2, marginRight: 3 }}></span>Réel &lt; projeté</span>
@@ -4974,15 +4974,15 @@ function SuiviPortfolio({ simProjets }) {
             <div style={SECTION}>
               <SectionHeader icon="ti-calendar" title="Saisie mensuelle" badge={derniersMois.length + " mois"} />
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 19 }}>
                   <thead><tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
-                    <th style={{ padding: "6px 8px", textAlign: "left", fontSize: 10, color: "#78716C", fontWeight: 600 }}>Mois</th>
-                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 10, color: "#78716C", fontWeight: 600 }}>Loyer réel</th>
-                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 10, color: "#78716C", fontWeight: 600 }}>Charges réelles</th>
-                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 10, color: "#78716C", fontWeight: 600 }}>Vacance</th>
-                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 10, color: "#78716C", fontWeight: 600 }}>Notes</th>
-                    <th style={{ padding: "6px 8px", textAlign: "right", fontSize: 10, color: "#78716C", fontWeight: 600 }}>Cash-flow</th>
-                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 10, color: "#78716C", fontWeight: 600 }}>Écart</th>
+                    <th style={{ padding: "6px 8px", textAlign: "left", fontSize: 19, color: "#78716C", fontWeight: 600 }}>Mois</th>
+                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 19, color: "#78716C", fontWeight: 600 }}>Loyer réel</th>
+                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 19, color: "#78716C", fontWeight: 600 }}>Charges réelles</th>
+                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 19, color: "#78716C", fontWeight: 600 }}>Vacance</th>
+                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 19, color: "#78716C", fontWeight: 600 }}>Notes</th>
+                    <th style={{ padding: "6px 8px", textAlign: "right", fontSize: 19, color: "#78716C", fontWeight: 600 }}>Cash-flow</th>
+                    <th style={{ padding: "6px 8px", textAlign: "center", fontSize: 19, color: "#78716C", fontWeight: 600 }}>Écart</th>
                   </tr></thead>
                   <tbody>
                     {derniersMois.map(function(mk, idx) {
@@ -4993,15 +4993,15 @@ function SuiviPortfolio({ simProjets }) {
                       var ecart = pf(bien.loyerProjete) > 0 && loyerR > 0 ? loyerR - pf(bien.loyerProjete) : null;
                       var moisLabel = mk.slice(5, 7) + "/" + mk.slice(0, 4);
                       return (<tr key={mk} style={{ borderBottom: "1px solid #FFE8D9", background: idx % 2 === 0 ? "rgba(248,250,252,0.5)" : "transparent" }}>
-                        <td style={{ padding: "4px 8px", fontWeight: 600, color: "#44403C", fontSize: 11 }}>{moisLabel}</td>
+                        <td style={{ padding: "4px 8px", fontWeight: 600, color: "#44403C", fontSize: 19 }}>{moisLabel}</td>
                         <td style={{ padding: "4px 4px", textAlign: "center" }}><input type="number" value={md.loyerReel || ""} onChange={function(e) { updateMois(bien.id, mk, "loyerReel", e.target.value); }} placeholder={bien.loyerProjete || "—"} step="50" style={Object.assign({}, fS, { width: 80, textAlign: "center" })} /></td>
                         <td style={{ padding: "4px 4px", textAlign: "center" }}><input type="number" value={md.chargesReelles || ""} onChange={function(e) { updateMois(bien.id, mk, "chargesReelles", e.target.value); }} placeholder={bien.chargesProjetees || "—"} step="50" style={Object.assign({}, fS, { width: 80, textAlign: "center" })} /></td>
                         <td style={{ padding: "4px 4px", textAlign: "center" }}>
-                          <button onClick={function() { updateMois(bien.id, mk, "vacant", md.vacant ? false : true); }} style={{ background: md.vacant ? "rgba(220,38,38,0.1)" : "rgba(22,163,74,0.1)", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 10, fontWeight: 600, color: md.vacant ? "#dc2626" : "#16a34a", cursor: "pointer" }}>{md.vacant ? "Vacant" : "Occupé"}</button>
+                          <button onClick={function() { updateMois(bien.id, mk, "vacant", md.vacant ? false : true); }} style={{ background: md.vacant ? "rgba(220,38,38,0.1)" : "rgba(22,163,74,0.1)", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 19, fontWeight: 600, color: md.vacant ? "#dc2626" : "#16a34a", cursor: "pointer" }}>{md.vacant ? "Vacant" : "Occupé"}</button>
                         </td>
                         <td style={{ padding: "4px 4px", textAlign: "center" }}><input value={md.notes || ""} onChange={function(e) { updateMois(bien.id, mk, "notes", e.target.value); }} placeholder="..." style={Object.assign({}, fS, { width: 100 })} /></td>
-                        <td style={{ padding: "4px 8px", textAlign: "right", fontWeight: 600, color: loyerR > 0 ? (cf >= 0 ? "#16a34a" : "#dc2626") : "#A8A29E", fontSize: 11 }}>{loyerR > 0 ? (cf >= 0 ? "+" : "") + fmt(Math.round(cf), 0) + " €" : "—"}</td>
-                        <td style={{ padding: "4px 8px", textAlign: "center", fontSize: 10, fontWeight: 600, color: ecart != null ? (ecart >= 0 ? "#16a34a" : "#dc2626") : "#A8A29E" }}>{ecart != null ? (ecart >= 0 ? "+" : "") + fmt(Math.round(ecart), 0) + " €" : "—"}</td>
+                        <td style={{ padding: "4px 8px", textAlign: "right", fontWeight: 600, color: loyerR > 0 ? (cf >= 0 ? "#16a34a" : "#dc2626") : "#A8A29E", fontSize: 19 }}>{loyerR > 0 ? (cf >= 0 ? "+" : "") + fmt(Math.round(cf), 0) + " €" : "—"}</td>
+                        <td style={{ padding: "4px 8px", textAlign: "center", fontSize: 19, fontWeight: 600, color: ecart != null ? (ecart >= 0 ? "#16a34a" : "#dc2626") : "#A8A29E" }}>{ecart != null ? (ecart >= 0 ? "+" : "") + fmt(Math.round(ecart), 0) + " €" : "—"}</td>
                       </tr>);
                     })}
                   </tbody>
@@ -5013,7 +5013,7 @@ function SuiviPortfolio({ simProjets }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 300, color: "#A8A29E" }}>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}></div>
-              <div style={{ fontSize: 14, fontWeight: 500 }}>Sélectionne ou ajoute un bien pour commencer le suivi</div>
+              <div style={{ fontSize: 19, fontWeight: 500 }}>Sélectionne ou ajoute un bien pour commencer le suivi</div>
             </div>
           </div>
         )}
@@ -5070,9 +5070,9 @@ function ProfilInvestisseur() {
     });
   };
 
-  var fieldStyle = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none", boxSizing: "border-box" };
-  var labelStyle = { display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 3 };
-  var sepStyle = { fontSize: 11, fontWeight: 700, color: "#F97316", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 14, marginBottom: 6, paddingBottom: 4, borderBottom: "2px solid #FFF3EC" };
+  var fieldStyle = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none", boxSizing: "border-box" };
+  var labelStyle = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 3 };
+  var sepStyle = { fontSize: 19, fontWeight: 700, color: "#F97316", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 14, marginBottom: 6, paddingBottom: 4, borderBottom: "2px solid #FFF3EC" };
 
   // Inline field renderer (not a component, avoids focus loss)
   var renderField = function(label, path, opts) {
@@ -5114,18 +5114,18 @@ function ProfilInvestisseur() {
           { label: "Patrimoine total", value: fmtEur(totalPatrimoineImmoNet + totalPatrimoineFinancier), icon: "▲", color: "#F97316" },
         ].map(function(k) {
           return (<div key={k.label} style={{ background: "#fff", borderRadius: 14, padding: "12px", border: "1.5px solid #FFE8D9", textAlign: "center" }}>
-            <div style={{ fontSize: 18, marginBottom: 4 }}>{k.icon}</div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: k.color }}>{k.value}</div>
-            <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 2 }}>{k.label}</div>
+            <div style={{ fontSize: 19, marginBottom: 4 }}>{k.icon}</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: k.color }}>{k.value}</div>
+            <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{k.label}</div>
           </div>);
         })}
       </div>
 
       {/* Bouton enregistrer */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, alignItems: "center" }}>
-        {saveStatus === "saved" && <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 600 }}>✓ Enregistré</span>}
-        {saveStatus === "pending" && <span style={{ fontSize: 12, color: "#f59e0b", fontWeight: 500 }}>Modifications non enregistrées</span>}
-        <button onClick={sauvegarder} style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "10px 24px", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 700, boxShadow: "0 4px 14px #FFE8D9" }}>
+        {saveStatus === "saved" && <span style={{ fontSize: 19, color: "#16a34a", fontWeight: 600 }}>✓ Enregistré</span>}
+        {saveStatus === "pending" && <span style={{ fontSize: 19, color: "#f59e0b", fontWeight: 500 }}>Modifications non enregistrées</span>}
+        <button onClick={sauvegarder} style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "10px 24px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 700, boxShadow: "0 4px 14px #FFE8D9" }}>
            Enregistrer
         </button>
       </div>
@@ -5177,10 +5177,10 @@ function ProfilInvestisseur() {
               </select>
             </div>
             <div><label style={labelStyle}>Montant annuel</label><input type="number" value={rev.montantAnnuel} onChange={function(e) { update("revenus." + idx + ".montantAnnuel", e.target.value); }} style={fieldStyle} placeholder="€/an" /></div>
-            <button onClick={function() { removeRow("revenus", idx); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "7px 0", color: "#dc2626", cursor: "pointer", fontSize: 13 }}>×</button>
+            <button onClick={function() { removeRow("revenus", idx); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "7px 0", color: "#dc2626", cursor: "pointer", fontSize: 19 }}>×</button>
           </div>);
         })}
-        <button onClick={function() { addRow("revenus", { type: "", titulaire: "Emprunteur 1", montantAnnuel: "" }); }} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500, marginTop: 6 }}>+ Ajouter un revenu</button>
+        <button onClick={function() { addRow("revenus", { type: "", titulaire: "Emprunteur 1", montantAnnuel: "" }); }} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 500, marginTop: 6 }}>+ Ajouter un revenu</button>
       </div>
 
       {/* Crédits en cours */}
@@ -5195,11 +5195,11 @@ function ProfilInvestisseur() {
               <div><label style={labelStyle}>Durée rest.</label><input type="number" value={cred.dureeRestante} onChange={function(e) { update("credits." + idx + ".dureeRestante", e.target.value); }} style={fieldStyle} placeholder="mois" /></div>
               <div><label style={labelStyle}>Capital restant</label><input type="number" value={cred.capitalRestant} onChange={function(e) { update("credits." + idx + ".capitalRestant", e.target.value); }} style={fieldStyle} placeholder="€" /></div>
               <div><label style={labelStyle}>Charge/an</label><input type="number" value={cred.chargeAnnuelle} onChange={function(e) { update("credits." + idx + ".chargeAnnuelle", e.target.value); }} style={fieldStyle} placeholder="€/an" /></div>
-              <button onClick={function() { removeRow("credits", idx); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "7px 0", color: "#dc2626", cursor: "pointer", fontSize: 13 }}>×</button>
+              <button onClick={function() { removeRow("credits", idx); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "7px 0", color: "#dc2626", cursor: "pointer", fontSize: 19 }}>×</button>
             </div>
           </div>);
         })}
-        <button onClick={function() { addRow("credits", { nature: "", titulaire: "Commun", preteur: "", dureeRestante: "", capitalRestant: "", chargeAnnuelle: "" }); }} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500, marginTop: 6 }}>+ Ajouter un crédit</button>
+        <button onClick={function() { addRow("credits", { nature: "", titulaire: "Commun", preteur: "", dureeRestante: "", capitalRestant: "", chargeAnnuelle: "" }); }} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 500, marginTop: 6 }}>+ Ajouter un crédit</button>
       </div>
 
       {/* Patrimoine Immobilier */}
@@ -5214,11 +5214,11 @@ function ProfilInvestisseur() {
               <div><label style={labelStyle}>Val. achat</label><input type="number" value={bien.valeurAcquisition} onChange={function(e) { update("patrimoineImmo." + idx + ".valeurAcquisition", e.target.value); }} style={fieldStyle} placeholder="€" /></div>
               <div><label style={labelStyle}>Val. estimée</label><input type="number" value={bien.valeurEstimee} onChange={function(e) { update("patrimoineImmo." + idx + ".valeurEstimee", e.target.value); }} style={fieldStyle} placeholder="€" /></div>
               <div><label style={labelStyle}>Capital restant</label><input type="number" value={bien.capitalRestant} onChange={function(e) { update("patrimoineImmo." + idx + ".capitalRestant", e.target.value); }} style={fieldStyle} placeholder="€" /></div>
-              <button onClick={function() { removeRow("patrimoineImmo", idx); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "7px 0", color: "#dc2626", cursor: "pointer", fontSize: 13 }}>×</button>
+              <button onClick={function() { removeRow("patrimoineImmo", idx); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "7px 0", color: "#dc2626", cursor: "pointer", fontSize: 19 }}>×</button>
             </div>
           </div>);
         })}
-        <button onClick={function() { addRow("patrimoineImmo", { type: "", proprietaire: "Commun", anneeAcquisition: "", valeurAcquisition: "", valeurEstimee: "", capitalRestant: "" }); }} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500, marginTop: 6 }}>+ Ajouter un bien</button>
+        <button onClick={function() { addRow("patrimoineImmo", { type: "", proprietaire: "Commun", anneeAcquisition: "", valeurAcquisition: "", valeurEstimee: "", capitalRestant: "" }); }} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 500, marginTop: 6 }}>+ Ajouter un bien</button>
       </div>
 
       {/* Patrimoine Financier */}
@@ -5230,23 +5230,23 @@ function ProfilInvestisseur() {
             <div><label style={labelStyle}>Propriétaire</label><select value={pf2.proprietaire} onChange={function(e) { update("patrimoineFinancier." + idx + ".proprietaire", e.target.value); }} style={fieldStyle}><option>Emprunteur 1</option><option>Emprunteur 2</option><option>Commun</option></select></div>
             <div><label style={labelStyle}>Établissement</label><input value={pf2.etablissement} onChange={function(e) { update("patrimoineFinancier." + idx + ".etablissement", e.target.value); }} style={fieldStyle} placeholder="Banque, courtier..." /></div>
             <div><label style={labelStyle}>Valeur</label><input type="number" value={pf2.valeur} onChange={function(e) { update("patrimoineFinancier." + idx + ".valeur", e.target.value); }} style={fieldStyle} placeholder="€" /></div>
-            <button onClick={function() { removeRow("patrimoineFinancier", idx); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "7px 0", color: "#dc2626", cursor: "pointer", fontSize: 13 }}>×</button>
+            <button onClick={function() { removeRow("patrimoineFinancier", idx); }} style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "7px 0", color: "#dc2626", cursor: "pointer", fontSize: 19 }}>×</button>
           </div>);
         })}
-        <button onClick={function() { addRow("patrimoineFinancier", { type: "", proprietaire: "Emprunteur 1", etablissement: "", valeur: "" }); }} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 500, marginTop: 6 }}>+ Ajouter un placement</button>
+        <button onClick={function() { addRow("patrimoineFinancier", { type: "", proprietaire: "Emprunteur 1", etablissement: "", valeur: "" }); }} style={{ background: "#F97316", border: "none", borderRadius: 8, padding: "6px 14px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 500, marginTop: 6 }}>+ Ajouter un placement</button>
       </div>
 
       {/* Capacité d'emprunt */}
       <div style={SECTION}>
         <SectionHeader icon="ti-chart-bar" title="Capacité d'emprunt estimée" />
-        <div style={{ fontSize: 11, color: "#78716C", marginBottom: 10, background: "#FFF8F3", borderRadius: 8, padding: "8px 10px" }}>
+        <div style={{ fontSize: 19, color: "#78716C", marginBottom: 10, background: "#FFF8F3", borderRadius: 8, padding: "8px 10px" }}>
           Les banques retiennent <b>70 % des loyers perçus</b> dans le calcul des revenus. Renseigne tes loyers actuels dans "Revenus" (type = Loyers) et les futurs loyers de ton projet ci-dessous.
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
           {renderField("Futurs loyers mensuels HC (nouveau projet)", "futursLoyersMensuels", { type: "number", placeholder: "Ex: 2050" })}
           <div>
             <label style={labelStyle}>Futurs loyers retenus (70%)</label>
-            <div style={{ padding: "7px 10px", background: "rgba(22,163,74,0.08)", borderRadius: 10, fontSize: 14, fontWeight: 700, color: "#16a34a" }}>
+            <div style={{ padding: "7px 10px", background: "rgba(22,163,74,0.08)", borderRadius: 10, fontSize: 19, fontWeight: 700, color: "#16a34a" }}>
               {fmtEur(Math.round(pf(profil.futursLoyersMensuels) * 0.7))} /mois
             </div>
           </div>
@@ -5284,7 +5284,7 @@ function ProfilInvestisseur() {
             ];
           })().map(function(k) {
             return (<div key={k.label} style={{ background: k.bold ? "#FFF3EC" : "rgba(255,255,255,0.8)", borderRadius: 12, padding: "10px 14px", border: "1px solid " + (k.bold ? "#FFE8D9" : "rgba(148,163,184,0.2)") }}>
-              <div style={{ fontSize: 10, color: "#A8A29E" }}>{k.label}</div>
+              <div style={{ fontSize: 19, color: "#A8A29E" }}>{k.label}</div>
               <div style={{ fontSize: k.bold ? 18 : 16, fontWeight: 800, color: k.color, marginTop: 2 }}>{k.value}</div>
             </div>);
           })}
@@ -5293,9 +5293,9 @@ function ProfilInvestisseur() {
 
       {/* Bouton enregistrer en bas */}
       <div style={{ display: "flex", justifyContent: "center", gap: 10, alignItems: "center", padding: "10px 0" }}>
-        {saveStatus === "saved" && <span style={{ fontSize: 13, color: "#16a34a", fontWeight: 600 }}>✓ Données enregistrées avec succès</span>}
-        {saveStatus === "pending" && <span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 500 }}>⚠ Modifications non enregistrées</span>}
-        <button onClick={sauvegarder} style={{ background: "#F97316", border: "none", borderRadius: 12, padding: "12px 32px", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700, boxShadow: "0 4px 14px #FFE8D9" }}>
+        {saveStatus === "saved" && <span style={{ fontSize: 19, color: "#16a34a", fontWeight: 600 }}>✓ Données enregistrées avec succès</span>}
+        {saveStatus === "pending" && <span style={{ fontSize: 19, color: "#f59e0b", fontWeight: 500 }}>⚠ Modifications non enregistrées</span>}
+        <button onClick={sauvegarder} style={{ background: "#F97316", border: "none", borderRadius: 12, padding: "12px 32px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 700, boxShadow: "0 4px 14px #FFE8D9" }}>
            Enregistrer ma fiche patrimoine
         </button>
       </div>
@@ -5436,9 +5436,9 @@ function SimulateurSCI() {
   const couleurTreso = (an1.tresoConsolidee || 0) >= 0 ? "#16a34a" : "#dc2626";
   const alertePalier = (an1.resultatFiscal || 0) > SEUIL_IS_BAS * 0.8;
 
-  const sepS = { fontSize: 10, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 8 };
-  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 13, outline: "none" };
-  const labelS = { display: "block", fontSize: 11, fontWeight: 600, color: "#78716C", marginBottom: 3 };
+  const sepS = { fontSize: 19, fontWeight: 700, color: "#A8A29E", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 8 };
+  const inputS = { width: "100%", background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "7px 10px", color: "#1C1917", fontSize: 19, outline: "none" };
+  const labelS = { display: "block", fontSize: 19, fontWeight: 600, color: "#78716C", marginBottom: 3 };
 
   // Tabs
   const tabs = [{ id: "dashboard", label: "Stats Tableau de bord" }]
@@ -5456,17 +5456,17 @@ function SimulateurSCI() {
               value={nomProjet}
               onChange={function(e) { setNomProjet(e.target.value); }}
               placeholder="Nom de la simulation SCI"
-              style={{ background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 14px", fontSize: 13, color: "#1C1917", width: 220, outline: "none" }}
+              style={{ background: "#FFF8F3", border: "1.5px solid #FFE8D9", borderRadius: 10, padding: "6px 14px", fontSize: 19, color: "#1C1917", width: 220, outline: "none" }}
             />
             <button onClick={function() { sauvegarderSCI(false); }}
-              style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "7px 16px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+              style={{ background: "#F97316", border: "none", borderRadius: 10, padding: "7px 16px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 600 }}>
                Sauver
             </button>
             <button onClick={exportJSONSCI}
-              style={{ background: "#FFF3EC", border: "1px solid #FFE8D9", borderRadius: 10, padding: "7px 14px", color: "#F97316", cursor: "pointer", fontSize: 12, fontWeight: 500 }}>
+              style={{ background: "#FFF3EC", border: "1px solid #FFE8D9", borderRadius: 10, padding: "7px 14px", color: "#F97316", cursor: "pointer", fontSize: 19, fontWeight: 500 }}>
               ⬇ Export JSON
             </button>
-            <span style={{ fontSize: 11, color: saveStatus === "saved" ? "#16a34a" : saveStatus === "pending" ? "#d97706" : "transparent" }}>
+            <span style={{ fontSize: 19, color: saveStatus === "saved" ? "#16a34a" : saveStatus === "pending" ? "#d97706" : "transparent" }}>
               {saveStatus === "saved" ? "✓ Sauvegardé" : " Modifications en cours..."}
             </span>
           </div>
@@ -5477,12 +5477,12 @@ function SimulateurSCI() {
               return (
                 <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 5, background: "#FFF3EC", border: "1px solid #FFE8D9", borderRadius: 8, padding: "3px 10px" }}>
                   <button onClick={function() { chargerProjetSCI(p); }}
-                    style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: "#F97316", cursor: "pointer" }}>
+                    style={{ background: "none", border: "none", fontSize: 19, fontWeight: 600, color: "#F97316", cursor: "pointer" }}>
                     {p.nom}
                   </button>
-                  <span style={{ fontSize: 10, color: "#A8A29E" }}>{p.savedAt}</span>
+                  <span style={{ fontSize: 19, color: "#A8A29E" }}>{p.savedAt}</span>
                   <button onClick={function() { supprimerProjetSCI(p.id); }}
-                    style={{ background: "none", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 11 }}>×</button>
+                    style={{ background: "none", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 19 }}>×</button>
                 </div>
               );
             })}
@@ -5491,7 +5491,7 @@ function SimulateurSCI() {
       </div>
 
       {/* Info banner */}
-      <div style={{ background: "linear-gradient(135deg,#FFF3EC,rgba(56,189,248,0.08))", borderRadius: 14, padding: "12px 16px", border: "1px solid #FFE8D9", fontSize: 12, color: "#44403C" }}>
+      <div style={{ background: "linear-gradient(135deg,#FFF3EC,rgba(56,189,248,0.08))", borderRadius: 14, padding: "12px 16px", border: "1px solid #FFE8D9", fontSize: 19, color: "#44403C" }}>
         <strong>SCI IS — Pilotage multi-biens</strong> — Consolidez plusieurs biens dans une même SCI. IS calculé sur le résultat global. CCA remboursables sans fiscalité. Seuil 15% / 25% suivi chaque année.
       </div>
 
@@ -5507,9 +5507,9 @@ function SimulateurSCI() {
         ].map(function(kpi) {
           return (
             <div key={kpi.label} style={{ background: "#fff", borderRadius: 14, padding: "12px", border: "1.5px solid #FFE8D9", textAlign: "center", backdropFilter: "blur(12px)" }}>
-              <div style={{ fontSize: 18, marginBottom: 4 }}>{kpi.icon}</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
-              <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 2 }}>{kpi.label}</div>
+              <div style={{ fontSize: 19, marginBottom: 4 }}>{kpi.icon}</div>
+              <div style={{ fontSize: 19, fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
+              <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{kpi.label}</div>
             </div>
           );
         })}
@@ -5521,14 +5521,14 @@ function SimulateurSCI() {
           const isActive = activeTab === t.id;
           return (
             <button key={t.id} onClick={function() { setActiveTab(t.id); if (t.bienId) setActiveBien(t.bienId); }}
-              style={{ padding: "7px 14px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600,
+              style={{ padding: "7px 14px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600,
                 background: isActive ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isActive ? "#fff" : "#78716C" }}>
               {t.label}
             </button>
           );
         })}
         <button onClick={addBien}
-          style={{ padding: "7px 14px", borderRadius: 10, border: "1.5px dashed #FFF3EC", cursor: "pointer", fontSize: 12, fontWeight: 600, background: "transparent", color: "#F97316" }}>
+          style={{ padding: "7px 14px", borderRadius: 10, border: "1.5px dashed #FFF3EC", cursor: "pointer", fontSize: 19, fontWeight: 600, background: "transparent", color: "#F97316" }}>
           + Ajouter un bien
         </button>
       </div>
@@ -5549,13 +5549,13 @@ function SimulateurSCI() {
             <div style={Object.assign({}, SECTION)}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: "#1C1917" }}><Icon name="ti-home" size={18} color="#F97316" /></span>
+                  <span style={{ fontSize: 19, fontWeight: 700, color: "#1C1917" }}><Icon name="ti-home" size={18} color="#F97316" /></span>
                   <input value={bien.nom} onChange={function(e) { updateBien(bien.id, "nom", e.target.value); }}
-                    style={{ fontSize: 15, fontWeight: 700, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "2px dashed #FFE8D9" }} />
+                    style={{ fontSize: 19, fontWeight: 700, color: "#1C1917", background: "transparent", border: "none", outline: "none", borderBottom: "2px dashed #FFE8D9" }} />
                 </div>
                 {biens.length > 1 && (
                   <button onClick={function() { removeBien(bien.id); }}
-                    style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "5px 12px", color: "#dc2626", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+                    style={{ background: "rgba(220,38,38,0.08)", border: "none", borderRadius: 8, padding: "5px 12px", color: "#dc2626", cursor: "pointer", fontSize: 19, fontWeight: 600 }}>
                     Supprimer
                   </button>
                 )}
@@ -5575,8 +5575,8 @@ function SimulateurSCI() {
                   ].map(function(kpi) {
                     return (
                       <div key={kpi.label} style={{ background: "#fff", borderRadius: 12, padding: "10px 12px", border: "1.5px solid #FFE8D9", textAlign: "center" }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: kpi.color }}>{kpi.value}</div>
-                        <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 2 }}>{kpi.label}</div>
+                        <div style={{ fontSize: 19, fontWeight: 700, color: kpi.color }}>{kpi.value}</div>
+                        <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>{kpi.label}</div>
                       </div>
                     );
                   })}
@@ -5600,7 +5600,7 @@ function SimulateurSCI() {
                   {[{ val: "15", label: "15% (≤ 42 500 €)" }, { val: "25", label: "25% (normal)" }].map(function(t) {
                     const isA = sciParams.tauxIS === t.val;
                     return <button key={t.val} onClick={function() { setSciParams(function(p) { return Object.assign({}, p, { tauxIS: t.val }); }); }}
-                      style={{ flex: 1, padding: "7px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>{t.label}</button>;
+                      style={{ flex: 1, padding: "7px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>{t.label}</button>;
                   })}
                 </div>
               </div>
@@ -5610,7 +5610,7 @@ function SimulateurSCI() {
                   {[{ val: "30", label: "30% (PFU)" }, { val: "17.2", label: "17.2% (PS)" }].map(function(t) {
                     const isA = sciParams.tauxDividendes === t.val;
                     return <button key={t.val} onClick={function() { setSciParams(function(p) { return Object.assign({}, p, { tauxDividendes: t.val }); }); }}
-                      style={{ flex: 1, padding: "7px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>{t.label}</button>;
+                      style={{ flex: 1, padding: "7px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>{t.label}</button>;
                   })}
                 </div>
               </div>
@@ -5629,7 +5629,7 @@ function SimulateurSCI() {
 
           <div style={SECTION}>
             <SectionHeader icon="↺" title="Comptes Courants d'Associés (CCA)" />
-            <div style={{ fontSize: 11, color: "#78716C", marginBottom: 10 }}>
+            <div style={{ fontSize: 19, color: "#78716C", marginBottom: 10 }}>
               Les apports CCA sont remboursables sans fiscalité. Les intérêts versés aux associés ({sciParams.tauxCCA}%/an) sont déductibles du résultat fiscal SCI.
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -5638,9 +5638,9 @@ function SimulateurSCI() {
                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                   <input type="number" value={sciParams.tauxCCA} min="0" step="0.1"
                     onChange={function(e) { setSciParams(function(p) { return Object.assign({}, p, { tauxCCA: e.target.value }); }); }} style={inputS} />
-                  <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 28 }}>%</span>
+                  <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 28 }}>%</span>
                 </div>
-                <div style={{ fontSize: 10, color: "#A8A29E", marginTop: 2 }}>Taux légal 2024 : {TAUX_CCA_LEGAL}% — déductible du résultat fiscal</div>
+                <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 2 }}>Taux légal 2024 : {TAUX_CCA_LEGAL}% — déductible du résultat fiscal</div>
               </div>
               <div>
                 <label style={labelS}>Stratégie de distribution</label>
@@ -5648,7 +5648,7 @@ function SimulateurSCI() {
                   {[{ val: "rembourser", label: "↺ Rembourser CCA d'abord" }, { val: "distribuer", label: " Distribuer dividendes" }].map(function(t) {
                     const isA = sciParams.distribuerOuRembourser === t.val;
                     return <button key={t.val} onClick={function() { setSciParams(function(p) { return Object.assign({}, p, { distribuerOuRembourser: t.val }); }); }}
-                      style={{ flex: 1, padding: "7px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>{t.label}</button>;
+                      style={{ flex: 1, padding: "7px 8px", borderRadius: 9, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: isA ? "#FFF3EC" : "rgba(148,163,184,0.12)", color: isA ? "#fff" : "#78716C" }}>{t.label}</button>;
                   })}
                 </div>
               </div>
@@ -5659,33 +5659,33 @@ function SimulateurSCI() {
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                       <input value={assoc.nom}
                         onChange={function(e) { updateCCA(assoc.id, "nom", e.target.value); }}
-                        style={{ flex: 1, background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed rgba(56,189,248,0.4)", fontSize: 13, fontWeight: 600, color: "#1C1917" }} />
+                        style={{ flex: 1, background: "transparent", border: "none", outline: "none", borderBottom: "1px dashed rgba(56,189,248,0.4)", fontSize: 19, fontWeight: 600, color: "#1C1917" }} />
                       {ccaAssocies.length > 1 && (
                         <button onClick={function() { setCcaAssocies(function(prev) { return prev.filter(function(a) { return a.id !== assoc.id; }); }); }}
-                          style={{ background: "transparent", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 13 }}>×</button>
+                          style={{ background: "transparent", border: "none", color: "#A8A29E", cursor: "pointer", fontSize: 19 }}>×</button>
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <input type="number" value={assoc.montant} min="0" step="1000"
                         onChange={function(e) { updateCCA(assoc.id, "montant", e.target.value); }}
                         style={Object.assign({}, inputS, { flex: 1 })} />
-                      <span style={{ fontSize: 11, color: "#A8A29E", minWidth: 16 }}>€</span>
+                      <span style={{ fontSize: 19, color: "#A8A29E", minWidth: 16 }}>€</span>
                     </div>
-                    <div style={{ fontSize: 10, color: "#FBB042", marginTop: 4 }}>
+                    <div style={{ fontSize: 19, color: "#FBB042", marginTop: 4 }}>
                       Intérêts/an : {fmtEur(pf(assoc.montant) * pf(sciParams.tauxCCA) / 100)} (déductibles)
                     </div>
                   </div>
                 );
               })}
               <button onClick={addCCA}
-                style={{ padding: "7px", borderRadius: 9, border: "1.5px dashed rgba(56,189,248,0.4)", cursor: "pointer", fontSize: 12, fontWeight: 600, background: "transparent", color: "#F97316" }}>
+                style={{ padding: "7px", borderRadius: 9, border: "1.5px dashed rgba(56,189,248,0.4)", cursor: "pointer", fontSize: 19, fontWeight: 600, background: "transparent", color: "#F97316" }}>
                 + Ajouter un associé
               </button>
               <div style={{ background: "rgba(56,189,248,0.08)", borderRadius: 10, padding: "10px 12px", border: "1px solid rgba(56,189,248,0.2)" }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#0369a1", marginBottom: 4 }}>Récapitulatif CCA</div>
+                <div style={{ fontSize: 19, fontWeight: 600, color: "#0369a1", marginBottom: 4 }}>Récapitulatif CCA</div>
                 <StatRow label="Total CCA apporté" value={fmtEur(totalCCA)} color="#FBB042" bold />
                 <StatRow label={"Intérêts/an (" + sciParams.tauxCCA + "%)"} value={fmtEur(totalCCA * pf(sciParams.tauxCCA) / 100)} color="#F97316" border={false} />
-                <div style={{ fontSize: 10, color: "#78716C", marginTop: 6 }}>
+                <div style={{ fontSize: 19, color: "#78716C", marginTop: 6 }}>
                   ✓ Remboursement non imposable — sortie d'argent sans PFU ni IR
                 </div>
               </div>
@@ -5694,7 +5694,7 @@ function SimulateurSCI() {
         </div>
       )}
 
-      <div style={{ background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 14px", fontSize: 11, color: "#78716C", border: "1.5px solid #FFE8D9" }}>
+      <div style={{ background: "rgba(241,245,249,0.8)", borderRadius: 12, padding: "10px 14px", fontSize: 19, color: "#78716C", border: "1.5px solid #FFE8D9" }}>
         ℹ IS calculé sur le résultat <strong>consolidé</strong> de la SCI (Σ tous biens). Seuil taux réduit 15% : 42 500 €/an. Les loyers sont indexés +1%/an. Les CCA sont remboursables sans imposition et les intérêts versés sont déductibles (taux légal {TAUX_CCA_LEGAL}%). Attention à la plus-value à la revente (amortissements réintégrés).
       </div>
     </div>
@@ -5764,11 +5764,11 @@ function AuthScreen({ onAuth }) {
   };
 
   var boxS = { maxWidth: 380, margin: "0 auto", padding: 32, background: "#fff", borderRadius: 24, boxShadow: "0 8px 40px #FFE8D9", border: "1.5px solid #FFE8D9", backdropFilter: "blur(20px)" };
-  var inputS = { width: "100%", padding: "11px 14px", borderRadius: 12, border: "1.5px solid #FFE8D9", fontSize: 14, outline: "none", background: "#FFF8F3", color: "#1C1917", boxSizing: "border-box" };
-  var btnS = { width: "100%", padding: "12px", borderRadius: 12, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 700, color: "#fff", background: "#F97316", boxSizing: "border-box" };
+  var inputS = { width: "100%", padding: "11px 14px", borderRadius: 12, border: "1.5px solid #FFE8D9", fontSize: 19, outline: "none", background: "#FFF8F3", color: "#1C1917", boxSizing: "border-box" };
+  var btnS = { width: "100%", padding: "12px", borderRadius: 12, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 700, color: "#fff", background: "#F97316", boxSizing: "border-box" };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", padding: 20 }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", fontSize: 15, padding: 20 }}>
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <div style={{ width: 56, height: 56, borderRadius: 16, background: "#F97316", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 20px #FFF3EC", marginBottom: 16 }}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12L12 4l9 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M5 10v8a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="18" cy="8" r="1.5" fill="#fbbf24"/></svg>
@@ -5777,7 +5777,7 @@ function AuthScreen({ onAuth }) {
           <span style={{ background: "linear-gradient(90deg,#F97316,#38bdf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>RADAR</span>
           <span style={{ color: "#1C1917" }}> IMMO 76</span>
         </h1>
-        <p style={{ fontSize: 13, color: "#78716C", margin: "8px 0 0" }}>Connecte-toi pour synchroniser tes projets sur tous tes appareils</p>
+        <p style={{ fontSize: 19, color: "#78716C", margin: "8px 0 0" }}>Connecte-toi pour synchroniser tes projets sur tous tes appareils</p>
       </div>
       <div style={boxS}>
         <div style={{ display: "flex", marginBottom: 20, borderRadius: 10, overflow: "hidden", border: "1.5px solid #FFE8D9" }}>
@@ -5785,7 +5785,7 @@ function AuthScreen({ onAuth }) {
             var active = mode === m;
             return (
               <button key={m} onClick={function() { setMode(m); setErr(""); setMsg(""); }}
-                style={{ flex: 1, padding: "9px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: active ? "#FFE8D9" : "transparent", color: active ? "#F97316" : "#A8A29E" }}>
+                style={{ flex: 1, padding: "9px", border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, background: active ? "#FFE8D9" : "transparent", color: active ? "#F97316" : "#A8A29E" }}>
                 {m === "login" ? "Connexion" : "Inscription"}
               </button>
             );
@@ -5793,16 +5793,16 @@ function AuthScreen({ onAuth }) {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "#78716C", display: "block", marginBottom: 4 }}>Email</label>
+            <label style={{ fontSize: 19, fontWeight: 600, color: "#78716C", display: "block", marginBottom: 4 }}>Email</label>
             <input type="email" value={email} onChange={function(e) { setEmail(e.target.value); }} style={inputS} placeholder="ton@email.com" />
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "#78716C", display: "block", marginBottom: 4 }}>Mot de passe</label>
+            <label style={{ fontSize: 19, fontWeight: 600, color: "#78716C", display: "block", marginBottom: 4 }}>Mot de passe</label>
             <input type="password" value={pass} onChange={function(e) { setPass(e.target.value); }} style={inputS} placeholder="••••••••"
               onKeyDown={function(e) { if (e.key === "Enter") submit(); }} />
           </div>
-          {err && <div style={{ fontSize: 12, color: "#dc2626", background: "rgba(220,38,38,0.06)", padding: "8px 12px", borderRadius: 8 }}>{err}</div>}
-          {msg && <div style={{ fontSize: 12, color: "#16a34a", background: "rgba(22,163,74,0.06)", padding: "8px 12px", borderRadius: 8 }}>{msg}</div>}
+          {err && <div style={{ fontSize: 19, color: "#dc2626", background: "rgba(220,38,38,0.06)", padding: "8px 12px", borderRadius: 8 }}>{err}</div>}
+          {msg && <div style={{ fontSize: 19, color: "#16a34a", background: "rgba(22,163,74,0.06)", padding: "8px 12px", borderRadius: 8 }}>{msg}</div>}
           <button onClick={submit} disabled={loading} style={Object.assign({}, btnS, { opacity: loading ? 0.6 : 1 })}>
             {loading ? "⏳ Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
           </button>
@@ -5818,7 +5818,7 @@ function AuthScreen({ onAuth }) {
               if (r.error) setErr(r.error.message);
               else setMsg("Email de réinitialisation envoyé !");
               setLoading(false);
-            }} style={{ background: "none", border: "none", color: "#F97316", fontSize: 12, cursor: "pointer", fontWeight: 500 }}>
+            }} style={{ background: "none", border: "none", color: "#F97316", fontSize: 19, cursor: "pointer", fontWeight: 500 }}>
               Mot de passe oublié ?
             </button>
           </div>
@@ -5854,8 +5854,8 @@ export default function App() {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FFF8F3", fontFamily: "system-ui,sans-serif" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}><Icon name="ti-home" size={20} color="#F97316" /></div>
-          <div style={{ fontSize: 14, color: "#78716C" }}>Chargement...</div>
+          <div style={{ fontSize: 38, marginBottom: 12 }}><Icon name="ti-home" size={20} color="#F97316" /></div>
+          <div style={{ fontSize: 19, color: "#78716C" }}>Chargement...</div>
         </div>
       </div>
     );
@@ -5961,7 +5961,7 @@ function AppMain({ user, onLogout }) {
   const handleNav = function(id) { setOnglet(id); };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", fontSize: 15 }}>
 
       {/* Sidebar */}
       <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", overflowX: "hidden", zIndex: 30, boxShadow: "none" }}>
@@ -5977,11 +5977,11 @@ function AppMain({ user, onLogout }) {
             </svg>
           </div>
           <div style={{ overflow: "hidden", whiteSpace: "nowrap" }}>
-              <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.5px", lineHeight: 1.1 }}>
+              <div style={{ fontSize: 19, fontWeight: 900, letterSpacing: "-0.5px", lineHeight: 1.1 }}>
                 <span style={{ color: "#F97316" }}>RADAR</span>
                 <span style={{ color: "#1C1917" }}> IMMO</span>
               </div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#A8A29E", letterSpacing: "2px", marginTop: 1 }}>SEINE-MARITIME</div>
+              <div style={{ fontSize: 19, fontWeight: 700, color: "#A8A29E", letterSpacing: "2px", marginTop: 1 }}>SEINE-MARITIME</div>
             </div>
         </div>
 
@@ -5991,7 +5991,7 @@ function AppMain({ user, onLogout }) {
             const isActive = onglet === n.id;
             return (
               <button key={n.id} onClick={function() { handleNav(n.id); }} 
-                style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-start", padding: "9px 10px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, width: "100%", textAlign: "left", background: isActive ? "#FFF3EC" : "transparent", color: isActive ? "#F97316" : "#A8A29E", borderLeft: isActive ? "3px solid #F97316" : "3px solid transparent", fontWeight: isActive ? 700 : 500, transition: "all 0.15s", overflow: "hidden", whiteSpace: "nowrap", position: "relative" }}>
+                style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-start", padding: "9px 10px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 19, fontWeight: 500, width: "100%", textAlign: "left", background: isActive ? "#FFF3EC" : "transparent", color: isActive ? "#F97316" : "#A8A29E", borderLeft: isActive ? "3px solid #F97316" : "3px solid transparent", fontWeight: isActive ? 700 : 500, transition: "all 0.15s", overflow: "hidden", whiteSpace: "nowrap", position: "relative" }}>
                 <Icon name={n.icon} size={18} style={{ flexShrink: 0 }} />
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{n.label}</span>
                 
@@ -6003,11 +6003,11 @@ function AppMain({ user, onLogout }) {
 
         {/* User + Logout */}
         <div style={{ marginTop: 6, padding: "8px", borderRadius: 10, background: "#FFF8F3", border: "1.5px solid #FFE8D9", overflow: "hidden" }}>
-          <div style={{ fontSize: 10, color: "#78716C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 6 }}>
+          <div style={{ fontSize: 19, color: "#78716C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 6 }}>
             {user.email}
           </div>
           <button onClick={onLogout}
-            style={{ width: "100%", padding: "6px", borderRadius: 8, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.06)", color: "#dc2626", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+            style={{ width: "100%", padding: "6px", borderRadius: 8, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.06)", color: "#dc2626", fontSize: 19, fontWeight: 600, cursor: "pointer" }}>
             Déconnexion
           </button>
         </div>
@@ -6017,8 +6017,8 @@ function AppMain({ user, onLogout }) {
       {/* Main */}
       <main style={{ flex: 1, padding: 20, overflowY: "auto", minWidth: 0 }}>
         <div style={{ marginBottom: 16 }}>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: "#1C1917", margin: 0 }}>{titres[onglet].h}</h1>
-          <p style={{ fontSize: 12, color: "#78716C", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
+          <h1 style={{ fontSize: 19, fontWeight: 700, color: "#1C1917", margin: 0 }}>{titres[onglet].h}</h1>
+          <p style={{ fontSize: 19, color: "#78716C", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
         </div>
         {onglet === "dashboard"  && <Dashboard projets={simProjets} onOuvrir={ouvrirProjet} onNav={handleNav} user={user} />}
         {onglet === "analyse"    && <AnalyseCommunes />}
@@ -6036,8 +6036,8 @@ function AppMain({ user, onLogout }) {
             {simProjets.length === 0 ? (
               <div style={{ textAlign: "center", padding: "60px 20px", color: "#A8A29E" }}>
                 <div style={{ fontSize: 48, marginBottom: 12 }}>⭐</div>
-                <div style={{ fontSize: 16, fontWeight: 600, color: "#78716C" }}>Aucun projet sauvegardé</div>
-                <div style={{ fontSize: 13, marginTop: 6 }}>Crée une simulation et clique sur "Sauver" pour la retrouver ici.</div>
+                <div style={{ fontSize: 19, fontWeight: 600, color: "#78716C" }}>Aucun projet sauvegardé</div>
+                <div style={{ fontSize: 19, marginTop: 6 }}>Crée une simulation et clique sur "Sauver" pour la retrouver ici.</div>
               </div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
@@ -6064,22 +6064,22 @@ function AppMain({ user, onLogout }) {
                         {/* Badge note */}
                         {note != null && (
                           <div style={{ position: "absolute", top: 10, right: 10, background: "#fff", borderRadius: 12, padding: "6px 12px", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", textAlign: "center", minWidth: 56 }}>
-                            <div style={{ fontSize: 18, fontWeight: 800, color: noteColor, lineHeight: 1 }}>{note}</div>
-                            <div style={{ fontSize: 9, fontWeight: 700, color: noteColor, marginTop: 1 }}>{noteLabel}</div>
+                            <div style={{ fontSize: 19, fontWeight: 800, color: noteColor, lineHeight: 1 }}>{note}</div>
+                            <div style={{ fontSize: 19, fontWeight: 700, color: noteColor, marginTop: 1 }}>{noteLabel}</div>
                           </div>
                         )}
                         {/* Badge régime */}
-                        <div style={{ position: "absolute", bottom: 8, left: 8, background: "#FFF3EC", color: "#fff", fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 8 }}>
+                        <div style={{ position: "absolute", bottom: 8, left: 8, background: "#FFF3EC", color: "#fff", fontSize: 19, fontWeight: 600, padding: "3px 9px", borderRadius: 8 }}>
                           {p.regimeActif}
                         </div>
                       </div>
                       {/* Infos */}
                       <div style={{ padding: "14px 16px" }}>
-                        <div style={{ fontSize: 15, fontWeight: 700, color: "#1C1917", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nom}</div>
+                        <div style={{ fontSize: 19, fontWeight: 700, color: "#1C1917", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nom}</div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                          <span style={{ fontSize: 11, color: "#A8A29E" }}>Calendrier {p.savedAt}</span>
+                          <span style={{ fontSize: 19, color: "#A8A29E" }}>Calendrier {p.savedAt}</span>
                           {p.inputs && p.inputs.prixVente && (
-                            <span style={{ fontSize: 12, fontWeight: 600, color: "#F97316" }}>{fmtEur(pf(p.inputs.prixVente))}</span>
+                            <span style={{ fontSize: 19, fontWeight: 600, color: "#F97316" }}>{fmtEur(pf(p.inputs.prixVente))}</span>
                           )}
                         </div>
                         {/* KPIs rapides */}
@@ -6097,8 +6097,8 @@ function AppMain({ user, onLogout }) {
                                 ].map(function(k) {
                                   return (
                                     <div key={k.label} style={{ background: "rgba(241,245,249,0.8)", borderRadius: 10, padding: "6px 8px", textAlign: "center" }}>
-                                      <div style={{ fontSize: 13, fontWeight: 700, color: k.color }}>{k.value}</div>
-                                      <div style={{ fontSize: 9, color: "#A8A29E", marginTop: 1 }}>{k.label}</div>
+                                      <div style={{ fontSize: 19, fontWeight: 700, color: k.color }}>{k.value}</div>
+                                      <div style={{ fontSize: 19, color: "#A8A29E", marginTop: 1 }}>{k.label}</div>
                                     </div>
                                   );
                                 })}
@@ -6108,7 +6108,7 @@ function AppMain({ user, onLogout }) {
                         })()}
                         <button
                           onClick={function(e) { e.stopPropagation(); ouvrirProjet(p); }}
-                          style={{ width: "100%", background: "#F97316", border: "none", borderRadius: 10, padding: "8px", color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+                          style={{ width: "100%", background: "#F97316", border: "none", borderRadius: 10, padding: "8px", color: "#fff", cursor: "pointer", fontSize: 19, fontWeight: 600 }}>
                            Ouvrir la simulation
                         </button>
                       </div>
