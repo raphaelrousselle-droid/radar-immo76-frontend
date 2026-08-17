@@ -6677,7 +6677,7 @@ function ComparateurDPE() {
             <div style={Object.assign({},SECTION,{ background:gainNet10ans>=0?"rgba(22,163,74,0.04)":"rgba(220,38,38,0.04)", border:"1.5px solid "+(gainNet10ans>=0?"#BBF7D0":"rgba(220,38,38,0.2)") })}>
               <SectionHeader icon="ti-trophy" title="Rentabilité de la rénovation" />
               {[
-                { label:"Retour sur invest. (loyers seuls)", val:retourInvestissement ? retourInvestissement.toFixed(1)+" ans" : "—", color:"#1C1917" },
+                { label:"Retour sur invest. (loyers seuls)", val:retourInvest ? retourInvest.toFixed(1)+" ans" : "—", color:"#1C1917" },
                 { label:"Obligation légale résolue", val:seraLegal?"✓ Oui":"✗ Non", color:seraLegal?"#16a34a":"#dc2626" },
                 { label:"Gain net global sur 10 ans", val:(gainNet10ans>=0?"+":"")+fmtEur(gainNet10ans), color:gainNet10ans>=0?"#16a34a":"#dc2626", big:true },
               ].map(function(r,i) {
