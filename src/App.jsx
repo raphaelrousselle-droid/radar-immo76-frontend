@@ -5815,7 +5815,7 @@ export default function App() {
 
 function AppMain({ user, onLogout }) {
   const [onglet, setOnglet] = useState("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [cloudReady, setCloudReady] = useState(false);
 
   // Photos et projets remontés ici pour survivre aux changements d'onglet
@@ -5903,33 +5903,31 @@ function AppMain({ user, onLogout }) {
     favoris:       { h: "Mes projets sauvegardés", sub: "Retrouve et charge toutes tes simulations d'investissement." },
   };
 
-  const handleNav = function(id) { setOnglet(id); setSidebarOpen(false); };
+  const handleNav = function(id) { setOnglet(id); };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
 
       {/* Sidebar */}
-      <aside style={{ width: sidebarOpen ? 220 : 64, minWidth: sidebarOpen ? 220 : 64, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: sidebarOpen ? "18px 12px" : "18px 8px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", overflowX: "hidden", transition: "width 0.22s cubic-bezier(.4,0,.2,1), min-width 0.22s cubic-bezier(.4,0,.2,1), padding 0.22s", zIndex: 30, boxShadow: "none" }}>
+      <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", overflowX: "hidden", zIndex: 30, boxShadow: "none" }}>
 
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, overflow: "hidden", minHeight: 40 }}>
           <div style={{ flexShrink: 0, width: 36, height: 36, borderRadius: 10, background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px #FFF3EC", cursor: "pointer" }}
-            onClick={function() { setSidebarOpen(!sidebarOpen); }}>
+            onClick={function() { handleNav("dashboard"); }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M3 12L12 4l9 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M5 10v8a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <circle cx="18" cy="8" r="1.5" fill="#fbbf24"/>
             </svg>
           </div>
-          {sidebarOpen && (
-            <div style={{ overflow: "hidden", whiteSpace: "nowrap" }}>
+          <div style={{ overflow: "hidden", whiteSpace: "nowrap" }}>
               <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.5px", lineHeight: 1.1 }}>
-                <span style={{ background: "linear-gradient(90deg,#F97316,#38bdf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>RADAR</span>
+                <span style={{ color: "#F97316" }}>RADAR</span>
                 <span style={{ color: "#1C1917" }}> IMMO</span>
               </div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#F97316", letterSpacing: "2px", marginTop: 1 }}>76</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#A8A29E", letterSpacing: "2px", marginTop: 1 }}>SEINE-MARITIME</div>
             </div>
-          )}
         </div>
 
         {/* Nav */}
@@ -5937,40 +5935,28 @@ function AppMain({ user, onLogout }) {
           {navItems.map(function(n) {
             const isActive = onglet === n.id;
             return (
-              <button key={n.id} onClick={function() { handleNav(n.id); }} title={!sidebarOpen ? n.label : undefined}
-                style={{ display: "flex", alignItems: "center", gap: sidebarOpen ? 10 : 0, justifyContent: sidebarOpen ? "flex-start" : "center", padding: sidebarOpen ? "9px 10px" : "9px 0", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, width: "100%", textAlign: "left", background: isActive ? "#FFF3EC" : "transparent", color: isActive ? "#F97316" : "#A8A29E", borderLeft: isActive ? "3px solid #F97316" : "3px solid transparent", fontWeight: isActive ? 700 : 500, transition: "all 0.15s", overflow: "hidden", whiteSpace: "nowrap", position: "relative" }}>
+              <button key={n.id} onClick={function() { handleNav(n.id); }} 
+                style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-start", padding: "9px 10px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, width: "100%", textAlign: "left", background: isActive ? "#FFF3EC" : "transparent", color: isActive ? "#F97316" : "#A8A29E", borderLeft: isActive ? "3px solid #F97316" : "3px solid transparent", fontWeight: isActive ? 700 : 500, transition: "all 0.15s", overflow: "hidden", whiteSpace: "nowrap", position: "relative" }}>
                 <span style={{ fontSize: 17, flexShrink: 0 }}>{n.icon}</span>
-                {sidebarOpen && <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{n.label}</span>}
-                {isActive && !sidebarOpen && <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", width: 3, height: 20, borderRadius: "3px 0 0 3px", background: "#F97316" }} />}
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{n.label}</span>
+                
               </button>
             );
           })}
         </div>
 
-        {/* Toggle */}
-        <button onClick={function() { setSidebarOpen(!sidebarOpen); }}
-          style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: sidebarOpen ? "flex-end" : "center", gap: 6, padding: "7px 8px", borderRadius: 10, border: "none", cursor: "pointer", background: "rgba(148,163,184,0.1)", color: "#A8A29E", fontSize: 11, fontWeight: 500, width: "100%", transition: "all 0.15s" }}>
-          <span style={{ fontSize: 14, transition: "transform 0.22s", transform: sidebarOpen ? "rotate(180deg)" : "rotate(0deg)", display: "inline-block" }}>›</span>
-          {sidebarOpen && <span>Réduire</span>}
-        </button>
+
         {/* User + Logout */}
-        {sidebarOpen ? (
-          <div style={{ marginTop: 6, padding: "8px", borderRadius: 10, background: "#FFF8F3", overflow: "hidden" }}>
-            <div style={{ fontSize: 10, color: "#78716C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 6 }}>
-              🔒 {user.email}
-            </div>
-            <button onClick={onLogout}
-              style={{ width: "100%", padding: "6px", borderRadius: 8, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.06)", color: "#dc2626", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
-              Déconnexion
-            </button>
+        <div style={{ marginTop: 6, padding: "8px", borderRadius: 10, background: "#FFF8F3", border: "1.5px solid #FFE8D9", overflow: "hidden" }}>
+          <div style={{ fontSize: 10, color: "#78716C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 6 }}>
+            🔒 {user.email}
           </div>
-        ) : (
-          <button onClick={onLogout} title="Déconnexion"
-            style={{ marginTop: 4, width: "100%", padding: "6px", borderRadius: 8, border: "none", background: "rgba(220,38,38,0.06)", color: "#dc2626", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            ⏻
+          <button onClick={onLogout}
+            style={{ width: "100%", padding: "6px", borderRadius: 8, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.06)", color: "#dc2626", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+            Déconnexion
           </button>
-        )}
-        {!sidebarOpen && <div style={{ fontSize: 9, color: "#F97316", textAlign: "center", marginTop: 4, letterSpacing: "1px", fontWeight: 800 }}>76</div>}
+        </div>
+        
       </aside>
 
       {/* Main */}
