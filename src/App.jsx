@@ -7017,6 +7017,66 @@ function CalculateurEmprunt() {
   );
 }
 
+
+// Enrichit les communes avec leurs coordonnées GPS via l'API geo.api.gouv.fr
+async function enrichirCoordonnees(communes) {
+  var sn = function(v) { return v == null ? 0 : parseFloat(v) || 0; };
+
+  // D'abord mapper sans coordonnées
+  var mapped = communes.map(function(c) {
+    return {
+      nom: c.nom || "",
+      code: c.code_insee || c.code || "",
+      score: sn(c.scores && c.scores.global),
+      rendement: sn(c.scores && c.scores.rendement),
+      demo: sn(c.scores && c.scores.demographie),
+      socio: sn(c.scores && c.scores.socio_eco),
+      pop: parseInt(c.population || 0),
+      lat: 0, lon: 0,
+    };
+  }).filter(function(c) { return c.nom !== "" && c.code !== ""; });
+
+  // Vérifier si on a déjà les coordonnées en cache
+  var coordsKey = "radar-immo-coords-v1";
+  var coordsCache = {};
+  try {
+    var stored = localStorage.getItem(coordsKey);
+    if (stored) coordsCache = JSON.parse(stored) || {};
+  } catch(e) {}
+
+  // Identifier les communes sans coordonnées
+  var sansCoords = mapped.filter(function(c) { return !coordsCache[c.code]; });
+
+  // Charger les coordonnées par batch de 50 via l'API geo.api.gouv.fr
+  if (sansCoords.length > 0) {
+    var batches = [];
+    for (var i = 0; i < sansCoords.length; i += 50) {
+      batches.push(sansCoords.slice(i, i + 50));
+    }
+    for (var b = 0; b < batches.length; b++) {
+      try {
+        var codes = batches[b].map(function(c) { return c.code; }).join(",");
+        var r = await fetch("https://geo.api.gouv.fr/communes?code=" + codes + "&fields=centre&format=json&geometry=centre");
+        var data = await r.json();
+        data.forEach(function(d) {
+          if (d.centre && d.centre.coordinates) {
+            coordsCache[d.code] = { lat: d.centre.coordinates[1], lon: d.centre.coordinates[0] };
+          }
+        });
+      } catch(e) {}
+    }
+    // Sauvegarder en cache
+    try { localStorage.setItem(coordsKey, JSON.stringify(coordsCache)); } catch(e) {}
+  }
+
+  // Appliquer les coordonnées
+  return mapped.map(function(c) {
+    var coords = coordsCache[c.code];
+    if (coords) { c.lat = coords.lat; c.lon = coords.lon; }
+    return c;
+  }).filter(function(c) { return c.lat !== 0; });
+}
+
 // ─── CARTE INTERACTIVE DES COMMUNES ──────────────────────────────────────────
 function CarteCommunes() {
   var _sel = React.useState(null); var selected = _sel[0]; var setSelected = _sel[1];
@@ -7049,24 +7109,29 @@ function CarteCommunes() {
 
   React.useEffect(function() {
     setDataLoading(true);
-    getCommunesCache().then(function(list) {
-      var sn = function(v) { return v == null ? 0 : parseFloat(v) || 0; };
-      var mapped = (list || []).map(function(c) {
-        return {
-          nom: c.nom || c.NOM_COMMUNE_COMPLET || c.libelle_commune || "",
-          code: c.code_commune || c.code || "",
-          score: sn(c.scores && c.scores.global),
-          rendement: sn(c.scores && c.scores.rendement),
-          demo: sn(c.scores && c.scores.demographie),
-          socio: sn(c.scores && c.scores.socio_eco),
-          pop: parseInt(c.population || 0),
-          lat: parseFloat(c.latitude || 0),
-          lon: parseFloat(c.longitude || 0),
-        };
-      }).filter(function(c) { return c.lat !== 0 && c.lon !== 0 && c.nom !== ""; });
+
+    // 1. Lire le cache communes depuis localStorage
+    var raw = [];
+    try {
+      var stored = localStorage.getItem("radar-immo-communes-v3");
+      if (stored) raw = JSON.parse(stored) || [];
+    } catch(e) {}
+
+    if (raw.length === 0) {
+      // Essayer de charger depuis l'API
+      fetch(API_BASE + "/communes")
+        .then(function(r) { return r.json(); })
+        .then(function(d) { raw = d.communes || []; return enrichirCoordonnees(raw); })
+        .then(function(mapped) { setCommunesData(mapped); setDataLoading(false); })
+        .catch(function() { setDataLoading(false); });
+      return;
+    }
+
+    enrichirCoordonnees(raw).then(function(mapped) {
       setCommunesData(mapped);
       setDataLoading(false);
     }).catch(function() { setDataLoading(false); });
+
   }, []);
 
   var scoreColor = function(s) {
