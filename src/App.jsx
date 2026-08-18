@@ -7055,8 +7055,8 @@ async function enrichirCoordonnees(communes) {
     }
     for (var b = 0; b < batches.length; b++) {
       try {
-        var codes = batches[b].map(function(c) { return c.code; }).join(",");
-        var r = await fetch("https://geo.api.gouv.fr/communes?code=" + codes + "&fields=centre&format=json&geometry=centre");
+        var codes = batches[b].map(function(c) { return "code=" + c.code; }).join("&");
+        var r = await fetch("https://geo.api.gouv.fr/communes?" + codes + "&fields=centre&format=json");
         var data = await r.json();
         data.forEach(function(d) {
           if (d.centre && d.centre.coordinates) {
@@ -7126,6 +7126,15 @@ function CarteCommunes() {
         .catch(function() { setDataLoading(false); });
       return;
     }
+
+    // Vider le cache coords si vide (forcer rechargement)
+    try {
+      var coordsStored = localStorage.getItem("radar-immo-coords-v1");
+      var coordsParsed = coordsStored ? JSON.parse(coordsStored) : {};
+      if (Object.keys(coordsParsed).length === 0) {
+        localStorage.removeItem("radar-immo-coords-v1");
+      }
+    } catch(e) {}
 
     enrichirCoordonnees(raw).then(function(mapped) {
       setCommunesData(mapped);
