@@ -7043,22 +7043,30 @@ function CarteCommunes() {
     document.head.appendChild(script);
   }, []);
 
-  // Données communes (reprises du module Analyse communes)
-  var communesData = React.useMemo(function() {
-    if (!window._communesCache || window._communesCache.length === 0) return [];
-    return window._communesCache.slice(0, 100).map(function(c) {
-      return {
-        nom: c.NOM_COMMUNE_COMPLET || c.nom || "",
-        code: c.code_commune || c.code || "",
-        score: c.score_global || 0,
-        rendement: c.score_rendement || 0,
-        demo: c.score_demographie || 0,
-        socio: c.score_socioeco || 0,
-        pop: c.population || 0,
-        lat: c.latitude || c.lat || 0,
-        lon: c.longitude || c.lon || 0,
-      };
-    }).filter(function(c) { return c.lat !== 0 && c.lon !== 0; });
+  // Données communes — chargées via getCommunesCache() (même source qu'Analyse communes)
+  var _cd = React.useState([]); var communesData = _cd[0]; var setCommunesData = _cd[1];
+  var _loading = React.useState(true); var dataLoading = _loading[0]; var setDataLoading = _loading[1];
+
+  React.useEffect(function() {
+    setDataLoading(true);
+    getCommunesCache().then(function(list) {
+      var sn = function(v) { return v == null ? 0 : parseFloat(v) || 0; };
+      var mapped = (list || []).map(function(c) {
+        return {
+          nom: c.nom || c.NOM_COMMUNE_COMPLET || c.libelle_commune || "",
+          code: c.code_commune || c.code || "",
+          score: sn(c.scores && c.scores.global),
+          rendement: sn(c.scores && c.scores.rendement),
+          demo: sn(c.scores && c.scores.demographie),
+          socio: sn(c.scores && c.scores.socio_eco),
+          pop: parseInt(c.population || 0),
+          lat: parseFloat(c.latitude || 0),
+          lon: parseFloat(c.longitude || 0),
+        };
+      }).filter(function(c) { return c.lat !== 0 && c.lon !== 0 && c.nom !== ""; });
+      setCommunesData(mapped);
+      setDataLoading(false);
+    }).catch(function() { setDataLoading(false); });
   }, []);
 
   var scoreColor = function(s) {
@@ -7180,13 +7188,19 @@ function CarteCommunes() {
               <div style={{ fontSize:13 }}>Chargement de la carte…</div>
             </div>
           )}
-          {communesData.length === 0 && leafletReady && (
+          {dataLoading && leafletReady && (
             <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100%", color:"#A8A29E", flexDirection:"column", gap:12 }}>
-              <Icon name="ti-map" size={48} color="#FFE8D9" />
-              <div style={{ fontSize:13, textAlign:"center", padding:"0 20px" }}>Va d'abord dans <strong>Analyse communes</strong> pour charger les données, puis reviens ici.</div>
+              <div style={{ width:32, height:32, border:"3px solid #FFE8D9", borderTopColor:"#F97316", borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
+              <div style={{ fontSize:13 }}>Chargement des communes…</div>
             </div>
           )}
-          <div ref={mapRef} style={{ width:"100%", height:"100%", display:leafletReady&&communesData.length>0?"block":"none" }} />
+          {!dataLoading && communesData.length === 0 && leafletReady && (
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100%", color:"#A8A29E", flexDirection:"column", gap:12 }}>
+              <Icon name="ti-map" size={48} color="#FFE8D9" />
+              <div style={{ fontSize:13, textAlign:"center", padding:"0 20px" }}>Aucune donnée de commune disponible. Vérifie ta connexion.</div>
+            </div>
+          )}
+          <div ref={mapRef} style={{ width:"100%", height:"100%", display:leafletReady&&communesData.length>0&&!dataLoading?"block":"none" }} />
         </div>
 
         {/* Panel droite */}
