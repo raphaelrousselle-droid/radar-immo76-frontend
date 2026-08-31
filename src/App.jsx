@@ -645,6 +645,7 @@ function SectionTitle({ children }) {
 }
 
 function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
+  var isMobile = useIsMobile();
   const totalSurface = lots.reduce(function(s, l) { return s + pf(l.surface); }, 0);
   const totalLoyer = lots.reduce(function(s, l) { return s + pf(l.loyer); }, 0);
   const totalTravaux = lots.reduce(function(s, l) { return s + pf(l.travaux); }, 0);
@@ -6029,6 +6030,21 @@ function AppMain({ user, onLogout }) {
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
 
+      {/* Hamburger mobile */}
+      {isMobile && (
+        <div style={{ position:"fixed", top:0, left:0, right:0, height:56, background:"#fff", borderBottom:"1.5px solid #FFE8D9", display:"flex", alignItems:"center", padding:"0 16px", gap:12, zIndex:60 }}>
+          <button onClick={function(){setSidebarMobileOpen(function(v){return !v;});}}
+            style={{ width:36, height:36, borderRadius:8, border:"1.5px solid #FFE8D9", background:"#FFF8F3", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="14" y2="18"/></svg>
+          </button>
+          <div style={{ fontWeight:800, fontSize:15 }}><span style={{ color:"#F97316" }}>RADAR</span> IMMO</div>
+          <div style={{ marginLeft:"auto", fontSize:12, color:"#A8A29E" }}>{navItems.find(function(n){return n.id===onglet;})?.label||""}</div>
+        </div>
+      )}
+      {/* Overlay mobile */}
+      {isMobile && sidebarMobileOpen && (
+        <div onClick={function(){setSidebarMobileOpen(false);}} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.35)", zIndex:45 }} />
+      )}
       {/* Sidebar */}
       <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", position: isMobile ? "fixed" : "sticky", top: 0, left: 0, height: "100vh", zIndex: 50, transform: isMobile && !sidebarMobileOpen ? "translateX(-200px)" : "translateX(0)", transition: "transform 0.25s ease", display: "flex", flexDirection: "column", gap: 4, overflowY: "auto", overflowX: "hidden", boxShadow: isMobile && sidebarMobileOpen ? "4px 0 24px rgba(0,0,0,0.15)" : "none" }}>
 
@@ -6095,7 +6111,7 @@ function AppMain({ user, onLogout }) {
       </aside>
 
       {/* Main */}
-      <main style={{ flex: 1, padding: 20, overflowY: "auto", minWidth: 0 }}>
+      <main style={{ flex: 1, padding: isMobile ? "68px 12px 20px" : 20, overflowY: "auto", minWidth: 0 }}>
         <div style={{ marginBottom: 16 }}>
           <h1 style={{ fontSize: 19, fontWeight: 700, color: "#1C1917", margin: 0 }}>{titres[onglet].h}</h1>
           <p style={{ fontSize: 13, color: "#78716C", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
