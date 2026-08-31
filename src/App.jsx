@@ -44,6 +44,7 @@ const ICONS = {
   "ti-refresh": "M20 11A8 8 0 1 0 12 20m8-9v5h-5",
   "ti-user": "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
   "ti-chevron-right": "M9 18l6-6-6-6",
+  "ti-menu-2": "M4 6h16M4 12h16M4 18h7",
   "ti-copy": "M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-2M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2M10 4h4v4h-4V4z",
   "ti-leaf": "M5 21C5 21 5 13 12 8C19 3 21 3 21 3C21 3 21 5 16 12C11 19 5 21 5 21Z M5 21 L12 14",
   "ti-flame": "M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0C17 7 12 2 12 2zM9 17a3 3 0 0 0 6 0",
@@ -53,9 +54,6 @@ const ICONS = {
   "ti-wind": "M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2",
   "ti-sun": "M12 3v1m0 16v1M4.22 4.22l.707.707m12.02 12.02.707.707M1 12h1m18 0h1M4.22 19.78l.707-.707m12.02-12.02.707-.707M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7z",
   "ti-check-circle": "M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3",
-  "ti-map": "M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3V7zm6-3v13m6-10v13",
-  "ti-calculator": "M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm3 4h10M7 12h2m4 0h2M7 16h2m4 0h2",
-  "ti-users": "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm14 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
 };
 
 function Icon({ name, size, color, style }) {
@@ -77,6 +75,9 @@ if (!document.getElementById("radar-global-styles")) {
   var styleEl = document.createElement("style");
   styleEl.id = "radar-global-styles";
   styleEl.textContent = `
+    @media (max-width: 767px) {
+      .mn-content { padding: 12px !important; }
+    }
     * { box-sizing: border-box; }
     button { transition: opacity 0.15s, transform 0.1s, background 0.15s, box-shadow 0.15s !important; }
     button:hover:not(:disabled) { opacity: 0.9; }
@@ -92,6 +93,27 @@ if (!document.getElementById("radar-global-styles")) {
   `;
   document.head.appendChild(styleEl);
 }
+
+// ── Hook responsive ──────────────────────────────────────────────────────────
+function useIsMobile() {
+  var _m = React.useState(window.innerWidth < 768);
+  var isMobile = _m[0]; var setIsMobile = _m[1];
+  React.useEffect(function() {
+    var handler = function() { setIsMobile(window.innerWidth < 768); };
+    window.addEventListener("resize", handler);
+    return function() { window.removeEventListener("resize", handler); };
+  }, []);
+  return isMobile;
+}
+
+// Viewport meta pour mobile
+if (!document.querySelector("meta[name=viewport]")) {
+  var meta = document.createElement("meta");
+  meta.name = "viewport";
+  meta.content = "width=device-width, initial-scale=1, maximum-scale=1";
+  document.head.appendChild(meta);
+}
+
 const SUPABASE_URL = "https://iudxpwmbwcaspihtvhay.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Ab3inJlUcsRG-p6fU4y4pQ_0ncHppba";
 
@@ -723,7 +745,7 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
           );
         })}
       </div>
-      <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
+      <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4,1fr)", gap: 8 }}>
         {[
           { label: "Σ Surface", value: fmt(totalSurface, 0) + " m²", ok: surfOk, ref: surfaceGlobale > 0, refVal: fmt(surfaceGlobale, 0) + " m²" },
           { label: "Σ Loyers", value: fmtEur(totalLoyer), ok: loyerOk, ref: loyerGlobal > 0, refVal: fmtEur(loyerGlobal) },
@@ -754,7 +776,7 @@ const DEFAULT_INPUTS = {
   gliPct: "0",
 };
 
-function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharger, onProjetCharge }) {
+function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharger, onProjetCharge, isMobile }) {
   const [inputs, setInputs] = useState(function() {
     // Pas de persistence directe des inputs - on repart de DEFAULT_INPUTS
     // La persistence se fait via les projets sauvegardés
@@ -1750,7 +1772,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
                 <InputField label="Durée" name="dureeAnnees" value={inputs.dureeAnnees} onChange={handleChange} unit="ans" step="1" />
                 <InputField label="Différé de remboursement" name="differeMois" value={inputs.differeMois} onChange={handleChange} unit="mois" step="1" />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 6, background: "#FFF3EC", borderRadius: 10, padding: "8px 10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4,1fr)", gap: 8, marginTop: 6, background: "#FFF3EC", borderRadius: 10, padding: "8px 10px" }}>
                 <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Total à financer</div><div style={{ fontSize: 14, fontWeight: 700, color: "#F97316" }}>{fmtEur(result.depenseNette)}</div></div>
                 <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Apport</div><div style={{ fontSize: 14, fontWeight: 700, color: "#16a34a" }}>{fmtEur(pf(inputs.apport))}</div></div>
                 <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Reste à financer</div><div style={{ fontSize: 14, fontWeight: 700, color: "#dc2626" }}>{fmtEur(result.sommeEmpruntee)}</div></div>
@@ -2058,7 +2080,7 @@ function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData })
         <StatRow label="GAIN TOTAL NET" value={(gainTotal >= 0 ? "+" : "") + fmtEur(Math.round(gainTotal))} bold color={gainTotal >= 0 ? "#16a34a" : "#dc2626"} border={false} />
 
         {/* KPIs finaux */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
           <div style={{ background: "#FFF3EC", borderRadius: 14, padding: "12px", textAlign: "center", border: "1px solid #FFF3EC" }}>
             <div style={{ fontSize: 10, color: "#78716C" }}>ROI sur apport</div>
             <div style={{ fontSize: 23, fontWeight: 800, color: roiSurApport >= 0 ? "#16a34a" : "#dc2626" }}>{fmt(roiSurApport, 0)} %</div>
@@ -2081,7 +2103,7 @@ function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData })
 }
 
 // ─── DASHBOARD D'ACCUEIL ──────────────────────────────────────────────────────
-function Dashboard({ projets, onOuvrir, onNav, user }) {
+function Dashboard({ projets, onOuvrir, onNav, user, isMobile }) {
   // Charger le profil investisseur
   var profil = null;
   try { profil = JSON.parse(localStorage.getItem("radar-immo-profil-v1")); } catch(e) {}
@@ -2697,7 +2719,7 @@ function SimulateurCredit() {
       {/* Tableau d'amortissement */}
       <div style={SECTION}>
         <SectionHeader icon="ti-calendar" title="Tableau d'amortissement" badge={calc.anneesEffectives + " ans"} />
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
@@ -2958,7 +2980,7 @@ function SimulateurTravaux() {
       {/* Section Prix à la quantité */}
       <div style={sectionStyle}>
         <SectionHeader icon="ti-calculator" title="Prix à la quantité" badge={"Sous-total : " + fmtEur(calcQ.total)} />
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
@@ -2976,7 +2998,7 @@ function SimulateurTravaux() {
       {/* Section Prix fixe */}
       <div style={sectionStyle}>
         <SectionHeader icon="ti-home" title={"Prix fixe (logement " + (grand ? "> 50 m²" : "< 50 m²") + ")"} badge={"Sous-total : " + fmtEur(calcF.total)} />
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
@@ -2994,7 +3016,7 @@ function SimulateurTravaux() {
       {/* Section Prix au m² (habitable) */}
       <div style={sectionStyle}>
         <SectionHeader icon="ti-ruler-measure" title={"Prix au m² habitable (" + fmt(surf, 0) + " m²)"} badge={"Sous-total : " + fmtEur(calcM.total)} />
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
@@ -3011,7 +3033,7 @@ function SimulateurTravaux() {
       {/* Section Bâtiment */}
       <div style={sectionStyle}>
         <SectionHeader icon="ti-crane" title="Bâtiment (toiture & façade)" badge={"Sous-total : " + fmtEur(calcB.total)} />
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
@@ -3208,7 +3230,7 @@ function ComparateurOffres() {
       </div>
 
       {/* Cartes */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(260px, 100%), 1fr))", gap: 14 }}>
         {offres.map(function(o, idx) {
           const couleur = couleurs[idx % couleurs.length];
           const r = resultats.find(function(r) { return r.id === o.id; }).calc;
@@ -3336,7 +3358,7 @@ function ComparateurOffres() {
       {/* Tableau comparatif */}
       <div style={SECTION}>
         <SectionHeader icon="ti-scale" title="Tableau comparatif" />
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
@@ -5911,6 +5933,8 @@ export default function App() {
 function AppMain({ user, onLogout }) {
   const [onglet, setOnglet] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  var isMobile = useIsMobile();
+  var _smo = React.useState(false); var sidebarMobileOpen = _smo[0]; var setSidebarMobileOpen = _smo[1];
   const [cloudReady, setCloudReady] = useState(false);
 
   // Photos et projets remontés ici pour survivre aux changements d'onglet
@@ -5977,8 +6001,6 @@ function AppMain({ user, onLogout }) {
     { id: "offres",        label: "Comparateur offres",      icon: "ti-scale" },
     { id: "travaux",       label: "Simulateur travaux",      icon: "ti-hammer" },
     { id: "dpe",           label: "Comparateur DPE",         icon: "ti-leaf" },
-    { id: "emprunt",       label: "Capacité d'emprunt",      icon: "ti-calculator" },
-    { id: "carte",         label: "Carte des communes",      icon: "ti-map" },
     { id: "plusvalue",     label: "Plus-value immo",         icon: "ti-trending-up" },
     { id: "sci",           label: "Simulateur SCI IS",       icon: "ti-building-skyscraper" },
     { id: "portfolio",     label: "Suivi portfolio",         icon: "ti-folder-open" },
@@ -5993,8 +6015,6 @@ function AppMain({ user, onLogout }) {
     exploitation:  { h: "Comparateur de modes d'exploitation", sub: "Compare location nue, meublée, colocation et courte durée pour optimiser ton rendement." },
     credit:        { h: "Simulation de crédit", sub: "Calcule mensualités, coût total et tableau d'amortissement de ton prêt." },
     offres:        { h: "Comparateur d'offres de financement", sub: "Compare plusieurs propositions de banques sur une base homogène avec score pondéré." },
-    emprunt:       { h: "Calculateur de capacité d'emprunt", sub: "Simule ta capacité d'emprunt réelle en intégrant les revenus locatifs, co-emprunteur et charges existantes." },
-    carte:         { h: "Carte des communes — Seine-Maritime", sub: "Scores d'investissement par commune, visualisés sur carte interactive." },
     dpe:           { h: "Comparateur DPE & Travaux", sub: "Simule le coût d'amélioration énergétique, l'impact sur le loyer et la rentabilité de l'investissement." },
     travaux:       { h: "Simulateur de coût des travaux", sub: "Estime le budget travaux poste par poste et son impact sur la rentabilité." },
     plusvalue:      { h: "Calculateur de plus-value immobilière", sub: "Estime l'impôt sur la plus-value selon la durée de détention et les abattements légaux." },
@@ -6004,13 +6024,13 @@ function AppMain({ user, onLogout }) {
     favoris:       { h: "Mes projets sauvegardés", sub: "Retrouve et charge toutes tes simulations d'investissement." },
   };
 
-  const handleNav = function(id) { setOnglet(id); };
+  const handleNav = function(id) { setOnglet(id); setSidebarMobileOpen(false); };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
 
       {/* Sidebar */}
-      <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", overflowX: "hidden", transition: "width 0.22s cubic-bezier(.4,0,.2,1), min-width 0.22s cubic-bezier(.4,0,.2,1), padding 0.22s", zIndex: 30, boxShadow: sidebarOpen ? "4px 0 24px #FFF3EC" : "none" }}>
+      <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", position: isMobile ? "fixed" : "sticky", top: 0, left: 0, height: "100vh", zIndex: 50, transform: isMobile && !sidebarMobileOpen ? "translateX(-100%)" : "translateX(0)", transition: "transform 0.25s cubic-bezier(.4,0,.2,1)", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", overflowX: "hidden", transition: "width 0.22s cubic-bezier(.4,0,.2,1), min-width 0.22s cubic-bezier(.4,0,.2,1), padding 0.22s", zIndex: 30, boxShadow: sidebarOpen ? "4px 0 24px #FFF3EC" : "none" }}>
 
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, overflow: "hidden", minHeight: 40 }}>
@@ -6080,16 +6100,14 @@ function AppMain({ user, onLogout }) {
           <h1 style={{ fontSize: 19, fontWeight: 700, color: "#1C1917", margin: 0 }}>{titres[onglet].h}</h1>
           <p style={{ fontSize: 13, color: "#78716C", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
         </div>
-        {onglet === "dashboard"  && <Dashboard projets={simProjets} onOuvrir={ouvrirProjet} onNav={handleNav} user={user} />}
+        {onglet === "dashboard"  && <Dashboard projets={simProjets} onOuvrir={ouvrirProjet} onNav={handleNav} user={user} isMobile={isMobile} />}
         {onglet === "analyse"    && <AnalyseCommunes />}
-        {onglet === "simulation" && <SimulationProjet photos={simPhotos} setPhotos={setSimPhotos} projets={simProjets} setProjets={setSimProjets} projetACharger={simProjetACharger} onProjetCharge={function() { setSimProjetACharger(null); }} />}
+        {onglet === "simulation" && <SimulationProjet photos={simPhotos} setPhotos={setSimPhotos} projets={simProjets} setProjets={setSimProjets} projetACharger={simProjetACharger} onProjetCharge={function() { setSimProjetACharger(null); }} isMobile={isMobile} />}
         {onglet === "exploitation" && <SimulateurExploitation simProjets={simProjets} />}
         {onglet === "credit"     && <SimulateurCredit />}
         {onglet === "offres"     && <ComparateurOffres />}
         {onglet === "travaux"    && <SimulateurTravaux />}
         {onglet === "dpe"       && <ComparateurDPE />}
-        {onglet === "emprunt"   && <CalculateurEmprunt />}
-        {onglet === "carte"     && <CarteCommunes />}
         {onglet === "plusvalue"  && <CalculateurPlusValue />}
         {onglet === "sci"       && <SimulateurSCI />}
         {onglet === "portfolio" && <SuiviPortfolio simProjets={simProjets} />}
@@ -6213,6 +6231,7 @@ function DPEBadge(props) {
 
 // ─── COMPARATEUR DPE & TRAVAUX (API ADEME) ────────────────────────────────────
 function ComparateurDPE() {
+  var isMobile = useIsMobile();
   var DPE_COLORS = DPE_COLORS_GLOBAL;
   var DPE_ILLEGAL = ["F","G"];
   var DPE_ORDER   = ["A","B","C","D","E","F","G"];
@@ -6590,7 +6609,7 @@ function ComparateurDPE() {
 
       {/* ── Résultats ── */}
       {dpeActuel && coutBrut > 0 && (
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:12 }}>
 
           {/* Coûts */}
           <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
@@ -6716,632 +6735,6 @@ function ComparateurDPE() {
           <div style={{ fontSize:13, marginTop:6 }}>L'outil interroge la base ADEME de plus de 12 millions de DPE</div>
         </div>
       )}
-    </div>
-  );
-}
-
-// ─── CALCULATEUR CAPACITÉ D'EMPRUNT ──────────────────────────────────────────
-function CalculateurEmprunt() {
-  var pf = function(v) { var n = parseFloat(String(v).replace(",",".")); return isNaN(n)?0:n; };
-  var fmtEur = function(v) { return Math.round(v).toLocaleString("fr-FR")+" €"; };
-  var fmt1 = function(v) { return v.toFixed(1).replace(".",","); };
-
-  // ── State ──────────────────────────────────────────────────────────────────
-  var _r1 = React.useState("4000"); var rev1 = _r1[0]; var setRev1 = _r1[1];
-  var _r2 = React.useState("0");    var rev2 = _r2[0]; var setRev2 = _r2[1];
-  var _rl = React.useState("0");    var revLoc = _rl[0]; var setRevLoc = _rl[1];
-  var _c1 = React.useState("0");    var cred1 = _c1[0]; var setCred1 = _c1[1];
-  var _c2 = React.useState("0");    var cred2 = _c2[0]; var setCred2 = _c2[1];
-  var _ap = React.useState("20000");var apport = _ap[0]; var setApport = _ap[1];
-  var _tx = React.useState("4.2");  var taux = _tx[0];   var setTaux = _tx[1];
-  var _as = React.useState("0.30"); var assur = _as[0];  var setAssur = _as[1];
-  var _du = React.useState("25");   var duree = _du[0];  var setDuree = _du[1];
-  var _fn = React.useState("1500"); var fraisNot = _fn[0]; var setFraisNot = _fn[1];
-  var _fc = React.useState("1000"); var fraisBanq = _fc[0]; var setFraisBanq = _fc[1];
-  var _tauxLoc = React.useState("70"); var tauxLoc = _tauxLoc[0]; var setTauxLoc = _tauxLoc[1];
-  var _mode = React.useState("locatif"); var mode = _mode[0]; var setMode = _mode[1];
-
-  // ── Calculs ────────────────────────────────────────────────────────────────
-  var R1 = pf(rev1), R2 = pf(rev2), RL = pf(revLoc);
-  var C1 = pf(cred1), C2 = pf(cred2);
-  var AP = pf(apport), TX = pf(taux), AS = pf(assur), DU = pf(duree);
-  var FN = pf(fraisNot), FB = pf(fraisBanq), TL = pf(tauxLoc);
-
-  // Revenus pris en compte selon mode
-  // Locatif : banques retiennent 70% des revenus locatifs
-  // Résidence principale : revenus locatifs non pris en compte
-  var revLocRetenu = mode === "locatif" ? RL * (TL/100) : 0;
-  var revTotalBrut = R1 + R2 + RL;
-  var revTotalRetenu = R1 + R2 + revLocRetenu;
-
-  // Charges existantes
-  var chargesExist = C1 + C2;
-
-  // Taux d'endettement max 35% (règle HCSF)
-  var mensualiteMax = revTotalRetenu * 0.35 - chargesExist;
-  var mensualiteMax30 = revTotalRetenu * 0.30 - chargesExist; // prudent
-
-  // Calcul capacité d'emprunt depuis mensualité max
-  var nMois = DU * 12;
-  var tMens = TX / 100 / 12;
-  var tAssurMens = AS / 100 / 12;
-
-  var calcMontant = function(mensMax) {
-    var mensCredit = mensMax - (0 * tAssurMens); // approx itérative
-    if (tMens === 0) return mensMax * nMois;
-    // M = mensualite_credit * (1 - (1+t)^-n) / t
-    // montant * tAssurMens = mensualite_assur
-    // mensMax = mensCredit + montant * tAssurMens
-    // montant = mensCredit / (t / (1-(1+t)^-n)) = mensCredit * facteur
-    var facteur = (1 - Math.pow(1+tMens, -nMois)) / tMens;
-    // mensMax = montant/facteur + montant*tAssurMens
-    // montant * (1/facteur + tAssurMens) = mensMax
-    return mensMax / (1/facteur + tAssurMens);
-  };
-
-  var capaciteEmprunt35 = Math.max(0, calcMontant(mensualiteMax));
-  var capaciteEmprunt30 = Math.max(0, calcMontant(mensualiteMax30));
-
-  // Budget total d'achat
-  var budgetTotal35 = capaciteEmprunt35 + AP;
-  var budgetTotal30 = capaciteEmprunt30 + AP;
-
-  // Prix du bien max (hors frais)
-  var tauxFraisNotaire = 0.08; // 8% ancien
-  var prixBienMax35 = budgetTotal35 / (1 + tauxFraisNotaire) - FB;
-  var prixBienMax30 = budgetTotal30 / (1 + tauxFraisNotaire) - FB;
-
-  // Mensualité réelle pour chaque scénario
-  var calcMensualite = function(montant) {
-    if (tMens === 0) return montant / nMois;
-    var mens_credit = montant * tMens / (1 - Math.pow(1+tMens, -nMois));
-    var mens_assur = montant * tAssurMens;
-    return mens_credit + mens_assur;
-  };
-
-  var mens35 = calcMensualite(capaciteEmprunt35);
-  var mens30 = calcMensualite(capaciteEmprunt30);
-
-  var tauxEndetteReel35 = revTotalRetenu > 0 ? (chargesExist + mens35) / revTotalRetenu * 100 : 0;
-  var tauxEndetteReel30 = revTotalRetenu > 0 ? (chargesExist + mens30) / revTotalRetenu * 100 : 0;
-
-  // Coût total crédit
-  var coutTotal35 = mens35 * nMois - capaciteEmprunt35;
-  var coutTotal30 = mens30 * nMois - capaciteEmprunt30;
-
-  var inputS = { background:"#FFF8F3", border:"1.5px solid #FFE8D9", borderRadius:10, padding:"8px 12px", fontSize:14, color:"#1C1917", outline:"none", width:"100%" };
-  var selectS = Object.assign({}, inputS, { cursor:"pointer" });
-
-  var Row = function(props) {
-    return (
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:"1px solid #FFE8D9" }}>
-        <span style={{ fontSize:13, color:"#78716C" }}>{props.label}</span>
-        <span style={{ fontSize:props.big?17:14, fontWeight:props.big?800:600, color:props.color||"#1C1917" }}>{props.val}</span>
-      </div>
-    );
-  };
-
-  var KPI = function(props) {
-    return (
-      <div style={{ background:"#fff", border:"1.5px solid #FFE8D9", borderRadius:13, padding:"14px 16px" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
-          <div style={{ width:30, height:30, borderRadius:8, background:"#FFF3EC", display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <Icon name={props.icon} size={16} color="#F97316" />
-          </div>
-          <span style={{ fontSize:11, color:"#A8A29E", textTransform:"uppercase", letterSpacing:"0.06em", fontWeight:600 }}>{props.label}</span>
-        </div>
-        <div style={{ fontSize:22, fontWeight:800, color:props.color||"#F97316", lineHeight:1 }}>{props.val}</div>
-        {props.sub && <div style={{ fontSize:11, color:"#A8A29E", marginTop:4 }}>{props.sub}</div>}
-      </div>
-    );
-  };
-
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-
-      {/* Mode locatif / RP */}
-      <div style={SECTION}>
-        <SectionHeader icon="ti-calculator" title="Type de projet" />
-        <div style={{ display:"flex", gap:8 }}>
-          {[
-            { id:"locatif", label:"Investissement locatif", desc:"Les loyers sont pris en compte à "+TL+"%" },
-            { id:"rp",      label:"Résidence principale",   desc:"Revenus locatifs non comptabilisés" },
-          ].map(function(m) {
-            var isA = mode === m.id;
-            return (
-              <button key={m.id} onClick={function(){setMode(m.id);}}
-                style={{ flex:1, background:isA?"#FFF3EC":"#FFF8F3", border:"1.5px solid "+(isA?"#F97316":"#FFE8D9"), borderRadius:12, padding:"12px 16px", cursor:"pointer", textAlign:"left" }}>
-                <div style={{ fontSize:14, fontWeight:700, color:isA?"#F97316":"#1C1917" }}>{m.label}</div>
-                <div style={{ fontSize:11, color:"#A8A29E", marginTop:3 }}>{m.desc}</div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
-
-        {/* Revenus */}
-        <div style={SECTION}>
-          <SectionHeader icon="ti-trending-up" title="Revenus mensuels nets" />
-          {[
-            { label:"Emprunteur 1 (nets avant impôts)", val:rev1, set:setRev1 },
-            { label:"Emprunteur 2 (co-emprunteur)", val:rev2, set:setRev2 },
-            { label:"Revenus locatifs existants/mois", val:revLoc, set:setRevLoc },
-          ].map(function(f) {
-            return (
-              <div key={f.label} style={{ marginBottom:10 }}>
-                <div style={{ fontSize:12, color:"#A8A29E", marginBottom:4, fontWeight:600 }}>{f.label}</div>
-                <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                  <input type="number" value={f.val} min="0" onChange={function(e){f.set(e.target.value);}} style={inputS} />
-                  <span style={{ fontSize:13, color:"#A8A29E" }}>€</span>
-                </div>
-              </div>
-            );
-          })}
-          {mode === "locatif" && (
-            <div style={{ marginTop:4 }}>
-              <div style={{ fontSize:12, color:"#A8A29E", marginBottom:4, fontWeight:600 }}>Taux de prise en compte des loyers (%)</div>
-              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <input type="range" min="50" max="100" step="5" value={tauxLoc}
-                  onChange={function(e){setTauxLoc(e.target.value);}}
-                  style={{ flex:1, accentColor:"#F97316" }} />
-                <span style={{ fontSize:14, fontWeight:700, color:"#F97316", minWidth:36 }}>{tauxLoc}%</span>
-              </div>
-              <div style={{ fontSize:11, color:"#A8A29E", marginTop:2 }}>Règle HCSF : 70% pour l'investissement locatif</div>
-            </div>
-          )}
-
-          <div style={{ marginTop:12, background:"#FFF3EC", borderRadius:10, padding:"10px 12px" }}>
-            <div style={{ fontSize:12, color:"#78716C" }}>Revenus retenus par la banque</div>
-            <div style={{ fontSize:18, fontWeight:800, color:"#F97316" }}>{fmtEur(revTotalRetenu)}/mois</div>
-            {revLocRetenu > 0 && <div style={{ fontSize:11, color:"#A8A29E", marginTop:2 }}>dont {fmtEur(revLocRetenu)} de loyers ({TL}%)</div>}
-          </div>
-        </div>
-
-        {/* Charges et paramètres */}
-        <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <div style={SECTION}>
-            <SectionHeader icon="ti-credit-card" title="Charges de crédit existantes" />
-            {[
-              { label:"Crédit en cours — Emprunteur 1 (€/mois)", val:cred1, set:setCred1 },
-              { label:"Crédit en cours — Emprunteur 2 (€/mois)", val:cred2, set:setCred2 },
-            ].map(function(f) {
-              return (
-                <div key={f.label} style={{ marginBottom:10 }}>
-                  <div style={{ fontSize:12, color:"#A8A29E", marginBottom:4, fontWeight:600 }}>{f.label}</div>
-                  <input type="number" value={f.val} min="0" onChange={function(e){f.set(e.target.value);}} style={inputS} />
-                </div>
-              );
-            })}
-            <Row label="Total charges mensuelles" val={fmtEur(chargesExist)+"/mois"} color="#dc2626" />
-            <Row label="Mensualité max à 35% (HCSF)" val={fmtEur(Math.max(0,mensualiteMax))+"/mois"} color={mensualiteMax>0?"#16a34a":"#dc2626"} />
-          </div>
-
-          <div style={SECTION}>
-            <SectionHeader icon="ti-building-bank" title="Paramètres du crédit" />
-            {[
-              { label:"Taux crédit (%)", val:taux, set:setTaux, step:"0.05" },
-              { label:"Taux assurance (%)", val:assur, set:setAssur, step:"0.01" },
-              { label:"Durée (ans)", val:duree, set:setDuree, step:"1", min:"5", max:"30" },
-              { label:"Apport personnel (€)", val:apport, set:setApport, step:"1000" },
-              { label:"Frais bancaires estimés (€)", val:fraisBanq, set:setFraisBanq, step:"500" },
-            ].map(function(f) {
-              return (
-                <div key={f.label} style={{ marginBottom:10 }}>
-                  <div style={{ fontSize:12, color:"#A8A29E", marginBottom:4, fontWeight:600 }}>{f.label}</div>
-                  <input type="number" value={f.val} min={f.min||"0"} max={f.max} step={f.step||"1"}
-                    onChange={function(e){f.set(e.target.value);}} style={inputS} />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Résultats */}
-      {revTotalRetenu > 0 && mensualiteMax > 0 && (
-        <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          {/* KPIs */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(180px,1fr))", gap:10 }}>
-            <KPI icon="ti-home" label="Capacité d'emprunt (35%)" val={fmtEur(capaciteEmprunt35)} sub={"Mensualité : "+fmtEur(mens35)+"/mois"} />
-            <KPI icon="ti-coin" label="Budget total (35%)" val={fmtEur(budgetTotal35)} sub={"Apport "+fmtEur(AP)+" inclus"} color="#16a34a" />
-            <KPI icon="ti-building-skyscraper" label="Prix bien max (35%)" val={fmtEur(prixBienMax35)} sub="Frais notaire 8% déduits" color="#1C1917" />
-            <KPI icon="ti-scale" label="Taux endettement réel" val={fmt1(tauxEndetteReel35)+"%"} sub={tauxEndetteReel35<=35?"✓ Dans les clous HCSF":"⚠ Dépasse 35%"} color={tauxEndetteReel35<=35?"#16a34a":"#dc2626"} />
-          </div>
-
-          {/* Tableau comparatif 35% vs 30% */}
-          <div style={SECTION}>
-            <SectionHeader icon="ti-scale" title="Comparatif selon le taux d'endettement" />
-            <div style={{ overflowX:"auto" }}>
-              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
-                <thead>
-                  <tr style={{ borderBottom:"2px solid #FFE8D9" }}>
-                    <th style={{ textAlign:"left", padding:"8px 12px", fontSize:11, color:"#A8A29E", textTransform:"uppercase", letterSpacing:"0.06em" }}>Critère</th>
-                    <th style={{ textAlign:"right", padding:"8px 12px", color:"#F97316", fontWeight:700 }}>35% — Max HCSF</th>
-                    <th style={{ textAlign:"right", padding:"8px 12px", color:"#16a34a", fontWeight:700 }}>30% — Prudent</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { label:"Mensualité max", v35:fmtEur(mensualiteMax)+"/mois", v30:fmtEur(mensualiteMax30)+"/mois" },
-                    { label:"Capacité d'emprunt", v35:fmtEur(capaciteEmprunt35), v30:fmtEur(capaciteEmprunt30) },
-                    { label:"Budget total (avec apport)", v35:fmtEur(budgetTotal35), v30:fmtEur(budgetTotal30) },
-                    { label:"Prix bien max (frais inclus)", v35:fmtEur(prixBienMax35), v30:fmtEur(prixBienMax30), bold:true },
-                    { label:"Mensualité réelle", v35:fmtEur(mens35)+"/mois", v30:fmtEur(mens30)+"/mois" },
-                    { label:"Coût total du crédit", v35:fmtEur(coutTotal35), v30:fmtEur(coutTotal30) },
-                    { label:"Taux d'endettement réel", v35:fmt1(tauxEndetteReel35)+"%", v30:fmt1(tauxEndetteReel30)+"%" },
-                  ].map(function(r, i) {
-                    return (
-                      <tr key={i} style={{ borderBottom:"1px solid #FFE8D9", background:r.bold?"#FFF8F3":"transparent" }}>
-                        <td style={{ padding:"9px 12px", color:"#78716C", fontWeight:r.bold?700:400 }}>{r.label}</td>
-                        <td style={{ padding:"9px 12px", textAlign:"right", fontWeight:r.bold?800:600, color:"#F97316" }}>{r.v35}</td>
-                        <td style={{ padding:"9px 12px", textAlign:"right", fontWeight:r.bold?800:600, color:"#16a34a" }}>{r.v30}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Conseils */}
-          <div style={Object.assign({},SECTION,{background:"rgba(249,115,22,0.03)"})}>
-            <SectionHeader icon="ti-rocket" title="Points clés pour la banque" />
-            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-              {[
-                { ok: chargesExist < revTotalRetenu * 0.15, msg: chargesExist < revTotalRetenu * 0.15 ? "Tes charges actuelles sont faibles — bon signal pour la banque." : "Tes charges actuelles sont élevées — elles réduisent ta capacité." },
-                { ok: AP >= capaciteEmprunt35 * 0.10, msg: AP >= capaciteEmprunt35 * 0.10 ? "Ton apport représente "+fmt1(AP/capaciteEmprunt35*100)+"% du crédit — bien au-dessus des 10% recommandés." : "Ton apport est inférieur à 10% du crédit — pense à augmenter l'apport." },
-                { ok: tauxEndetteReel35 <= 35, msg: tauxEndetteReel35 <= 35 ? "Taux d'endettement à "+fmt1(tauxEndetteReel35)+"% — dans les clous HCSF (max 35%)." : "Taux d'endettement à "+fmt1(tauxEndetteReel35)+"% — dépasse la règle HCSF de 35%." },
-                { ok: mode === "locatif" && revLocRetenu > 0, msg: mode === "locatif" ? "En locatif, la banque retient "+TL+"% de tes loyers. Certaines banques vont jusqu'à 80%." : "En résidence principale, les loyers ne sont pas pris en compte par la banque." },
-              ].map(function(c, i) {
-                return (
-                  <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"8px 12px", background:c.ok?"#F0FDF4":"#FEF2F2", borderRadius:10, border:"1px solid "+(c.ok?"#BBF7D0":"#FECACA") }}>
-                    <span style={{ fontSize:14, flexShrink:0 }}>{c.ok ? "✓" : "⚠"}</span>
-                    <span style={{ fontSize:13, color:c.ok?"#16a34a":"#dc2626" }}>{c.msg}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {revTotalRetenu === 0 && (
-        <div style={{ textAlign:"center", padding:"40px 20px", color:"#A8A29E" }}>
-          <Icon name="ti-calculator" size={48} color="#FFE8D9" />
-          <div style={{ fontSize:16, fontWeight:600, color:"#78716C", marginTop:12 }}>Renseigne tes revenus pour calculer ta capacité</div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-
-// Enrichit les communes avec leurs coordonnées GPS via l'API geo.api.gouv.fr
-async function enrichirCoordonnees(communes) {
-  var sn = function(v) { return v == null ? 0 : parseFloat(v) || 0; };
-
-  // D'abord mapper sans coordonnées
-  var mapped = communes.map(function(c) {
-    return {
-      nom: c.nom || "",
-      code: c.code_insee || c.code || "",
-      score: sn(c.scores && c.scores.global),
-      rendement: sn(c.scores && c.scores.rendement),
-      demo: sn(c.scores && c.scores.demographie),
-      socio: sn(c.scores && c.scores.socio_eco),
-      pop: parseInt(c.population || 0),
-      lat: 0, lon: 0,
-    };
-  }).filter(function(c) { return c.nom !== "" && c.code !== ""; });
-
-  // Vérifier si on a déjà les coordonnées en cache
-  var coordsKey = "radar-immo-coords-v1";
-  var coordsCache = {};
-  try {
-    var stored = localStorage.getItem(coordsKey);
-    if (stored) coordsCache = JSON.parse(stored) || {};
-  } catch(e) {}
-
-  // Identifier les communes sans coordonnées
-  var sansCoords = mapped.filter(function(c) { return !coordsCache[c.code]; });
-
-  // Charger les coordonnées par batch de 50 via l'API geo.api.gouv.fr
-  if (sansCoords.length > 0) {
-    var batches = [];
-    for (var i = 0; i < sansCoords.length; i += 50) {
-      batches.push(sansCoords.slice(i, i + 50));
-    }
-    for (var b = 0; b < batches.length; b++) {
-      try {
-        var codes = batches[b].map(function(c) { return "code=" + c.code; }).join("&");
-        var r = await fetch("https://geo.api.gouv.fr/communes?" + codes + "&fields=centre&format=json");
-        var data = await r.json();
-        data.forEach(function(d) {
-          if (d.centre && d.centre.coordinates) {
-            coordsCache[d.code] = { lat: d.centre.coordinates[1], lon: d.centre.coordinates[0] };
-          }
-        });
-      } catch(e) {}
-    }
-    // Sauvegarder en cache
-    try { localStorage.setItem(coordsKey, JSON.stringify(coordsCache)); } catch(e) {}
-  }
-
-  // Appliquer les coordonnées
-  return mapped.map(function(c) {
-    var coords = coordsCache[c.code];
-    if (coords) { c.lat = coords.lat; c.lon = coords.lon; }
-    return c;
-  }).filter(function(c) { return c.lat !== 0; });
-}
-
-// ─── CARTE INTERACTIVE DES COMMUNES ──────────────────────────────────────────
-function CarteCommunes() {
-  var _sel = React.useState(null); var selected = _sel[0]; var setSelected = _sel[1];
-  var _filtre = React.useState("score"); var filtre = _filtre[0]; var setFiltre = _filtre[1];
-  var _search = React.useState(""); var search = _search[0]; var setSearch = _search[1];
-
-  // Charger Leaflet dynamiquement
-  var _leaflet = React.useState(false); var leafletReady = _leaflet[0]; var setLeafletReady = _leaflet[1];
-  var mapRef = React.useRef(null);
-  var mapInstance = React.useRef(null);
-  var markersRef = React.useRef([]);
-
-  React.useEffect(function() {
-    if (document.getElementById("leaflet-css")) { setLeafletReady(true); return; }
-    var link = document.createElement("link");
-    link.id = "leaflet-css";
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(link);
-
-    var script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = function() { setLeafletReady(true); };
-    document.head.appendChild(script);
-  }, []);
-
-  // Données communes — chargées via getCommunesCache() (même source qu'Analyse communes)
-  var _cd = React.useState([]); var communesData = _cd[0]; var setCommunesData = _cd[1];
-  var _loading = React.useState(true); var dataLoading = _loading[0]; var setDataLoading = _loading[1];
-
-  React.useEffect(function() {
-    setDataLoading(true);
-
-    // 1. Lire le cache communes depuis localStorage
-    var raw = [];
-    try {
-      var stored = localStorage.getItem("radar-immo-communes-v3");
-      if (stored) raw = JSON.parse(stored) || [];
-    } catch(e) {}
-
-    if (raw.length === 0) {
-      // Essayer de charger depuis l'API
-      fetch(API_BASE + "/communes")
-        .then(function(r) { return r.json(); })
-        .then(function(d) { raw = d.communes || []; return enrichirCoordonnees(raw); })
-        .then(function(mapped) { setCommunesData(mapped); setDataLoading(false); })
-        .catch(function() { setDataLoading(false); });
-      return;
-    }
-
-    // Vider le cache coords si vide (forcer rechargement)
-    try {
-      var coordsStored = localStorage.getItem("radar-immo-coords-v1");
-      var coordsParsed = coordsStored ? JSON.parse(coordsStored) : {};
-      if (Object.keys(coordsParsed).length === 0) {
-        localStorage.removeItem("radar-immo-coords-v1");
-      }
-    } catch(e) {}
-
-    enrichirCoordonnees(raw).then(function(mapped) {
-      setCommunesData(mapped);
-      setDataLoading(false);
-    }).catch(function() { setDataLoading(false); });
-
-  }, []);
-
-  var scoreColor = function(s) {
-    if (s >= 8) return "#16a34a";
-    if (s >= 6) return "#F97316";
-    if (s >= 4) return "#fbbf24";
-    return "#dc2626";
-  };
-
-  // Initialiser la carte Leaflet
-  React.useEffect(function() {
-    if (!leafletReady || !mapRef.current || mapInstance.current) return;
-    var L = window.L;
-    if (!L) return;
-
-    var map = L.map(mapRef.current, { center:[49.7, 1.0], zoom:9, zoomControl:true });
-    mapInstance.current = map;
-
-    // Fond de carte OpenStreetMap
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-      maxZoom: 18,
-    }).addTo(map);
-
-    return function() {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-    };
-  }, [leafletReady]);
-
-  // Mettre à jour les marqueurs
-  React.useEffect(function() {
-    if (!leafletReady || !mapInstance.current || communesData.length === 0) return;
-    var L = window.L;
-    if (!L) return;
-    var map = mapInstance.current;
-
-    // Supprimer anciens marqueurs
-    markersRef.current.forEach(function(m) { m.remove(); });
-    markersRef.current = [];
-
-    var filteredData = communesData.filter(function(c) {
-      return !search || c.nom.toLowerCase().includes(search.toLowerCase());
-    });
-
-    filteredData.forEach(function(c) {
-      var score = filtre === "score" ? c.score : filtre === "rendement" ? c.rendement : c.demo;
-      var color = scoreColor(score);
-      var size = Math.max(8, Math.min(24, 8 + score * 1.5));
-
-      var icon = L.divIcon({
-        className: "",
-        html: '<div style="width:'+size+'px;height:'+size+'px;background:'+color+';border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);cursor:pointer;transition:transform 0.15s;" onmouseover="this.style.transform=\'scale(1.3)\'" onmouseout="this.style.transform=\'scale(1)\'"></div>',
-        iconSize: [size, size],
-        iconAnchor: [size/2, size/2],
-      });
-
-      var marker = L.marker([c.lat, c.lon], { icon: icon })
-        .addTo(map)
-        .on("click", function() { setSelected(c); });
-
-      markersRef.current.push(marker);
-    });
-  }, [leafletReady, communesData, filtre, search]);
-
-  var filtres = [
-    { id:"score", label:"Score global" },
-    { id:"rendement", label:"Rendement" },
-    { id:"demo", label:"Démographie" },
-  ];
-
-  var topCommunes = [...communesData]
-    .sort(function(a,b) {
-      var sa = filtre==="score"?a.score:filtre==="rendement"?a.rendement:a.demo;
-      var sb = filtre==="score"?b.score:filtre==="rendement"?b.rendement:b.demo;
-      return sb-sa;
-    })
-    .slice(0,10);
-
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-
-      {/* Filtres */}
-      <div style={SECTION}>
-        <SectionHeader icon="ti-map" title="Carte des communes — Seine-Maritime" />
-        <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
-          <div style={{ display:"flex", gap:6 }}>
-            {filtres.map(function(f) {
-              var isA = filtre===f.id;
-              return (
-                <button key={f.id} onClick={function(){setFiltre(f.id);}}
-                  style={{ padding:"6px 14px", borderRadius:8, border:"1.5px solid "+(isA?"#F97316":"#FFE8D9"), background:isA?"#FFF3EC":"#FFF8F3", color:isA?"#F97316":"#78716C", fontSize:13, fontWeight:isA?700:500, cursor:"pointer" }}>
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-          <input value={search} onChange={function(e){setSearch(e.target.value);}}
-            placeholder="Filtrer une commune..."
-            style={{ flex:1, minWidth:180, background:"#FFF8F3", border:"1.5px solid #FFE8D9", borderRadius:10, padding:"7px 12px", fontSize:13, outline:"none", color:"#1C1917" }} />
-          <div style={{ display:"flex", alignItems:"center", gap:8, fontSize:11, color:"#A8A29E" }}>
-            <div style={{ display:"flex", gap:4, alignItems:"center" }}>
-              {[["#16a34a","≥ 8"],["#F97316","≥ 6"],["#fbbf24","≥ 4"],["#dc2626","< 4"]].map(function(c) {
-                return <span key={c[1]} style={{ display:"flex", alignItems:"center", gap:3 }}><span style={{ width:10, height:10, borderRadius:"50%", background:c[0], display:"inline-block" }}></span>{c[1]}</span>;
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 320px", gap:14 }}>
-        {/* Carte */}
-        <div style={{ background:"#fff", border:"1.5px solid #FFE8D9", borderRadius:16, overflow:"hidden", height:500 }}>
-          {!leafletReady && (
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100%", color:"#A8A29E", flexDirection:"column", gap:12 }}>
-              <div style={{ width:32, height:32, border:"3px solid #FFE8D9", borderTopColor:"#F97316", borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
-              <div style={{ fontSize:13 }}>Chargement de la carte…</div>
-            </div>
-          )}
-          {dataLoading && leafletReady && (
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100%", color:"#A8A29E", flexDirection:"column", gap:12 }}>
-              <div style={{ width:32, height:32, border:"3px solid #FFE8D9", borderTopColor:"#F97316", borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
-              <div style={{ fontSize:13 }}>Chargement des communes…</div>
-            </div>
-          )}
-          {!dataLoading && communesData.length === 0 && leafletReady && (
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100%", color:"#A8A29E", flexDirection:"column", gap:12 }}>
-              <Icon name="ti-map" size={48} color="#FFE8D9" />
-              <div style={{ fontSize:13, textAlign:"center", padding:"0 20px" }}>Aucune donnée de commune disponible. Vérifie ta connexion.</div>
-            </div>
-          )}
-          <div ref={mapRef} style={{ width:"100%", height:"100%", display:leafletReady&&communesData.length>0&&!dataLoading?"block":"none" }} />
-        </div>
-
-        {/* Panel droite */}
-        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-
-          {/* Commune sélectionnée */}
-          {selected && (
-            <div style={{ background:"#fff", border:"1.5px solid #F97316", borderRadius:14, padding:14 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
-                <div>
-                  <div style={{ fontSize:16, fontWeight:800, color:"#1C1917" }}>{selected.nom}</div>
-                  <div style={{ fontSize:12, color:"#A8A29E" }}>{selected.pop ? selected.pop.toLocaleString("fr-FR")+" hab." : ""} · {selected.code}</div>
-                </div>
-                <div style={{ width:40, height:40, borderRadius:10, background:scoreColor(selected.score), display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, fontWeight:800, color:"#fff" }}>
-                  {selected.score.toFixed(1)}
-                </div>
-              </div>
-              {[
-                { label:"Rendement", val:selected.rendement, max:10 },
-                { label:"Démographie", val:selected.demo, max:10 },
-                { label:"Socio-éco", val:selected.socio, max:10 },
-              ].map(function(r) {
-                return (
-                  <div key={r.label} style={{ marginBottom:8 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
-                      <span style={{ fontSize:12, color:"#78716C" }}>{r.label}</span>
-                      <span style={{ fontSize:12, fontWeight:700, color:scoreColor(r.val) }}>{r.val.toFixed(1)}</span>
-                    </div>
-                    <div style={{ height:6, background:"#FFE8D9", borderRadius:999, overflow:"hidden" }}>
-                      <div style={{ height:"100%", width:(r.val/r.max*100)+"%", background:scoreColor(r.val), borderRadius:999, transition:"width 0.4s" }} />
-                    </div>
-                  </div>
-                );
-              })}
-              <button onClick={function(){}}
-                style={{ width:"100%", marginTop:8, background:"#F97316", border:"none", borderRadius:10, padding:"8px", color:"#fff", fontSize:13, fontWeight:700, cursor:"pointer" }}>
-                Voir le détail commune
-              </button>
-            </div>
-          )}
-
-          {/* Top 10 */}
-          <div style={{ background:"#fff", border:"1.5px solid #FFE8D9", borderRadius:14, padding:14, flex:1, overflow:"auto" }}>
-            <div style={{ fontSize:12, fontWeight:700, color:"#A8A29E", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:10 }}>
-              Top 10 — {filtres.find(function(f){return f.id===filtre;})?.label}
-            </div>
-            {topCommunes.map(function(c, i) {
-              var score = filtre==="score"?c.score:filtre==="rendement"?c.rendement:c.demo;
-              var isSelected = selected && selected.code === c.code;
-              return (
-                <div key={c.code} onClick={function(){ setSelected(c); if(mapInstance.current) mapInstance.current.setView([c.lat,c.lon],13); }}
-                  style={{ display:"flex", alignItems:"center", gap:8, padding:"7px 0", borderBottom:"1px solid #FFE8D9", cursor:"pointer", background:isSelected?"#FFF3EC":"transparent", borderRadius:6, paddingLeft:isSelected?8:0, transition:"all 0.15s" }}>
-                  <span style={{ fontSize:11, fontWeight:800, color:"#D6D3D1", width:20 }}>{i+1}</span>
-                  <div style={{ width:8, height:8, borderRadius:"50%", background:scoreColor(score), flexShrink:0 }} />
-                  <span style={{ flex:1, fontSize:13, fontWeight:600, color:"#1C1917" }}>{c.nom}</span>
-                  <span style={{ fontSize:13, fontWeight:800, color:scoreColor(score) }}>{score.toFixed(1)}</span>
-                </div>
-              );
-            })}
-            {topCommunes.length === 0 && (
-              <div style={{ textAlign:"center", padding:"20px", color:"#A8A29E", fontSize:13 }}>
-                Charge d'abord les données dans Analyse communes
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
