@@ -6030,7 +6030,7 @@ function AppMain({ user, onLogout }) {
     <div style={{ display: "flex", minHeight: "100vh", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
 
       {/* Sidebar */}
-      <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", position: isMobile ? "fixed" : "sticky", top: 0, left: 0, height: "100vh", zIndex: 50, transform: isMobile && !sidebarMobileOpen ? "translateX(-100%)" : "translateX(0)", transition: "transform 0.25s cubic-bezier(.4,0,.2,1)", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", overflowX: "hidden", transition: "width 0.22s cubic-bezier(.4,0,.2,1), min-width 0.22s cubic-bezier(.4,0,.2,1), padding 0.22s", zIndex: 30, boxShadow: sidebarOpen ? "4px 0 24px #FFF3EC" : "none" }}>
+      <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", position: isMobile ? "fixed" : "sticky", top: 0, left: 0, height: "100vh", zIndex: 50, transform: isMobile && !sidebarMobileOpen ? "translateX(-200px)" : "translateX(0)", transition: "transform 0.25s ease", display: "flex", flexDirection: "column", gap: 4, overflowY: "auto", overflowX: "hidden", boxShadow: isMobile && sidebarMobileOpen ? "4px 0 24px rgba(0,0,0,0.15)" : "none" }}>
 
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, overflow: "hidden", minHeight: 40 }}>
