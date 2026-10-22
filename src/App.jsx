@@ -1020,68 +1020,70 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
   const [loadingDvf, setLoadingDvf] = useState(false);
 
   // Fetch DVF direct depuis l'API Cerema (côté navigateur)
+  // Stratégie en cascade : commune → mutations brutes commune → département 76
   var fetchDVFDirect = useCallback(function(nomCommune) {
     if (!nomCommune) return;
     setDvfDirect(null);
     setLoadingDvf(true);
-    // Étape 1 : code INSEE via geo.api.gouv.fr
+
+    var calcMedian = function(arr) {
+      var vals = arr.map(function(m) { return m.valeur_fonciere / m.surface_reelle_bati; })
+        .filter(function(v) { return v > 200 && v < 15000; })
+        .sort(function(a, b) { return a - b; });
+      if (!vals.length) return null;
+      var mid = Math.floor(vals.length / 2);
+      return vals.length % 2 === 0 ? (vals[mid-1] + vals[mid]) / 2 : vals[mid];
+    };
+
+    // Étape 1 : récupérer le code INSEE
     fetch("https://geo.api.gouv.fr/communes?nom=" + encodeURIComponent(nomCommune) + "&codeDepartement=76&fields=code,nom&limit=3")
       .then(function(r) { return r.json(); })
       .then(function(communes) {
         if (!communes || communes.length === 0) throw new Error("Commune introuvable");
-        // Choisir la commune la plus proche du nom
         var match = communes.find(function(c) { return c.nom.toLowerCase() === nomCommune.toLowerCase(); }) || communes[0];
         var codeInsee = match.code;
-        // Étape 2 : indicateurs de prix DVF depuis Cerema
+
+        // Étape 2a : indicateurs stats commune
         return fetch("https://apidf-preprod.cerema.fr/indicateurs/prix/communes/?code_insee=" + codeInsee + "&ordering=-annee&page_size=5")
           .then(function(r2) { return r2.json(); })
           .then(function(data) {
-            // Prendre les données les plus récentes
             var rows = data.results || data;
-            if (!rows || rows.length === 0) throw new Error("Pas de données DVF");
-            // Chercher la dernière année avec données appart ou maison
-            var best = rows.find(function(r) { return r.prix_m2_median_appart || r.prix_m2_median_maison; }) || rows[0];
-            setDvfDirect({
-              codeInsee: codeInsee,
-              annee: best.annee,
-              appart_m2: best.prix_m2_median_appart ? Number(best.prix_m2_median_appart) : null,
-              maison_m2: best.prix_m2_median_maison ? Number(best.prix_m2_median_maison) : null,
-              nb_mutations: best.nb_mutations_appart || best.nb_mutations_maison || null,
-            });
-          });
-      })
-      .catch(function(err) {
-        // Essai alternatif : API mutations directes pour calculer la médiane localement
-        fetch("https://geo.api.gouv.fr/communes?nom=" + encodeURIComponent(nomCommune) + "&codeDepartement=76&fields=code&limit=1")
-          .then(function(r) { return r.json(); })
-          .then(function(cs) {
-            if (!cs || cs.length === 0) return;
-            var code = cs[0].code;
-            return fetch("https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?code_insee=" + code + "&nature_mutation=Vente&page_size=100&ordering=-date_mutation")
-              .then(function(r2) { return r2.json(); })
-              .then(function(data) {
-                var rows = (data.results || []).filter(function(m) { return m.surface_reelle_bati > 0 && m.valeur_fonciere > 0; });
-                if (rows.length === 0) return;
-                var apparts = rows.filter(function(m) { return m.type_local === "Appartement"; });
-                var maisons = rows.filter(function(m) { return m.type_local === "Maison"; });
-                var median = function(arr, key) {
-                  var vals = arr.map(function(m) { return m.valeur_fonciere / m.surface_reelle_bati; }).filter(function(v) { return v > 100 && v < 20000; }).sort(function(a,b) { return a-b; });
-                  if (!vals.length) return null;
-                  var mid = Math.floor(vals.length / 2);
-                  return vals.length % 2 === 0 ? (vals[mid-1] + vals[mid]) / 2 : vals[mid];
-                };
-                setDvfDirect({
-                  codeInsee: code,
-                  annee: "récent",
-                  appart_m2: median(apparts),
-                  maison_m2: median(maisons),
-                  nb_mutations: rows.length,
-                  source: "calculé",
-                });
+            var best = rows && rows.find(function(r) { return r.prix_m2_median_appart || r.prix_m2_median_maison; });
+            if (best) {
+              setDvfDirect({ scope: nomCommune, annee: best.annee, appart_m2: best.prix_m2_median_appart ? Number(best.prix_m2_median_appart) : null, maison_m2: best.prix_m2_median_maison ? Number(best.prix_m2_median_maison) : null, nb_mutations: best.nb_mutations_appart || best.nb_mutations_maison || null });
+              return; // succès
+            }
+            // Étape 2b : mutations brutes commune (calcul local)
+            return fetch("https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?code_insee=" + codeInsee + "&nature_mutation=Vente&page_size=200&ordering=-date_mutation")
+              .then(function(r3) { return r3.json(); })
+              .then(function(d3) {
+                var rows3 = (d3.results || []).filter(function(m) { return m.surface_reelle_bati > 0 && m.valeur_fonciere > 0; });
+                var apparts = rows3.filter(function(m) { return m.type_local === "Appartement"; });
+                var maisons = rows3.filter(function(m) { return m.type_local === "Maison"; });
+                var ma = calcMedian(apparts); var mm = calcMedian(maisons);
+                if (ma || mm) {
+                  setDvfDirect({ scope: nomCommune, annee: "récentes", appart_m2: ma, maison_m2: mm, nb_mutations: rows3.length, source: "calculé" });
+                  return;
+                }
+                throw new Error("Pas assez de transactions");
               });
           })
-          .catch(function() { setDvfDirect(null); });
+          // Étape 3 : fallback département 76
+          .catch(function() {
+            return fetch("https://apidf-preprod.cerema.fr/indicateurs/prix/departements/?code_departement=76&ordering=-annee&page_size=3")
+              .then(function(r4) { return r4.json(); })
+              .then(function(d4) {
+                var rows4 = d4.results || d4;
+                var best4 = rows4 && rows4.find(function(r) { return r.prix_m2_median_appart || r.prix_m2_median_maison; });
+                if (best4) {
+                  setDvfDirect({ scope: "Seine-Maritime (dép. 76)", annee: best4.annee, appart_m2: best4.prix_m2_median_appart ? Number(best4.prix_m2_median_appart) : null, maison_m2: best4.prix_m2_median_maison ? Number(best4.prix_m2_median_maison) : null, nb_mutations: null, fallback: true });
+                } else {
+                  setDvfDirect(null);
+                }
+              });
+          });
       })
+      .catch(function() { setDvfDirect(null); })
       .finally(function() { setLoadingDvf(false); });
   }, []);
 
@@ -1992,8 +1994,11 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               // Priorité : données DVF directes Cerema, fallback backend
               var prixM2Appart = (dvfDirect && dvfDirect.appart_m2) || (donneesCommune && donneesCommune.prix && donneesCommune.prix.appartement_m2 ? Number(donneesCommune.prix.appartement_m2) : null);
               var prixM2Maison = (dvfDirect && dvfDirect.maison_m2) || (donneesCommune && donneesCommune.prix && donneesCommune.prix.maison_m2 ? Number(donneesCommune.prix.maison_m2) : null);
+              var isFallbackDept = dvfDirect && dvfDirect.fallback;
               var loyerM2 = loy && loy.appartement_m2 != null ? Number(loy.appartement_m2) : null;
-              var sourceLabel = dvfDirect ? ("DVF " + (dvfDirect.annee || "") + (dvfDirect.nb_mutations ? " · " + dvfDirect.nb_mutations + " ventes" : "")) : "backend";
+              var sourceLabel = dvfDirect
+                ? ("DVF " + (dvfDirect.annee || "") + (dvfDirect.nb_mutations ? " · " + dvfDirect.nb_mutations + " ventes" : "") + (dvfDirect.fallback ? " · réf. " + dvfDirect.scope : ""))
+                : "backend";
               // Afficher le bloc si : commune choisie ET (données dispo OU chargement en cours)
               if (!inputs.commune) return null;
               if (loadingDvf && !prixM2Appart && !prixM2Maison) return (
@@ -2044,10 +2049,12 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
                   {/* Ligne verdict */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
                     <div>
-                      <div style={{ fontSize: 11, color: "#78716C", fontWeight: 600, textTransform: "uppercase", marginBottom: 3 }}>Verdict de prix DVF · {inputs.commune}</div>
+                      <div style={{ fontSize: 11, color: "#78716C", fontWeight: 600, textTransform: "uppercase", marginBottom: 3 }}>
+                        Verdict de prix DVF · {isFallbackDept ? <span style={{ color: "#d97706" }}>réf. {dvfDirect.scope}</span> : inputs.commune}
+                      </div>
                       <div style={{ fontSize: 18, fontWeight: 800, color: verdictColor }}>{verdictIcon} {verdict}</div>
                       {diff != null && <div style={{ fontSize: 12, color: verdictColor, marginTop: 2, fontWeight: 600 }}>
-                        {diff > 0 ? "+" : ""}{diff.toFixed(1)}% vs prix médian {refLabel}
+                        {diff > 0 ? "+" : ""}{diff.toFixed(1)}% vs prix médian {refLabel}{isFallbackDept ? " (Seine-Maritime)" : ""}
                       </div>}
                     </div>
                     <div style={{ textAlign: "right" }}>
