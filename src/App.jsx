@@ -1917,37 +1917,84 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               var pri = donneesCommune.prix;
               var loy = donneesCommune.loyer;
               var surf = pf(inputs.surfaceGlobale);
-              var prixM2Projet = surf > 0 ? pf(inputs.prixVente) / surf : null;
+              var pv = pf(inputs.prixVente);
+              var prixM2Projet = surf > 0 && pv > 0 ? pv / surf : null;
               var prixM2Appart = pri.appartement_m2 ? Number(pri.appartement_m2) : null;
               var prixM2Maison = pri.maison_m2 ? Number(pri.maison_m2) : null;
               var loyerM2 = loy && loy.appartement_m2 != null ? Number(loy.appartement_m2) : null;
-              var diffA = prixM2Projet && prixM2Appart ? (prixM2Projet - prixM2Appart) / prixM2Appart * 100 : null;
-              var diffM = prixM2Projet && prixM2Maison ? (prixM2Projet - prixM2Maison) / prixM2Maison * 100 : null;
-              var gc = function(d) { return d == null ? "#F97316" : d > 10 ? "#dc2626" : d > 0 ? "#d97706" : "#16a34a"; };
-              var gb = function(d) { return d == null ? "rgba(241,245,249,0.8)" : d > 10 ? "rgba(254,226,226,0.5)" : d > 0 ? "rgba(254,243,199,0.5)" : "rgba(220,252,231,0.5)"; };
-              var diffLabel = function(d) { return d != null ? (d > 0 ? "⬆️ +" : "⬇️ ") + Math.abs(d).toFixed(1) + "% vs votre projet" : surf > 0 ? "—" : "Renseigne la surface"; };
+              // Référence marché : appartement prioritaire, sinon maison
+              var prixRef = prixM2Appart || prixM2Maison;
+              var refLabel = prixM2Appart ? "appartements" : "maisons";
+              var diff = prixM2Projet && prixRef ? (prixM2Projet - prixRef) / prixRef * 100 : null;
+
+              // Verdict
+              var verdict, verdictColor, verdictBg, verdictIcon, conseil;
+              if (diff == null) {
+                verdict = "Renseigne prix et surface"; verdictColor = "#78716C"; verdictBg = "#F5F5F4"; verdictIcon = "—"; conseil = "";
+              } else if (diff <= -10) {
+                verdict = "Très bonne affaire"; verdictColor = "#15803d"; verdictBg = "rgba(220,252,231,0.6)"; verdictIcon = "🟢";
+                conseil = "Prix nettement sous le marché. Peu ou pas de négociation nécessaire.";
+              } else if (diff <= -3) {
+                verdict = "Bonne affaire"; verdictColor = "#16a34a"; verdictBg = "rgba(220,252,231,0.4)"; verdictIcon = "🟢";
+                conseil = "Prix légèrement sous le marché. Bien positionné.";
+              } else if (diff <= 5) {
+                verdict = "Prix dans le marché"; verdictColor = "#d97706"; verdictBg = "rgba(254,243,199,0.5)"; verdictIcon = "🟡";
+                conseil = "Prix cohérent avec le marché local. Marge de 3–5% envisageable.";
+              } else if (diff <= 15) {
+                verdict = "Légèrement surcoté"; verdictColor = "#ea580c"; verdictBg = "rgba(255,237,213,0.6)"; verdictIcon = "🟠";
+                conseil = "Prix au-dessus du marché. Négocie " + fmt((pv * diff / 100), 0) + " € de remise.";
+              } else {
+                verdict = "Surcoté"; verdictColor = "#dc2626"; verdictBg = "rgba(254,226,226,0.5)"; verdictIcon = "🔴";
+                conseil = "Prix significativement au-dessus du marché. Négocie au minimum " + fmt(pv - (prixRef * surf), 0) + " €.";
+              }
+
+              // Barre de positionnement
+              var barMin = prixRef ? prixRef * 0.7 : 0;
+              var barMax = prixRef ? prixRef * 1.4 : 1;
+              var barPct = prixM2Projet && prixRef ? Math.min(100, Math.max(0, (prixM2Projet - barMin) / (barMax - barMin) * 100)) : 50;
+              var barRefPct = prixRef ? Math.min(100, Math.max(0, (prixRef - barMin) / (barMax - barMin) * 100)) : 50;
+
               return (
-                <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
-                  {prixM2Appart && <div style={{ background: gb(diffA), borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                    <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Prix marché appart.</div>
-                    <div style={{ fontSize: 19, fontWeight: 800, color: gc(diffA), margin: "3px 0 2px" }}>{fmt(prixM2Appart, 0)} €/m²</div>
-                    <div style={{ fontSize: 12, color: "#78716C" }}>{diffLabel(diffA)}</div>
-                  </div>}
-                  {prixM2Maison && <div style={{ background: gb(diffM), borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                    <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Prix marché maison</div>
-                    <div style={{ fontSize: 19, fontWeight: 800, color: gc(diffM), margin: "3px 0 2px" }}>{fmt(prixM2Maison, 0)} €/m²</div>
-                    <div style={{ fontSize: 12, color: "#78716C" }}>{diffLabel(diffM)}</div>
-                  </div>}
-                  {loyerM2 && <div style={{ background: "rgba(224,242,254,0.5)", borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                    <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Loyer marché /m²</div>
-                    <div style={{ fontSize: 19, fontWeight: 800, color: "#0ea5e9", margin: "3px 0 2px" }}>{loyerM2.toFixed(1)} €/m²/mois</div>
-                    <div style={{ fontSize: 12, color: "#78716C" }}>{surf > 0 ? "→ Loyer estimé : " + fmt(loyerM2 * surf, 0) + " €/mois" : "Renseigne la surface"}</div>
-                  </div>}
-                  {prixM2Projet && <div style={{ background: "rgba(238,242,255,0.7)", borderRadius: 12, padding: "10px 14px", border: "1.5px solid #FFE8D9" }}>
-                    <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase" }}>Votre prix /m²</div>
-                    <div style={{ fontSize: 19, fontWeight: 800, color: "#F97316", margin: "3px 0 2px" }}>{fmt(prixM2Projet, 0)} €/m²</div>
-                    <div style={{ fontSize: 12, color: "#78716C" }}>{fmt(pf(inputs.prixVente), 0)} € ÷ {fmt(surf, 0)} m²</div>
-                  </div>}
+                <div style={{ marginTop: 14, background: verdictBg, borderRadius: 14, padding: "14px 16px", border: "1.5px solid #FFE8D9" }}>
+                  {/* Ligne verdict */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#78716C", fontWeight: 600, textTransform: "uppercase", marginBottom: 3 }}>Verdict de prix DVF · {inputs.commune}</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: verdictColor }}>{verdictIcon} {verdict}</div>
+                      {diff != null && <div style={{ fontSize: 12, color: verdictColor, marginTop: 2, fontWeight: 600 }}>
+                        {diff > 0 ? "+" : ""}{diff.toFixed(1)}% vs prix médian {refLabel}
+                      </div>}
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      {prixM2Projet && <div style={{ fontSize: 22, fontWeight: 800, color: "#F97316" }}>{fmt(prixM2Projet, 0)} €/m²</div>}
+                      {prixRef && <div style={{ fontSize: 12, color: "#78716C" }}>Marché : {fmt(prixRef, 0)} €/m²</div>}
+                    </div>
+                  </div>
+
+                  {/* Barre de positionnement */}
+                  {prixM2Projet && prixRef && (
+                    <div style={{ marginTop: 12 }}>
+                      <div style={{ position: "relative", height: 8, background: "linear-gradient(to right, #16a34a, #d97706, #dc2626)", borderRadius: 4 }}>
+                        {/* Curseur marché */}
+                        <div style={{ position: "absolute", left: barRefPct + "%", top: -4, transform: "translateX(-50%)", width: 2, height: 16, background: "#44403C", borderRadius: 2 }}></div>
+                        {/* Curseur projet */}
+                        <div style={{ position: "absolute", left: barPct + "%", top: -5, transform: "translateX(-50%)", width: 14, height: 18, background: "#F97316", borderRadius: 4, border: "2px solid #fff", boxShadow: "0 1px 4px rgba(0,0,0,0.2)" }}></div>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#A8A29E", marginTop: 4 }}>
+                        <span>–30% marché</span>
+                        <span style={{ color: "#44403C", fontWeight: 600 }}>◆ médian</span>
+                        <span>+40% marché</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Conseil + loyer estimé */}
+                  <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {conseil && <div style={{ flex: 1, minWidth: 180, fontSize: 12, color: "#44403C", background: "rgba(255,255,255,0.7)", borderRadius: 8, padding: "7px 10px" }}>{conseil}</div>}
+                    {loyerM2 && surf > 0 && <div style={{ fontSize: 12, color: "#0ea5e9", background: "rgba(224,242,254,0.6)", borderRadius: 8, padding: "7px 10px", fontWeight: 500 }}>
+                      Loyer marché estimé : <strong>{fmt(loyerM2 * surf, 0)} €/mois</strong> ({loyerM2.toFixed(1)} €/m²)
+                    </div>}
+                  </div>
                 </div>
               );
             })()}
