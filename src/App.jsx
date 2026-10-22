@@ -1016,6 +1016,74 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
   const [communeSuggestions, setCommuneSuggestions] = useState([]);
   const [donneesCommune, setDonneesCommune] = useState(null);
   const [loadingCommune, setLoadingCommune] = useState(false);
+  const [dvfDirect, setDvfDirect] = useState(null); // données DVF directes depuis Cerema
+  const [loadingDvf, setLoadingDvf] = useState(false);
+
+  // Fetch DVF direct depuis l'API Cerema (côté navigateur)
+  var fetchDVFDirect = useCallback(function(nomCommune) {
+    if (!nomCommune) return;
+    setDvfDirect(null);
+    setLoadingDvf(true);
+    // Étape 1 : code INSEE via geo.api.gouv.fr
+    fetch("https://geo.api.gouv.fr/communes?nom=" + encodeURIComponent(nomCommune) + "&codeDepartement=76&fields=code,nom&limit=3")
+      .then(function(r) { return r.json(); })
+      .then(function(communes) {
+        if (!communes || communes.length === 0) throw new Error("Commune introuvable");
+        // Choisir la commune la plus proche du nom
+        var match = communes.find(function(c) { return c.nom.toLowerCase() === nomCommune.toLowerCase(); }) || communes[0];
+        var codeInsee = match.code;
+        // Étape 2 : indicateurs de prix DVF depuis Cerema
+        return fetch("https://apidf-preprod.cerema.fr/indicateurs/prix/communes/?code_insee=" + codeInsee + "&ordering=-annee&page_size=5")
+          .then(function(r2) { return r2.json(); })
+          .then(function(data) {
+            // Prendre les données les plus récentes
+            var rows = data.results || data;
+            if (!rows || rows.length === 0) throw new Error("Pas de données DVF");
+            // Chercher la dernière année avec données appart ou maison
+            var best = rows.find(function(r) { return r.prix_m2_median_appart || r.prix_m2_median_maison; }) || rows[0];
+            setDvfDirect({
+              codeInsee: codeInsee,
+              annee: best.annee,
+              appart_m2: best.prix_m2_median_appart ? Number(best.prix_m2_median_appart) : null,
+              maison_m2: best.prix_m2_median_maison ? Number(best.prix_m2_median_maison) : null,
+              nb_mutations: best.nb_mutations_appart || best.nb_mutations_maison || null,
+            });
+          });
+      })
+      .catch(function(err) {
+        // Essai alternatif : API mutations directes pour calculer la médiane localement
+        fetch("https://geo.api.gouv.fr/communes?nom=" + encodeURIComponent(nomCommune) + "&codeDepartement=76&fields=code&limit=1")
+          .then(function(r) { return r.json(); })
+          .then(function(cs) {
+            if (!cs || cs.length === 0) return;
+            var code = cs[0].code;
+            return fetch("https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?code_insee=" + code + "&nature_mutation=Vente&page_size=100&ordering=-date_mutation")
+              .then(function(r2) { return r2.json(); })
+              .then(function(data) {
+                var rows = (data.results || []).filter(function(m) { return m.surface_reelle_bati > 0 && m.valeur_fonciere > 0; });
+                if (rows.length === 0) return;
+                var apparts = rows.filter(function(m) { return m.type_local === "Appartement"; });
+                var maisons = rows.filter(function(m) { return m.type_local === "Maison"; });
+                var median = function(arr, key) {
+                  var vals = arr.map(function(m) { return m.valeur_fonciere / m.surface_reelle_bati; }).filter(function(v) { return v > 100 && v < 20000; }).sort(function(a,b) { return a-b; });
+                  if (!vals.length) return null;
+                  var mid = Math.floor(vals.length / 2);
+                  return vals.length % 2 === 0 ? (vals[mid-1] + vals[mid]) / 2 : vals[mid];
+                };
+                setDvfDirect({
+                  codeInsee: code,
+                  annee: "récent",
+                  appart_m2: median(apparts),
+                  maison_m2: median(maisons),
+                  nb_mutations: rows.length,
+                  source: "calculé",
+                });
+              });
+          })
+          .catch(function() { setDvfDirect(null); });
+      })
+      .finally(function() { setLoadingDvf(false); });
+  }, []);
 
   // Autocompletion depuis le cache mémoire
   useEffect(function() {
@@ -1052,6 +1120,9 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
     if (inputs.commune) {
       setCommuneSearch(inputs.commune);
       fetchDonneesCommune(inputs.commune);
+      fetchDVFDirect(inputs.commune);
+    } else {
+      setDvfDirect(null);
     }
   }, [inputs.commune]);
 
@@ -1913,15 +1984,29 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
               )}
             </div>
             {loadingCommune && <div style={{ marginTop: 8, fontSize: 13, color: "#A8A29E" }}>⏳ Chargement des données marché...</div>}
-            {donneesCommune && donneesCommune.prix && (function() {
-              var pri = donneesCommune.prix;
-              var loy = donneesCommune.loyer;
+            {(function() {
+              var loy = donneesCommune && donneesCommune.loyer;
               var surf = pf(inputs.surfaceGlobale);
               var pv = pf(inputs.prixVente);
               var prixM2Projet = surf > 0 && pv > 0 ? pv / surf : null;
-              var prixM2Appart = pri.appartement_m2 ? Number(pri.appartement_m2) : null;
-              var prixM2Maison = pri.maison_m2 ? Number(pri.maison_m2) : null;
+              // Priorité : données DVF directes Cerema, fallback backend
+              var prixM2Appart = (dvfDirect && dvfDirect.appart_m2) || (donneesCommune && donneesCommune.prix && donneesCommune.prix.appartement_m2 ? Number(donneesCommune.prix.appartement_m2) : null);
+              var prixM2Maison = (dvfDirect && dvfDirect.maison_m2) || (donneesCommune && donneesCommune.prix && donneesCommune.prix.maison_m2 ? Number(donneesCommune.prix.maison_m2) : null);
               var loyerM2 = loy && loy.appartement_m2 != null ? Number(loy.appartement_m2) : null;
+              var sourceLabel = dvfDirect ? ("DVF " + (dvfDirect.annee || "") + (dvfDirect.nb_mutations ? " · " + dvfDirect.nb_mutations + " ventes" : "")) : "backend";
+              // Afficher le bloc si : commune choisie ET (données dispo OU chargement en cours)
+              if (!inputs.commune) return null;
+              if (loadingDvf && !prixM2Appart && !prixM2Maison) return (
+                <div style={{ marginTop: 14, background: "#FFF8F3", borderRadius: 14, padding: "14px 16px", border: "1.5px solid #FFE8D9", color: "#78716C", fontSize: 13 }}>
+                  ⏳ Chargement des données DVF pour {inputs.commune}…
+                </div>
+              );
+              if (!prixM2Appart && !prixM2Maison) return (
+                <div style={{ marginTop: 14, background: "#F5F5F4", borderRadius: 14, padding: "14px 16px", border: "1.5px solid #FFE8D9" }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#78716C" }}>Pas de données DVF disponibles pour {inputs.commune}</div>
+                  <div style={{ fontSize: 12, color: "#A8A29E", marginTop: 4 }}>Les petites communes ont parfois peu de transactions enregistrées.</div>
+                </div>
+              );
               // Référence marché : appartement prioritaire, sinon maison
               var prixRef = prixM2Appart || prixM2Maison;
               var refLabel = prixM2Appart ? "appartements" : "maisons";
@@ -1994,6 +2079,9 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
                     {loyerM2 && surf > 0 && <div style={{ fontSize: 12, color: "#0ea5e9", background: "rgba(224,242,254,0.6)", borderRadius: 8, padding: "7px 10px", fontWeight: 500 }}>
                       Loyer marché estimé : <strong>{fmt(loyerM2 * surf, 0)} €/mois</strong> ({loyerM2.toFixed(1)} €/m²)
                     </div>}
+                  </div>
+                  <div style={{ marginTop: 8, fontSize: 10, color: "#A8A29E" }}>
+                    Source : {dvfDirect ? "API DVF Cerema · " + sourceLabel : "données backend"} · Données indicatives
                   </div>
                 </div>
               );
