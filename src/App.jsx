@@ -44,7 +44,6 @@ const ICONS = {
   "ti-refresh": "M20 11A8 8 0 1 0 12 20m8-9v5h-5",
   "ti-user": "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
   "ti-chevron-right": "M9 18l6-6-6-6",
-  "ti-menu-2": "M4 6h16M4 12h16M4 18h7",
   "ti-copy": "M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-2M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2M10 4h4v4h-4V4z",
   "ti-leaf": "M5 21C5 21 5 13 12 8C19 3 21 3 21 3C21 3 21 5 16 12C11 19 5 21 5 21Z M5 21 L12 14",
   "ti-flame": "M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0C17 7 12 2 12 2zM9 17a3 3 0 0 0 6 0",
@@ -75,9 +74,6 @@ if (!document.getElementById("radar-global-styles")) {
   var styleEl = document.createElement("style");
   styleEl.id = "radar-global-styles";
   styleEl.textContent = `
-    @media (max-width: 767px) {
-      .mn-content { padding: 12px !important; }
-    }
     * { box-sizing: border-box; }
     button { transition: opacity 0.15s, transform 0.1s, background 0.15s, box-shadow 0.15s !important; }
     button:hover:not(:disabled) { opacity: 0.9; }
@@ -93,25 +89,14 @@ if (!document.getElementById("radar-global-styles")) {
   `;
   document.head.appendChild(styleEl);
 }
-
-// ── Hook responsive ──────────────────────────────────────────────────────────
 function useIsMobile() {
-  var _m = React.useState(window.innerWidth < 768);
-  var isMobile = _m[0]; var setIsMobile = _m[1];
+  const [isMob, setIsMob] = React.useState(function() { return window.innerWidth < 768; });
   React.useEffect(function() {
-    var handler = function() { setIsMobile(window.innerWidth < 768); };
+    var handler = function() { setIsMob(window.innerWidth < 768); };
     window.addEventListener("resize", handler);
     return function() { window.removeEventListener("resize", handler); };
   }, []);
-  return isMobile;
-}
-
-// Viewport meta pour mobile
-if (!document.querySelector("meta[name=viewport]")) {
-  var meta = document.createElement("meta");
-  meta.name = "viewport";
-  meta.content = "width=device-width, initial-scale=1, maximum-scale=1";
-  document.head.appendChild(meta);
+  return isMob;
 }
 
 const SUPABASE_URL = "https://iudxpwmbwcaspihtvhay.supabase.co";
@@ -336,6 +321,238 @@ function getNoteColor(note) {
 function getNoteLabel(note) {
   if (note >= 80) return "Excellent"; if (note >= 65) return "Très bon";
   if (note >= 50) return "Correct"; if (note >= 35) return "Passable"; return "Risqué";
+}
+
+// ── Scoring bancaire style 3D Investir ─────────────────────────────────────
+function calculerScoreBancaire(inputs, result) {
+  var pv = pf(inputs.prixVente);
+  var apport = pf(inputs.apport);
+  var loyer = pf(inputs.loyerMensuelHC);
+  var surface = pf(inputs.surfaceGlobale);
+  var duree = pf(inputs.dureeAnnees);
+  var taux = pf(inputs.tauxCredit);
+  if (pv <= 0) return null;
+
+  var depenseNette = pv + pf(inputs.fraisNotaire) + pf(inputs.travaux) + pf(inputs.amenagements) + pf(inputs.fraisBancairesAchat);
+  var sommeEmpruntee = depenseNette - apport;
+  var tMensuel = taux / 100 / 12;
+  var nMois = duree * 12;
+  var mensualite = tMensuel === 0 ? sommeEmpruntee / nMois : (sommeEmpruntee * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
+
+  // ─ Endettement (taux HCSF) : mensualité / (revenus perso + 70% loyer)
+  var revenusMensuels = 3500; // estimation si non renseigné
+  var loyerPris = loyer * 0.7;
+  var tauxHCSF = (revenusMensuels + loyerPris) > 0 ? (mensualite / (revenusMensuels + loyerPris)) * 100 : 99;
+  var scoreEndettement = tauxHCSF <= 25 ? 100 : tauxHCSF <= 30 ? 80 : tauxHCSF <= 35 ? 55 : tauxHCSF <= 40 ? 30 : 10;
+
+  // ─ Rendement locatif brut
+  var rendBrut = result ? result.rendBrut : (loyer > 0 && depenseNette > 0 ? (loyer * 12 / depenseNette) * 100 : 0);
+  var scoreRendement = rendBrut >= 10 ? 100 : rendBrut >= 7 ? 80 : rendBrut >= 5 ? 55 : rendBrut >= 3 ? 30 : 10;
+
+  // ─ Taille projet vs revenus (prix / (revenus*12))
+  var ratioTaille = revenusMensuels > 0 ? pv / (revenusMensuels * 12) : 99;
+  var scoreTaille = ratioTaille <= 3 ? 100 : ratioTaille <= 5 ? 80 : ratioTaille <= 8 ? 60 : ratioTaille <= 12 ? 35 : 15;
+
+  // ─ Règles internes bancaires (apport, durée, surface)
+  var pctApport = depenseNette > 0 ? (apport / depenseNette) * 100 : 0;
+  var scoreRegles = 0;
+  if (pctApport >= 20) scoreRegles += 40;
+  else if (pctApport >= 10) scoreRegles += 25;
+  else if (pctApport >= 5) scoreRegles += 15;
+  if (duree <= 20) scoreRegles += 30;
+  else if (duree <= 25) scoreRegles += 20;
+  else scoreRegles += 10;
+  if (surface >= 40) scoreRegles += 30;
+  else if (surface >= 20) scoreRegles += 20;
+  else if (surface > 0) scoreRegles += 10;
+  else scoreRegles += 20; // non renseigné = neutre
+
+  // Score global pondéré
+  var scoreGlobal = Math.round(
+    scoreEndettement * 0.30 +
+    scoreRendement * 0.25 +
+    scoreTaille * 0.25 +
+    scoreRegles * 0.20
+  );
+
+  // Points forts / vigilance
+  var pointsForts = [];
+  var pointsVigilance = [];
+  var suggestions = [];
+
+  if (tauxHCSF <= 30) pointsForts.push("Endettement maîtrisé (" + tauxHCSF.toFixed(1) + "%)");
+  else if (tauxHCSF > 35) pointsVigilance.push("Taux d'endettement élevé : " + tauxHCSF.toFixed(1) + "% (seuil HCSF 35%)");
+
+  if (rendBrut >= 6) pointsForts.push("Bon rendement locatif brut (" + rendBrut.toFixed(1) + "%)");
+  else if (rendBrut < 4 && rendBrut > 0) pointsVigilance.push("Rendement brut faible : " + rendBrut.toFixed(1) + "%");
+
+  if (pctApport >= 15) pointsForts.push("Apport solide (" + pctApport.toFixed(0) + "% du coût total)");
+  else if (pctApport < 10) pointsVigilance.push("Apport insuffisant : " + pctApport.toFixed(0) + "% (min. conseillé 10–15%)");
+
+  if (loyer > 0 && mensualite > 0) {
+    var couverture = (loyer / mensualite) * 100;
+    if (couverture >= 90) pointsForts.push("Loyer couvre " + couverture.toFixed(0) + "% de la mensualité");
+    else suggestions.push("Envisage d'augmenter le loyer ou de réduire la durée pour améliorer la couverture");
+  }
+
+  if (duree > 25) suggestions.push("Durée de crédit longue — évalue un remboursement sur 20 ans");
+  if (pctApport < 5 && pctApport > 0) suggestions.push("Renforce ton apport pour améliorer le dossier bancaire");
+
+  var dossierLabel = scoreGlobal >= 70 ? "Bon dossier" : scoreGlobal >= 50 ? "Dossier correct" : scoreGlobal >= 35 ? "Dossier fragile" : "Dossier faible";
+  var dossierColor = scoreGlobal >= 70 ? "#16a34a" : scoreGlobal >= 50 ? "#d97706" : scoreGlobal >= 35 ? "#f97316" : "#dc2626";
+
+  return {
+    scoreGlobal, scoreEndettement, scoreRendement, scoreTaille, scoreRegles,
+    tauxHCSF, rendBrut, pctApport, mensualite,
+    dossierLabel, dossierColor,
+    pointsForts, pointsVigilance, suggestions
+  };
+}
+
+// ── Composant ScoringBancaire ───────────────────────────────────────────────
+function ScoringBancaire({ inputs, result, regimeActif }) {
+  var s = calculerScoreBancaire(inputs, result);
+  if (!s) return null;
+
+  var pv = pf(inputs.prixVente);
+  if (pv <= 0) return (
+    <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #FFE8D9", padding: 20, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 180 }}>
+      <div style={{ textAlign: "center", color: "#A8A29E" }}>
+        <div style={{ fontSize: 32, marginBottom: 8 }}>🏦</div>
+        <div style={{ fontSize: 13 }}>Renseigne le prix d'achat pour voir le scoring bancaire</div>
+      </div>
+    </div>
+  );
+
+  var circumference = 2 * Math.PI * 38;
+  var dash = (s.scoreGlobal / 100) * circumference;
+  var gaugeColor = s.scoreGlobal >= 70 ? "#16a34a" : s.scoreGlobal >= 50 ? "#d97706" : s.scoreGlobal >= 35 ? "#f97316" : "#dc2626";
+
+  var axes = [
+    { label: "Endettement", score: s.scoreEndettement, detail: s.tauxHCSF.toFixed(1) + "%" },
+    { label: "Rendement", score: s.scoreRendement, detail: s.rendBrut.toFixed(1) + "%" },
+    { label: "Taille/Revenus", score: s.scoreTaille, detail: "" },
+    { label: "Règles internes", score: s.scoreRegles, detail: s.pctApport.toFixed(0) + "% apport" },
+  ];
+
+  // Trésorerie comparative par régime
+  var regimes = result ? Object.entries(result.regimes) : [];
+  var maxAbsTreso = regimes.length > 0 ? Math.max(...regimes.map(function(e) { return Math.abs(e[1].tresorerie / 12); }), 1) : 1;
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #FFE8D9", padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Header scoring */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "#1C1917" }}>Scoring bancaire</div>
+          <div style={{ fontSize: 12, color: "#78716C", marginTop: 2 }}>Analyse de ton dossier de financement</div>
+        </div>
+        {/* Jauge centrale */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="38" fill="none" stroke="#F3F4F6" strokeWidth="9"/>
+            <circle cx="48" cy="48" r="38" fill="none" stroke={gaugeColor} strokeWidth="9"
+              strokeDasharray={dash + " " + circumference} strokeLinecap="round"
+              transform="rotate(-90 48 48)" style={{ transition: "stroke-dasharray 0.6s ease" }}/>
+            <text x="48" y="52" textAnchor="middle" fontSize="22" fontWeight="800" fill={gaugeColor}>{s.scoreGlobal}</text>
+            <text x="48" y="64" textAnchor="middle" fontSize="10" fill="#A8A29E">/100</text>
+          </svg>
+          <div style={{ fontSize: 11, fontWeight: 700, color: s.dossierColor, marginTop: 2, background: s.dossierColor + "15", padding: "2px 10px", borderRadius: 20 }}>{s.dossierLabel}</div>
+        </div>
+      </div>
+
+      {/* 4 axes */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        {axes.map(function(ax) {
+          var c = ax.score >= 70 ? "#16a34a" : ax.score >= 50 ? "#d97706" : ax.score >= 30 ? "#f97316" : "#dc2626";
+          return (
+            <div key={ax.label} style={{ background: "#FAFAF9", borderRadius: 10, padding: "8px 12px", border: "1.5px solid #FFE8D9" }}>
+              <div style={{ fontSize: 10, color: "#78716C", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>{ax.label}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ flex: 1, height: 6, background: "#F3F4F6", borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ width: ax.score + "%", height: "100%", background: c, borderRadius: 3, transition: "width 0.5s ease" }}/>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: c, minWidth: 32 }}>{ax.score}</div>
+              </div>
+              {ax.detail && <div style={{ fontSize: 11, color: "#A8A29E", marginTop: 2 }}>{ax.detail}</div>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Taux HCSF + label */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", background: s.tauxHCSF > 35 ? "#FEF2F2" : "#F0FDF4", borderRadius: 10, border: "1.5px solid " + (s.tauxHCSF > 35 ? "#FECACA" : "#BBF7D0") }}>
+        <div style={{ fontSize: 22, fontWeight: 800, color: s.dossierColor }}>{s.tauxHCSF.toFixed(1)}%</div>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#1C1917" }}>Taux d'endettement HCSF</div>
+          <div style={{ fontSize: 11, color: "#78716C" }}>Seuil réglementaire : 35% · Mensualité {Math.round(s.mensualite).toLocaleString("fr-FR")} €/mois</div>
+        </div>
+      </div>
+
+      {/* Points forts */}
+      {s.pointsForts.length > 0 && (
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#16a34a", textTransform: "uppercase", marginBottom: 5 }}>Points forts</div>
+          {s.pointsForts.map(function(p, i) {
+            return <div key={i} style={{ display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 3 }}>
+              <span style={{ color: "#16a34a", fontSize: 13, marginTop: 1 }}>✓</span>
+              <span style={{ fontSize: 13, color: "#374151" }}>{p}</span>
+            </div>;
+          })}
+        </div>
+      )}
+
+      {/* Points de vigilance */}
+      {s.pointsVigilance.length > 0 && (
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#f97316", textTransform: "uppercase", marginBottom: 5 }}>Points de vigilance</div>
+          {s.pointsVigilance.map(function(p, i) {
+            return <div key={i} style={{ display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 3 }}>
+              <span style={{ color: "#f97316", fontSize: 13, marginTop: 1 }}>⚠</span>
+              <span style={{ fontSize: 13, color: "#374151" }}>{p}</span>
+            </div>;
+          })}
+        </div>
+      )}
+
+      {/* Suggestions */}
+      {s.suggestions.length > 0 && (
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 5 }}>Suggestions</div>
+          {s.suggestions.map(function(p, i) {
+            return <div key={i} style={{ display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 3 }}>
+              <span style={{ color: "#6B7280", fontSize: 13, marginTop: 1 }}>›</span>
+              <span style={{ fontSize: 13, color: "#374151" }}>{p}</span>
+            </div>;
+          })}
+        </div>
+      )}
+
+      {/* Trésorerie par régime (barres colorées) */}
+      {regimes.length > 0 && (
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#44403C", marginBottom: 8 }}>Trésorerie nette / mois par régime</div>
+          {regimes.map(function(e) {
+            var nom = e[0]; var r = e[1];
+            var tresoMois = r.tresorerie / 12;
+            var pct = Math.abs(tresoMois) / maxAbsTreso;
+            var barColor = tresoMois >= 100 ? "#16a34a" : tresoMois >= 0 ? "#d97706" : "#dc2626";
+            var barW = Math.max(4, Math.round(pct * 100));
+            var isActif = nom === regimeActif;
+            return (
+              <div key={nom} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 7, opacity: isActif ? 1 : 0.65 }}>
+                <div style={{ fontSize: 12, minWidth: 100, color: isActif ? "#1C1917" : "#78716C", fontWeight: isActif ? 700 : 400 }}>{nom}</div>
+                <div style={{ flex: 1, height: 10, background: "#F3F4F6", borderRadius: 5, overflow: "hidden" }}>
+                  <div style={{ width: barW + "%", height: "100%", background: barColor, borderRadius: 5, transition: "width 0.5s ease" }}/>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: barColor, minWidth: 80, textAlign: "right" }}>{tresoMois >= 0 ? "+" : ""}{Math.round(tresoMois).toLocaleString("fr-FR")} €/mois</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function projeterCashFlow(inputs, regimeNom, lots) {
@@ -645,7 +862,6 @@ function SectionTitle({ children }) {
 }
 
 function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
-  var isMobile = useIsMobile();
   const totalSurface = lots.reduce(function(s, l) { return s + pf(l.surface); }, 0);
   const totalLoyer = lots.reduce(function(s, l) { return s + pf(l.loyer); }, 0);
   const totalTravaux = lots.reduce(function(s, l) { return s + pf(l.travaux); }, 0);
@@ -746,7 +962,7 @@ function GestionLots({ lots, onChange, surfaceGlobale, loyerGlobal }) {
           );
         })}
       </div>
-      <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4,1fr)", gap: 8 }}>
+      <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
         {[
           { label: "Σ Surface", value: fmt(totalSurface, 0) + " m²", ok: surfOk, ref: surfaceGlobale > 0, refVal: fmt(surfaceGlobale, 0) + " m²" },
           { label: "Σ Loyers", value: fmtEur(totalLoyer), ok: loyerOk, ref: loyerGlobal > 0, refVal: fmtEur(loyerGlobal) },
@@ -777,7 +993,8 @@ const DEFAULT_INPUTS = {
   gliPct: "0",
 };
 
-function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharger, onProjetCharge, isMobile }) {
+function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharger, onProjetCharge }) {
+  var isMobile = useIsMobile();
   const [inputs, setInputs] = useState(function() {
     // Pas de persistence directe des inputs - on repart de DEFAULT_INPUTS
     // La persistence se fait via les projets sauvegardés
@@ -1735,9 +1952,11 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
             })()}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+          {/* Layout 2 colonnes style 3D Investir : paramètres + scoring */}
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1fr) 380px", gap: 14, alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={SECTION}>
-            <SectionHeader icon="ti-home" title="Achat & Financement" />
+            <SectionHeader icon="ti-home" title="Bien immobilier" />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               <InputField label="Prix de vente" name="prixVente" value={inputs.prixVente} onChange={handleChange} />
               <InputField label="Frais de notaire" name="fraisNotaire" value={inputs.fraisNotaire} onChange={handleChange} />
@@ -1773,7 +1992,7 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
                 <InputField label="Durée" name="dureeAnnees" value={inputs.dureeAnnees} onChange={handleChange} unit="ans" step="1" />
                 <InputField label="Différé de remboursement" name="differeMois" value={inputs.differeMois} onChange={handleChange} unit="mois" step="1" />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4,1fr)", gap: 8, marginTop: 6, background: "#FFF3EC", borderRadius: 10, padding: "8px 10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 6, background: "#FFF3EC", borderRadius: 10, padding: "8px 10px" }}>
                 <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Total à financer</div><div style={{ fontSize: 14, fontWeight: 700, color: "#F97316" }}>{fmtEur(result.depenseNette)}</div></div>
                 <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Apport</div><div style={{ fontSize: 14, fontWeight: 700, color: "#16a34a" }}>{fmtEur(pf(inputs.apport))}</div></div>
                 <div><div style={{ fontSize: 10, color: "#A8A29E" }}>Reste à financer</div><div style={{ fontSize: 14, fontWeight: 700, color: "#dc2626" }}>{fmtEur(result.sommeEmpruntee)}</div></div>
@@ -1813,6 +2032,39 @@ function SimulationProjet({ photos, setPhotos, projets, setProjets, projetACharg
             <GestionLots lots={lots} onChange={setLots} surfaceGlobale={pf(inputs.surfaceGlobale)} loyerGlobal={pf(inputs.loyerMensuelHC)} />
           </div>
         </div>
+          {/* Colonne droite : Scoring bancaire + sliders */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <ScoringBancaire inputs={inputs} result={result} regimeActif={regimeActif} />
+
+            {/* Ajuster en direct - sliders style 3D Investir */}
+            <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #FFE8D9", padding: 20 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#1C1917", marginBottom: 4 }}>Ajuster en direct</div>
+              <div style={{ fontSize: 12, color: "#78716C", marginBottom: 14 }}>Impact immédiat sur le score et les indicateurs</div>
+              {[
+                { label: "Prix d'achat", name: "prixVente", min: 0, max: 800000, step: 5000, unit: "€" },
+                { label: "Apport", name: "apport", min: 0, max: 200000, step: 1000, unit: "€" },
+                { label: "Loyer mensuel", name: "loyerMensuelHC", min: 0, max: 5000, step: 50, unit: "€" },
+                { label: "Durée crédit", name: "dureeAnnees", min: 5, max: 30, step: 1, unit: "ans" },
+              ].map(function(sl) {
+                var val = pf(inputs[sl.name]);
+                return (
+                  <div key={sl.name} style={{ marginBottom: 14 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <div style={{ fontSize: 12, color: "#78716C", fontWeight: 500 }}>{sl.label}</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#1C1917" }}>{val.toLocaleString("fr-FR")} {sl.unit}</div>
+                    </div>
+                    <input type="range" min={sl.min} max={sl.max} step={sl.step} value={val || 0}
+                      onChange={function(e) { setInputs(function(prev) { return Object.assign({}, prev, { [sl.name]: e.target.value }); }); }}
+                      style={{ width: "100%", accentColor: "#F97316", height: 4, cursor: "pointer" }} />
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#D4C8C0", marginTop: 2 }}>
+                      <span>{sl.min.toLocaleString("fr-FR")} {sl.unit}</span>
+                      <span>{sl.max.toLocaleString("fr-FR")} {sl.unit}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
           </div>
       )}
 
@@ -2081,7 +2333,7 @@ function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData })
         <StatRow label="GAIN TOTAL NET" value={(gainTotal >= 0 ? "+" : "") + fmtEur(Math.round(gainTotal))} bold color={gainTotal >= 0 ? "#16a34a" : "#dc2626"} border={false} />
 
         {/* KPIs finaux */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
           <div style={{ background: "#FFF3EC", borderRadius: 14, padding: "12px", textAlign: "center", border: "1px solid #FFF3EC" }}>
             <div style={{ fontSize: 10, color: "#78716C" }}>ROI sur apport</div>
             <div style={{ fontSize: 23, fontWeight: 800, color: roiSurApport >= 0 ? "#16a34a" : "#dc2626" }}>{fmt(roiSurApport, 0)} %</div>
@@ -2104,7 +2356,7 @@ function ReventeSimulator({ inputs, result, regime, regimeActif, cashFlowData })
 }
 
 // ─── DASHBOARD D'ACCUEIL ──────────────────────────────────────────────────────
-function Dashboard({ projets, onOuvrir, onNav, user, isMobile }) {
+function Dashboard({ projets, onOuvrir, onNav, user }) {
   // Charger le profil investisseur
   var profil = null;
   try { profil = JSON.parse(localStorage.getItem("radar-immo-profil-v1")); } catch(e) {}
@@ -2720,7 +2972,7 @@ function SimulateurCredit() {
       {/* Tableau d'amortissement */}
       <div style={SECTION}>
         <SectionHeader icon="ti-calendar" title="Tableau d'amortissement" badge={calc.anneesEffectives + " ans"} />
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
@@ -2981,7 +3233,7 @@ function SimulateurTravaux() {
       {/* Section Prix à la quantité */}
       <div style={sectionStyle}>
         <SectionHeader icon="ti-calculator" title="Prix à la quantité" badge={"Sous-total : " + fmtEur(calcQ.total)} />
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
@@ -2999,7 +3251,7 @@ function SimulateurTravaux() {
       {/* Section Prix fixe */}
       <div style={sectionStyle}>
         <SectionHeader icon="ti-home" title={"Prix fixe (logement " + (grand ? "> 50 m²" : "< 50 m²") + ")"} badge={"Sous-total : " + fmtEur(calcF.total)} />
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
@@ -3017,7 +3269,7 @@ function SimulateurTravaux() {
       {/* Section Prix au m² (habitable) */}
       <div style={sectionStyle}>
         <SectionHeader icon="ti-ruler-measure" title={"Prix au m² habitable (" + fmt(surf, 0) + " m²)"} badge={"Sous-total : " + fmtEur(calcM.total)} />
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
@@ -3034,7 +3286,7 @@ function SimulateurTravaux() {
       {/* Section Bâtiment */}
       <div style={sectionStyle}>
         <SectionHeader icon="ti-crane" title="Bâtiment (toiture & façade)" badge={"Sous-total : " + fmtEur(calcB.total)} />
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={theadStyle}>
               <th style={thStyle()}>Poste</th>
@@ -3231,7 +3483,7 @@ function ComparateurOffres() {
       </div>
 
       {/* Cartes */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(260px, 100%), 1fr))", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14 }}>
         {offres.map(function(o, idx) {
           const couleur = couleurs[idx % couleurs.length];
           const r = resultats.find(function(r) { return r.id === o.id; }).calc;
@@ -3359,7 +3611,7 @@ function ComparateurOffres() {
       {/* Tableau comparatif */}
       <div style={SECTION}>
         <SectionHeader icon="ti-scale" title="Tableau comparatif" />
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid rgba(148,163,184,0.2)" }}>
@@ -5934,8 +6186,6 @@ export default function App() {
 function AppMain({ user, onLogout }) {
   const [onglet, setOnglet] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  var isMobile = useIsMobile();
-  var _smo = React.useState(false); var sidebarMobileOpen = _smo[0]; var setSidebarMobileOpen = _smo[1];
   const [cloudReady, setCloudReady] = useState(false);
 
   // Photos et projets remontés ici pour survivre aux changements d'onglet
@@ -6025,28 +6275,13 @@ function AppMain({ user, onLogout }) {
     favoris:       { h: "Mes projets sauvegardés", sub: "Retrouve et charge toutes tes simulations d'investissement." },
   };
 
-  const handleNav = function(id) { setOnglet(id); setSidebarMobileOpen(false); };
+  const handleNav = function(id) { setOnglet(id); };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#FFF8F3", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
 
-      {/* Hamburger mobile */}
-      {isMobile && (
-        <div style={{ position:"fixed", top:0, left:0, right:0, height:56, background:"#fff", borderBottom:"1.5px solid #FFE8D9", display:"flex", alignItems:"center", padding:"0 16px", gap:12, zIndex:60 }}>
-          <button onClick={function(){setSidebarMobileOpen(function(v){return !v;});}}
-            style={{ width:36, height:36, borderRadius:8, border:"1.5px solid #FFE8D9", background:"#FFF8F3", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="14" y2="18"/></svg>
-          </button>
-          <div style={{ fontWeight:800, fontSize:15 }}><span style={{ color:"#F97316" }}>RADAR</span> IMMO</div>
-          <div style={{ marginLeft:"auto", fontSize:12, color:"#A8A29E" }}>{navItems.find(function(n){return n.id===onglet;})?.label||""}</div>
-        </div>
-      )}
-      {/* Overlay mobile */}
-      {isMobile && sidebarMobileOpen && (
-        <div onClick={function(){setSidebarMobileOpen(false);}} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.35)", zIndex:45 }} />
-      )}
       {/* Sidebar */}
-      <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", position: isMobile ? "fixed" : "sticky", top: 0, left: 0, height: "100vh", zIndex: 50, transform: isMobile && !sidebarMobileOpen ? "translateX(-200px)" : "translateX(0)", transition: "transform 0.25s ease", display: "flex", flexDirection: "column", gap: 4, overflowY: "auto", overflowX: "hidden", boxShadow: isMobile && sidebarMobileOpen ? "4px 0 24px rgba(0,0,0,0.15)" : "none" }}>
+      <aside style={{ width: 200, minWidth: 200, background: "#fff", borderRight: "1.5px solid #FFE8D9", padding: "18px 12px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", overflowX: "hidden", transition: "width 0.22s cubic-bezier(.4,0,.2,1), min-width 0.22s cubic-bezier(.4,0,.2,1), padding 0.22s", zIndex: 30, boxShadow: sidebarOpen ? "4px 0 24px #FFF3EC" : "none" }}>
 
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, overflow: "hidden", minHeight: 40 }}>
@@ -6111,14 +6346,14 @@ function AppMain({ user, onLogout }) {
       </aside>
 
       {/* Main */}
-      <main style={{ flex: 1, padding: isMobile ? "68px 12px 20px" : 20, overflowY: "auto", minWidth: 0 }}>
+      <main style={{ flex: 1, padding: 20, overflowY: "auto", minWidth: 0 }}>
         <div style={{ marginBottom: 16 }}>
           <h1 style={{ fontSize: 19, fontWeight: 700, color: "#1C1917", margin: 0 }}>{titres[onglet].h}</h1>
           <p style={{ fontSize: 13, color: "#78716C", margin: "4px 0 0" }}>{titres[onglet].sub}</p>
         </div>
-        {onglet === "dashboard"  && <Dashboard projets={simProjets} onOuvrir={ouvrirProjet} onNav={handleNav} user={user} isMobile={isMobile} />}
+        {onglet === "dashboard"  && <Dashboard projets={simProjets} onOuvrir={ouvrirProjet} onNav={handleNav} user={user} />}
         {onglet === "analyse"    && <AnalyseCommunes />}
-        {onglet === "simulation" && <SimulationProjet photos={simPhotos} setPhotos={setSimPhotos} projets={simProjets} setProjets={setSimProjets} projetACharger={simProjetACharger} onProjetCharge={function() { setSimProjetACharger(null); }} isMobile={isMobile} />}
+        {onglet === "simulation" && <SimulationProjet photos={simPhotos} setPhotos={setSimPhotos} projets={simProjets} setProjets={setSimProjets} projetACharger={simProjetACharger} onProjetCharge={function() { setSimProjetACharger(null); }} />}
         {onglet === "exploitation" && <SimulateurExploitation simProjets={simProjets} />}
         {onglet === "credit"     && <SimulateurCredit />}
         {onglet === "offres"     && <ComparateurOffres />}
@@ -6247,7 +6482,6 @@ function DPEBadge(props) {
 
 // ─── COMPARATEUR DPE & TRAVAUX (API ADEME) ────────────────────────────────────
 function ComparateurDPE() {
-  var isMobile = useIsMobile();
   var DPE_COLORS = DPE_COLORS_GLOBAL;
   var DPE_ILLEGAL = ["F","G"];
   var DPE_ORDER   = ["A","B","C","D","E","F","G"];
@@ -6625,7 +6859,7 @@ function ComparateurDPE() {
 
       {/* ── Résultats ── */}
       {dpeActuel && coutBrut > 0 && (
-        <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:12 }}>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
 
           {/* Coûts */}
           <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
