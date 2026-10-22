@@ -329,15 +329,14 @@ function calculerScoreBancaire(inputs, result) {
   var apport = pf(inputs.apport);
   var loyer = pf(inputs.loyerMensuelHC);
   var surface = pf(inputs.surfaceGlobale);
-  var duree = pf(inputs.dureeAnnees);
-  var taux = pf(inputs.tauxCredit);
-  if (pv <= 0) return null;
+  var duree = pf(inputs.dureeAnnees) || 25;
+  var taux = pf(inputs.tauxCredit) || 4.2;
 
-  var depenseNette = pv + pf(inputs.fraisNotaire) + pf(inputs.travaux) + pf(inputs.amenagements) + pf(inputs.fraisBancairesAchat);
-  var sommeEmpruntee = depenseNette - apport;
+  var depenseNette = pv > 0 ? pv + pf(inputs.fraisNotaire) + pf(inputs.travaux) + pf(inputs.amenagements) + pf(inputs.fraisBancairesAchat) : 0;
+  var sommeEmpruntee = Math.max(0, depenseNette - apport);
   var tMensuel = taux / 100 / 12;
-  var nMois = duree * 12;
-  var mensualite = tMensuel === 0 ? sommeEmpruntee / nMois : (sommeEmpruntee * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois));
+  var nMois = Math.max(1, duree * 12);
+  var mensualite = pv <= 0 ? 0 : (tMensuel === 0 ? sommeEmpruntee / nMois : (sommeEmpruntee * tMensuel) / (1 - Math.pow(1 + tMensuel, -nMois)));
 
   // ─ Endettement (taux HCSF) : mensualité / (revenus perso + 70% loyer)
   var revenusMensuels = 3500; // estimation si non renseigné
@@ -412,14 +411,16 @@ function calculerScoreBancaire(inputs, result) {
 // ── Composant ScoringBancaire ───────────────────────────────────────────────
 function ScoringBancaire({ inputs, result, regimeActif }) {
   var s = calculerScoreBancaire(inputs, result);
-  if (!s) return null;
-
   var pv = pf(inputs.prixVente);
-  if (pv <= 0) return (
-    <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #FFE8D9", padding: 20, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 180 }}>
+
+  if (!s || pv <= 0) return (
+    <div style={{ background: "#fff", borderRadius: 16, border: "1.5px solid #FFE8D9", padding: 20, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 200 }}>
       <div style={{ textAlign: "center", color: "#A8A29E" }}>
-        <div style={{ fontSize: 32, marginBottom: 8 }}>🏦</div>
-        <div style={{ fontSize: 13 }}>Renseigne le prix d'achat pour voir le scoring bancaire</div>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom: 10 }}>
+          <rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/>
+        </svg>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#78716C", marginBottom: 4 }}>Scoring bancaire</div>
+        <div style={{ fontSize: 12, color: "#A8A29E" }}>Renseigne le prix d'achat<br/>pour analyser ton dossier</div>
       </div>
     </div>
   );
@@ -6988,3 +6989,5 @@ function ComparateurDPE() {
     </div>
   );
 }
+
+  
